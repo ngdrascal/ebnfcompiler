@@ -13,8 +13,10 @@ namespace EbnfCompiler.AST
       private readonly Stack<INode> _stack;
       private INode _currentNode;
       private IProductionInfo _currentProd; // index into symbol table
+      private TokenDefinition _lastTokenInfo;
 
       public ICollection<ITokenDefinition> TokenDefinitions { get; private set; }
+
       public IDictionary<string, IProductionInfo> Productions { get; private set; }
 
       public AstBuilder()
@@ -25,6 +27,192 @@ namespace EbnfCompiler.AST
 
          TokenDefinitions = new Collection<ITokenDefinition>();
          Productions = new Dictionary<string, IProductionInfo>();
+      }
+
+      public void AddTokenName(IToken token)
+      {
+         if (TokenDefinitions.Count(p => p.Image == token.Image) == 0)
+         {
+            _lastTokenInfo = new TokenDefinition { Image = token.Image };
+            TokenDefinitions.Add(_lastTokenInfo);
+         }
+         else
+            Error("Token already defined: " + token.Image, token);
+      }
+
+      public void SetTokenDef(IToken token)
+      {
+         _lastTokenInfo.Definition = token.Image;
+      }
+
+      public void BeginSyntax()
+      {
+      }
+
+      public void EndSyntax()
+      {
+         FixupProdRefNodes();
+
+         foreach (var production in Productions)
+         {
+            BuildReferences(production.Key, production.Value.AltHead);
+            ComputeFirst(production.Key);
+         }
+
+         foreach (var production in Productions)
+            Debug.WriteLine(production.Value.ToString());
+      }
+
+      public void BeginStatement(IToken token)
+      {
+         _currentProd = new ProductionInfo(token.Image);
+         Productions.Add(token.Image, _currentProd);
+      }
+
+      public void EndStatement()
+      {
+         _currentProd.AltHead = (AltHeadNode)_currentNode;
+         _currentNode = null;
+      }
+
+      public void BeginExpression(IToken token)
+      {
+         var node = new AltHeadNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         _stack.Push(node);
+      }
+
+      public void EndExpression()
+      {
+         _currentNode = _stack.Pop();
+      }
+
+      public void BeginTerm(IToken token)
+      {
+         var node = new AlternativeNode(token);
+         _nodes.Add(node);
+
+         // set n to the altHead
+         var head = (AltHeadNode)_stack.Peek();
+         head.AltCount++;
+
+         // if there are not any existing alternatives
+         if (head.FirstAlt == null)
+            head.FirstAlt = node;
+         else // find the last alternative
+         {
+            var alt = head.FirstAlt;
+            while (alt.NextAlt != null)
+               alt = alt.NextAlt;
+            alt.NextAlt = node;
+         }
+
+         _currentNode = node;
+      }
+
+      public void EndTerm()
+      {
+         // point back to the head of the current set of alternatives
+         _currentNode = _stack.Peek();
+      }
+
+      public void BeginParens(IToken token)
+      {
+         var node = new LParenNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         _stack.Push(node);
+      }
+
+      public void EndParens(IToken token)
+      {
+         var node = new RParenNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         node.Mate = (LParenNode)_stack.Peek();
+         ((LParenNode)_stack.Peek()).Mate = node;
+
+         _stack.Pop();
+      }
+
+      public void BeginOption(IToken token)
+      {
+         var node = new LOptionNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         _stack.Push(node);
+      }
+
+      public void EndOption(IToken token)
+      {
+         var node = new ROptionNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         node.Mate = (LOptionNode)(_stack.Peek());
+         ((LOptionNode)_stack.Peek()).Mate = node;
+
+         _stack.Pop();
+      }
+
+      public void BeginKleene(IToken token)
+      {
+         var node = new LKleeneNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         _stack.Push(node);
+      }
+
+      public void EndKleene(IToken token)
+      {
+         var node = new RKleeneNode(token);
+         _nodes.Add(node);
+
+         AppendNode(node);
+
+         node.Mate = (LKleeneNode)_stack.Peek();
+         ((LKleeneNode)_stack.Peek()).Mate = node;
+
+         _stack.Pop();
+      }
+
+      public void FoundProduction(IToken token)
+      {
+         var node = new ProdRefNode(token);
+         _nodes.Add(node);
+         AppendNode(node);
+      }
+
+      public void FoundTerminal(IToken token)
+      {
+         //var enumImage = String.Empty;
+
+         //if (_tokens.ContainsKey(token.Image))
+         //   enumImage = _tokens[token.Image].Definition;
+         //else
+         //   Error("Undefined terminal: '" + token.Image + "'", token);
+
+         var node = new TerminalNode(token, token.Image);
+         AppendNode(node);
+      }
+
+      public void FoundAction(IToken token)
+      {
+         var node = new ActionNode(token);
+         _nodes.Add(node);
+         AppendNode(node);
       }
 
       private void Error(string message)
@@ -50,13 +238,13 @@ namespace EbnfCompiler.AST
          _currentNode = node;
       }
 
-      private void FixupProductions()
+      private void FixupProdRefNodes()
       {
-         foreach (var node in _nodes.Where(p=>p.NodeType == NodeType.ProdRef))
+         foreach (var node in _nodes.Where(p => p.NodeType == NodeType.ProdRef))
          {
             var prodRefNode = (ProdRefNode)node;
-            var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName);
-            prodRefNode.AltHead = prodInfo.Value.AltHead;
+            var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
+            prodRefNode.AltHead = prodInfo.AltHead;
          }
       }
 
@@ -265,194 +453,6 @@ namespace EbnfCompiler.AST
 
             alt = alt.NextAlt;
          }
-      }
-
-      private TokenDefinition _lastTokenInfo;
-
-      public void AddTokenName(IToken token)
-      {
-         if (TokenDefinitions.Count(p=>p.Image == token.Image)==0)
-         {
-            _lastTokenInfo = new TokenDefinition{Image = token.Image};
-            TokenDefinitions.Add(_lastTokenInfo);
-         }
-         else
-            Error("Token already defined: " + token.Image, token);
-      }
-
-      public void SetTokenDef(IToken token)
-      {
-         _lastTokenInfo.Definition = token.Image;
-      }
-
-      public void BeginSyntax()
-      {
-      }
-
-      public void EndSyntax()
-      {
-         FixupProductions();
-
-         foreach (var production in Productions)
-         {
-            BuildReferences(production.Key, production.Value.AltHead);
-            ComputeFirst(production.Key);
-         }
-
-         foreach (var production in Productions)
-            Debug.WriteLine(production.Value.ToString());
-      }
-
-      public void BeginStatement(IToken token)
-      {
-         _currentProd = new ProductionInfo(token.Image);
-         Productions.Add(token.Image, _currentProd);
-      }
-
-      public void EndStatement()
-      {
-         _currentProd.AltHead = (AltHeadNode)_currentNode;
-         _currentNode = null;
-      }
-
-      public void BeginExpression(IToken token)
-      {
-         var node = new AltHeadNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         _stack.Push(node);
-      }
-
-      public void EndExpression()
-      {
-         _currentNode = _stack.Pop();
-      }
-
-      public void BeginTerm(IToken token)
-      {
-         var node = new AlternativeNode(token);
-         _nodes.Add(node);
-
-         // set n to the altHead
-         var head = (AltHeadNode)_stack.Peek();
-         head.AltCount++;
-
-         // if there are not any existing alternatives
-         if (head.FirstAlt == null)
-            head.FirstAlt = node;
-         else // find the last alternative
-         {
-            var alt = head.FirstAlt;
-            while (alt.NextAlt != null)
-               alt = alt.NextAlt;
-            alt.NextAlt = node;
-         }
-
-         _currentNode = node;
-      }
-
-      public void EndTerm()
-      {
-         // point back to the head of the current set of alternatives
-         _currentNode = _stack.Peek();
-      }
-
-      public void BeginParens(IToken token)
-      {
-         var node = new LParenNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         _stack.Push(node);
-      }
-
-      public void EndParens(IToken token)
-      {
-         var node = new RParenNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         node.Mate = (LParenNode)_stack.Peek();
-         ((LParenNode)_stack.Peek()).Mate = node;
-
-         _stack.Pop();
-      }
-
-      public void BeginOption(IToken token)
-      {
-         var node = new LOptionNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         _stack.Push(node);
-      }
-
-      public void EndOption(IToken token)
-      {
-         var node = new ROptionNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         node.Mate = (LOptionNode)(_stack.Peek());
-         ((LOptionNode)_stack.Peek()).Mate = node;
-
-         _stack.Pop();
-      }
-
-      public void BeginKleene(IToken token)
-      {
-         var node = new LKleeneNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         _stack.Push(node);
-      }
-
-      public void EndKleene(IToken token)
-      {
-         var node = new RKleeneNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         node.Mate = (LKleeneNode)_stack.Peek();
-         ((LKleeneNode)_stack.Peek()).Mate = node;
-
-         _stack.Pop();
-      }
-
-      public void FoundProduction(IToken token)
-      {
-         var node = new ProdRefNode(token);
-         _nodes.Add(node);
-         AppendNode(node);
-      }
-
-      public void FoundTerminal(IToken token)
-      {
-         //var enumImage = String.Empty;
-
-         //if (_tokens.ContainsKey(token.Image))
-         //   enumImage = _tokens[token.Image].Definition;
-         //else
-         //   Error("Undefined terminal: '" + token.Image + "'", token);
-
-         var node = new TerminalNode(token, token.Image);
-         AppendNode(node);
-      }
-
-      public void FoundAction(IToken token)
-      {
-         var node = new ActionNode(token);
-         _nodes.Add(node);
-         AppendNode(node);
       }
    }
 }
