@@ -1,0 +1,14 @@
+%TOKENS%
+"BEGIN"          = "tkBegin"
+"END"            = "tkEnd"
+"INITIALIZATION" = "tkInitialization"
+"STATEMENTS"     = "tkStatements"
+"FINALIZATION"   = "tkFinalization"
+
+%EBNF%
+
+<InitSection> ::= (["INITIALIZATION" <StmtList>] [<Finalization>] | ["BEGIN" <StmtList>]) "END" .
+
+<StmtList> ::= "STATEMENTS" #ProcessLiteral(prevToken, true)# .
+
+<Finalization> ::= "FINALIZATION" .

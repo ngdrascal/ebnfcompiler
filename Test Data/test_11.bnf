@@ -1,0 +1,15 @@
+%TOKENS%
+
+"+" = "tkPlus"
+"-" = "tkMinus"
+"IDENT" = "tkIdent"
+
+
+%EBNF%
+
+<Expression> ::= [<Sign>] <Designator> .
+
+<Sign>       ::= "+" | "-" .
+
+<Designator> ::= "IDENT" [ <Expression> ] .
+

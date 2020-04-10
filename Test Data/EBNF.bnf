@@ -1,0 +1,45 @@
+%TOKENS%
+
+"IDENTIFIER" = "tkIdent"
+"STRING"     = "tkString"
+"ACTION"     = "tkAction"
+"%TOKENS%"   = "tkTokens"
+"%EBNF%"     = "tkEbnf"
+"."          = "tkPeriod"
+"|"          = "tkOr"
+"("          = "tkLParen"
+")"          = "tkRParen"
+"{"          = "tkLBrace"
+"}"          = "tkRBrace"
+"["          = "tkLBracket"
+"]"          = "tkRBracket"
+"::="        = "tkAssign"
+"="          = "tkEqual"
+
+
+%EBNF%
+
+<Input>      ::= <Tokens> <Grammar> .
+
+<Tokens>     ::= "%TOKENS%" {<TokenDef>} .
+
+<TokenDef>   ::= #AddTokenName(token)# "STRING" "=" #SetTokenDef(token)# "STRING" .
+
+<Grammar>    ::= "%EBNF%" <Syntax> .
+
+<Syntax>     ::= #BeginSyntax# {<Statement>} "." #EndSyntax# .
+
+<Statement>  ::= "IDENTIFIER" #BeginStatement#  "::=" <Expression> "." #EndStatement# .
+
+<Expression> ::= #BeginExpression# <Term> {"|" <Term>} #EndExpression# .
+
+<Term>       ::= #BeginTerm# <Actions> <Factor> <Actions> {<Factor> <Actions>} #EndTerm# .
+
+<Factor>     ::= #FoundProduction(token)# "IDENTIFIER" |
+                 #FoundTerminal(token)# "STRING" |
+                 "(" <Expression> ")" |
+                 "[" <Expression> "]" |
+                 "{" <Expression> "}" .
+
+<Actions>    ::= {#FoundAction(token)# "ACTION"} .
+
