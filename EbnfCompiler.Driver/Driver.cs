@@ -9,13 +9,13 @@ namespace EbnfCompiler.Driver
    [TestFixture]
    public class Driver
    {
-      private const string TestFilePath = @"..\..\..\..\Test Data\";
+      //private const string TestFilePath = @"..\..\..\..\Test Data\";
 
       private const string TestCase = @"
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            <S> ::= ""a"" | <T> .
+            <S> ::= (""a"") | <T> .
             <T> ::= ""b"" .
       ";
 
@@ -36,7 +36,7 @@ namespace EbnfCompiler.Driver
 
          foreach (var prod in astBuilder.Productions.Values)
          {
-            Debug.WriteLine($"{prod.Name}: {prod.AltHead.FirstSet}");
+            Debug.WriteLine($"{prod.Name}: {prod.Expression.FirstSet}");
          }
       }
    }

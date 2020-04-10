@@ -15,8 +15,8 @@ namespace EbnfCompiler.AST
       {
          get
          {
-            if (_firstSet.IsEmpty())
-               CalcFirstSet();
+            // if (_firstSet.IsEmpty())
+            //    CalcFirstSet();
             return _firstSet;
          }
       }
@@ -36,30 +36,46 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class AltHeadNode : Node, IAltHeadNode
+   public class ExpressionNode : Node, IExpressionNode
    {
-      public int AltCount { get; set; }
+      public int TermCount { get; set; }
 
-      public IAlternativeNode FirstAlt { get; set; }
+      public ITermNode FirstTerm { get; set; }
 
-      public AltHeadNode(IToken token)
-         : base(NodeType.AltHead, token)
+      public ExpressionNode(IToken token)
+         : base(NodeType.Expression, token)
       {
          Image = string.Empty;
-         AltCount = 0;
-         FirstAlt = null;
+         TermCount = 0;
+         FirstTerm = null;
+      }
+
+      public void AppendTerm(ITermNode newTerm)
+      {
+         TermCount++;
+
+         // if there are not any existing alternatives
+         if (FirstTerm == null)
+            FirstTerm = newTerm;
+         else // find the last term
+         {
+            var t = FirstTerm;
+            while (t.NextTerm != null)
+               t = t.NextTerm;
+            t.NextTerm = newTerm;
+         }
       }
 
       public override string ToString()
       {
          var result = string.Empty;
 
-         var alt = FirstAlt;
-         while (alt != null)
+         var term = FirstTerm;
+         while (term != null)
          {
-            result += alt.ToString();
-            alt = alt.NextAlt;
-            if (alt != null)
+            result += term.ToString();
+            term = term.NextTerm;
+            if (term != null)
                result += "|";
          }
          return result;
@@ -68,7 +84,7 @@ namespace EbnfCompiler.AST
       protected override void CalcFirstSet()
       {
          _firstSet.IncludesEpsilon = false;
-         var alt = FirstAlt;
+         var alt = FirstTerm;
          while (alt != null)
          {
             _firstSet.Add(alt.FirstSet);
@@ -76,19 +92,19 @@ namespace EbnfCompiler.AST
             {
                alt.FirstSet.IncludesEpsilon = true;
             }
-            alt = alt.NextAlt;
+            alt = alt.NextTerm;
          }
       }
    }
 
-   public class AlternativeNode : Node, IAlternativeNode
+   public class TermNode : Node, ITermNode
    {
-      public AlternativeNode(IToken token)
-         : base(NodeType.Alternative, token)
+      public TermNode(IToken token)
+         : base(NodeType.Term, token)
       {
       }
 
-      public IAlternativeNode NextAlt { get; set; }
+      public ITermNode NextTerm { get; set; }
 
       protected override void CalcFirstSet()
       {
@@ -112,7 +128,7 @@ namespace EbnfCompiler.AST
    public class ProdRefNode : Node, IProdRefNode
    {
       public string ProdName { get; }
-      public IAltHeadNode AltHead { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public ProdRefNode(IToken token)
          : base(NodeType.ProdRef, token)
@@ -123,7 +139,7 @@ namespace EbnfCompiler.AST
 
       public override string ToString()
       {
-         return "<" + Image + ">";
+         return $"<{ProdName}>";
       }
 
       protected override void CalcFirstSet()
@@ -177,12 +193,19 @@ namespace EbnfCompiler.AST
 
    public class LParenNode : Node
    {
-      public RParenNode Mate { get; set; }
+      //public RParenNode Mate { get; set; }
 
       public LParenNode(IToken token)
          : base(NodeType.LParen, token)
       {
-         Mate = null;
+         //Mate = null;
+      }
+
+      public IExpressionNode Expression { get; set; }
+
+      public override string ToString()
+      {
+         return $"( {Expression} )";
       }
 
       protected override void CalcFirstSet()
@@ -194,24 +217,24 @@ namespace EbnfCompiler.AST
 
    public class RParenNode : Node
    {
-      public LParenNode Mate { get; set; }
+      //public LParenNode Mate { get; set; }
 
       public RParenNode(IToken token)
          : base(NodeType.RParen, token)
       {
-         Mate = null;
+         //Mate = null;
       }
 
       protected override void CalcFirstSet()
       {
-         if (!Mate.FirstSet.IncludesEpsilon)
-            return;
-
-         if (Next == null)
-            return;
-
-         Mate.FirstSet.Add(Next.FirstSet);
-         Mate.FirstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
+         // if (!Mate.FirstSet.IncludesEpsilon)
+         //    return;
+         //
+         // if (Next == null)
+         //    return;
+         //
+         // Mate.FirstSet.Add(Next.FirstSet);
+         // Mate.FirstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
       }
    }
 

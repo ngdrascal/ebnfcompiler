@@ -8,13 +8,13 @@ namespace EbnfCompiler.AST
       private readonly List<string>_referencedBy = new List<string>();
 
       public string Name { get; }
-      public IAltHeadNode AltHead { get; set; }
+      public IExpressionNode Expression { get; set; }
       public IReadOnlyList<string> ReferencedBy => _referencedBy.AsReadOnly();
 
       public ProductionInfo(string name)
       {
          Name = name;
-         AltHead = null;
+         Expression = null;
       }
 
       public void AddReference(string prodName)
@@ -27,7 +27,7 @@ namespace EbnfCompiler.AST
 
       public override string ToString()
       {
-         return $"<{Name}>::={AltHead?.ToString()}.";
+         return $"<{Name}> ::= {Expression?.ToString()}.";
       }
    }
 }

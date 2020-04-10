@@ -6,7 +6,7 @@ namespace EbnfCompiler.AST
    {
       void AddReference(string prodName);
       string Name { get; }
-      IAltHeadNode AltHead { get; set; }
+      IExpressionNode Expression { get; set; }
       IReadOnlyList<string> ReferencedBy { get; }
    }
 }

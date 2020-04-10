@@ -33,7 +33,7 @@ namespace EbnfCompiler.AST
       {
          if (TokenDefinitions.Count(p => p.Image == token.Image) == 0)
          {
-            _lastTokenInfo = new TokenDefinition { Image = token.Image };
+            _lastTokenInfo = new TokenDefinition {Image = token.Image};
             TokenDefinitions.Add(_lastTokenInfo);
          }
          else
@@ -55,7 +55,7 @@ namespace EbnfCompiler.AST
 
          foreach (var production in Productions)
          {
-            BuildReferences(production.Key, production.Value.AltHead);
+            BuildReferences(production.Key, production.Value.Expression);
             ComputeFirst(production.Key);
          }
 
@@ -71,13 +71,15 @@ namespace EbnfCompiler.AST
 
       public void EndStatement()
       {
-         _currentProd.AltHead = (AltHeadNode)_currentNode;
+         _currentProd.Expression = (ExpressionNode) _currentNode;
          _currentNode = null;
       }
 
       public void BeginExpression(IToken token)
       {
-         var node = new AltHeadNode(token);
+         BeginTrace("BeginExpression");
+
+         var node = new ExpressionNode(token);
          _nodes.Add(node);
 
          AppendNode(node);
@@ -87,57 +89,60 @@ namespace EbnfCompiler.AST
 
       public void EndExpression()
       {
+         EndTrace("EndExpression");
+
          _currentNode = _stack.Pop();
       }
 
       public void BeginTerm(IToken token)
       {
-         var node = new AlternativeNode(token);
+         BeginTrace("BeginTerm");
+
+         var node = new TermNode(token);
          _nodes.Add(node);
 
-         // set n to the altHead
-         var head = (AltHeadNode)_stack.Peek();
-         head.AltCount++;
-
-         // if there are not any existing alternatives
-         if (head.FirstAlt == null)
-            head.FirstAlt = node;
-         else // find the last alternative
-         {
-            var alt = head.FirstAlt;
-            while (alt.NextAlt != null)
-               alt = alt.NextAlt;
-            alt.NextAlt = node;
-         }
+         var expr = _stack.Peek().AsExpression();
+         expr.AppendTerm(node);
 
          _currentNode = node;
       }
 
       public void EndTerm()
       {
-         // point back to the head of the current set of alternatives
+         EndTrace("EndTerm");
+
+         // point back to the head of the current set of term
          _currentNode = _stack.Peek();
       }
 
       public void BeginParens(IToken token)
       {
+         BeginTrace("BeginParens");
+
          var node = new LParenNode(token);
          _nodes.Add(node);
 
          AppendNode(node);
 
          _stack.Push(node);
+
+         //_stack.Push(new ExpressionNode(token));
       }
 
       public void EndParens(IToken token)
       {
-         var node = new RParenNode(token);
-         _nodes.Add(node);
+         EndTrace("EndParens");
 
-         AppendNode(node);
+         //var node = new RParenNode(token);
+         //_nodes.Add(node);
 
-         node.Mate = (LParenNode)_stack.Peek();
-         ((LParenNode)_stack.Peek()).Mate = node;
+         //AppendNode(node);
+
+         //node.Mate = (LParenNode)_stack.Peek();
+         //((LParenNode)_stack.Peek()).Mate = node;
+
+         // var expression = _stack.Pop().AsExpression();
+         // ((LParenNode)_stack.Peek()).Expression = expression;
 
          _stack.Pop();
       }
@@ -159,8 +164,8 @@ namespace EbnfCompiler.AST
 
          AppendNode(node);
 
-         node.Mate = (LOptionNode)(_stack.Peek());
-         ((LOptionNode)_stack.Peek()).Mate = node;
+         node.Mate = (LOptionNode) (_stack.Peek());
+         ((LOptionNode) _stack.Peek()).Mate = node;
 
          _stack.Pop();
       }
@@ -182,8 +187,8 @@ namespace EbnfCompiler.AST
 
          AppendNode(node);
 
-         node.Mate = (LKleeneNode)_stack.Peek();
-         ((LKleeneNode)_stack.Peek()).Mate = node;
+         node.Mate = (LKleeneNode) _stack.Peek();
+         ((LKleeneNode) _stack.Peek()).Mate = node;
 
          _stack.Pop();
       }
@@ -242,9 +247,9 @@ namespace EbnfCompiler.AST
       {
          foreach (var node in _nodes.Where(p => p.NodeType == NodeType.ProdRef))
          {
-            var prodRefNode = (ProdRefNode)node;
+            var prodRefNode = (ProdRefNode) node;
             var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
-            prodRefNode.AltHead = prodInfo.AltHead;
+            prodRefNode.Expression = prodInfo.Expression;
          }
       }
 
@@ -254,12 +259,12 @@ namespace EbnfCompiler.AST
          {
             switch (node.NodeType)
             {
-               case NodeType.AltHead:
+               case NodeType.Expression:
                   Debug.WriteLine("AltHead");
 
                   // figure the first set for each alternative and add them to first set of
                   // the head
-                  var alt = ((IAltHeadNode)node).FirstAlt;
+                  var alt = ((IExpressionNode) node).FirstTerm;
                   while (alt != null)
                   {
                      Traverse(prodName, alt.Next, alt.FirstSet);
@@ -267,22 +272,22 @@ namespace EbnfCompiler.AST
 
                      try
                      {
-                        ((AltHeadNode)node).FirstSet.Add(alt.FirstSet);
+                        ((ExpressionNode) node).FirstSet.Add(alt.FirstSet);
                      }
                      catch (Exception)
                      {
                         Error("Duplicate terminal in first set of <" + prodName + "> " + '\n' +
                               "First(<" + prodName + ">)=[" +
-                              ((AltHeadNode)node).FirstSet.DelimitedText() + ']',
-                              node);
+                              ((ExpressionNode) node).FirstSet.DelimitedText() + ']',
+                           node);
                      }
 
                      if (alt.FirstSet.IncludesEpsilon)
-                        ((AltHeadNode)node).FirstSet.IncludesEpsilon = true;
+                        ((ExpressionNode) node).FirstSet.IncludesEpsilon = true;
 
-                     Debug.WriteLine("First(head) = " + ((AltHeadNode)node).FirstSet);
+                     Debug.WriteLine("First(head) = " + ((ExpressionNode) node).FirstSet);
 
-                     alt = alt.NextAlt;
+                     alt = alt.NextTerm;
                   }
 
                   if (rollup)
@@ -290,7 +295,7 @@ namespace EbnfCompiler.AST
                      // add the first set of the head to the first set of <firstSet>
                      try
                      {
-                        firstSet.Add(((AltHeadNode)node).FirstSet);
+                        firstSet.Add(((ExpressionNode) node).FirstSet);
                      }
                      catch (Exception)
                      {
@@ -300,7 +305,7 @@ namespace EbnfCompiler.AST
                            node);
                      }
 
-                     if (((AltHeadNode)node).FirstSet.IncludesEpsilon)
+                     if (((ExpressionNode) node).FirstSet.IncludesEpsilon)
                         firstSet.IncludesEpsilon = true;
 
                      Debug.WriteLine("First(firstSet) = " + firstSet);
@@ -309,41 +314,43 @@ namespace EbnfCompiler.AST
                   break;
 
                case NodeType.ProdRef:
-                  Debug.WriteLine("ProdRef - " + ((ProdRefNode)node).ProdName);
-                  ComputeFirst(((ProdRefNode)node).ProdName);
-                  var prodInfo = Productions.First(p => p.Key == ((ProdRefNode)node).ProdName).Value;
+                  Debug.WriteLine("ProdRef - " + ((ProdRefNode) node).ProdName);
+                  ComputeFirst(((ProdRefNode) node).ProdName);
+                  var prodInfo = Productions.First(p => p.Key == ((ProdRefNode) node).ProdName).Value;
                   try
                   {
-                     firstSet.Add(prodInfo.AltHead.FirstSet);
+                     firstSet.Add(prodInfo.Expression.FirstSet);
                   }
                   catch (Exception)
                   {
                      Error("Duplicate terminal in first set of <" + prodName + "> " +
-                           "found in <" + ((ProdRefNode)node).ProdName + ">" + '\n' +
+                           "found in <" + ((ProdRefNode) node).ProdName + ">" + '\n' +
                            "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]" + '\n' +
-                           "First(<" + ((ProdRefNode)node).ProdName + ">)=[" +
-                           prodInfo.AltHead.FirstSet.DelimitedText() + "]", node);
+                           "First(<" + ((ProdRefNode) node).ProdName + ">)=[" +
+                           prodInfo.Expression.FirstSet.DelimitedText() + "]", node);
                   }
-                  firstSet.IncludesEpsilon = prodInfo.AltHead.FirstSet.IncludesEpsilon;
-                  if (!prodInfo.AltHead.FirstSet.IncludesEpsilon)
+
+                  firstSet.IncludesEpsilon = prodInfo.Expression.FirstSet.IncludesEpsilon;
+                  if (!prodInfo.Expression.FirstSet.IncludesEpsilon)
                      rollup = false;
                   break;
 
                case NodeType.TermName:
-                  Debug.WriteLine("TermName - " + ((TerminalNode)node).TermName);
+                  Debug.WriteLine("TermName - " + ((TerminalNode) node).TermName);
 
-                  if (!firstSet.Includes(((TerminalNode)node).TermName))
+                  if (!firstSet.Includes(((TerminalNode) node).TermName))
                   {
-                     firstSet.Add(((TerminalNode)node).TermName);
+                     firstSet.Add(((TerminalNode) node).TermName);
                      firstSet.IncludesEpsilon = false;
                      rollup = false;
                   }
                   else
                      Error("Duplicate in first set of <" + prodName + ">: " +
-                           ((TerminalNode)node).TermName, node);
+                           ((TerminalNode) node).TermName, node);
+
                   break;
 
-               case NodeType.Alternative:
+               case NodeType.Term:
                   Debug.WriteLine("Alternative");
                   // should never get here
                   break;
@@ -388,7 +395,7 @@ namespace EbnfCompiler.AST
                continue;
 
             // skip until no more nodes or a AltHead node
-            while ((node != null) && (node.NodeType != NodeType.AltHead))
+            while ((node != null) && (node.NodeType != NodeType.Expression))
                node = node.Next;
          }
       }
@@ -398,17 +405,17 @@ namespace EbnfCompiler.AST
          if (!Productions.TryGetValue(prodName, out var prodInfo))
             Error("Production not defined:" + prodName);
 
-         if (prodInfo == null || !prodInfo.AltHead.FirstSet.IsEmpty())
+         if (prodInfo == null || !prodInfo.Expression.FirstSet.IsEmpty())
             return;
 
          Debug.WriteLine("BEGIN PRODUCTION - " + prodName);
-         Traverse(prodName, prodInfo.AltHead, prodInfo.AltHead.FirstSet);
+         Traverse(prodName, prodInfo.Expression, prodInfo.Expression.FirstSet);
          Debug.WriteLine("END PRODUCTION - " + prodName);
       }
 
-      private void BuildReferences(string prodName, IAltHeadNode altHead)
+      private void BuildReferences(string prodName, IExpressionNode expression)
       {
-         var alt = altHead.FirstAlt;
+         var alt = expression.FirstTerm;
          while (alt != null)
          {
             var node = alt.Next;
@@ -417,16 +424,16 @@ namespace EbnfCompiler.AST
             {
                switch (node.NodeType)
                {
-                  case NodeType.AltHead:
-                     BuildReferences(prodName, (AltHeadNode)node);
+                  case NodeType.Expression:
+                     BuildReferences(prodName, (ExpressionNode) node);
                      break;
 
-                  case NodeType.Alternative:
+                  case NodeType.Term:
                      Error("Programming Error: an alternative should never follow an alternative");
                      break;
 
                   case NodeType.ProdRef:
-                     var name = ((ProdRefNode)node).ProdName;
+                     var name = ((ProdRefNode) node).ProdName;
                      if (!Productions.ContainsKey(name))
                         Error("Undefined production: <" + name + ">", node);
 
@@ -448,11 +455,31 @@ namespace EbnfCompiler.AST
                   case NodeType.EndKleene:
                      break;
                }
+
                node = node.Next;
             }
 
-            alt = alt.NextAlt;
+            alt = alt.NextTerm;
          }
+      }
+
+
+      private int _traceIndent = 0;
+
+      private void BeginTrace(string message)
+      {
+         var ident = new string(' ', _traceIndent);
+         _traceIndent += 2;
+
+         Trace.WriteLine($"{ident}{message}");
+      }
+
+      private void EndTrace(string message)
+      {
+         _traceIndent -= 2;
+         var ident = new string(' ', _traceIndent);
+
+         Trace.WriteLine($"{ident}{message}");
       }
    }
 }

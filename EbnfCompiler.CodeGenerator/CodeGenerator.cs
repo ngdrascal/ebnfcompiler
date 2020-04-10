@@ -44,9 +44,9 @@ namespace EbnfCompiler.CodeGenerator
          Append("\n");
       }
 
-      private void FirstOf(IAltHeadNode altHead, ITerminalSet target)
+      private void FirstOf(IExpressionNode expression, ITerminalSet target)
       {
-         var alt = altHead.FirstAlt;
+         var alt = expression.FirstTerm;
          while (alt != null)
          {
             var node = alt.Next;
@@ -58,15 +58,15 @@ namespace EbnfCompiler.CodeGenerator
 
             switch (node.NodeType)
             {
-               case NodeType.AltHead:
-                  FirstOf((IAltHeadNode)alt.Next, target);
+               case NodeType.Expression:
+                  FirstOf((IExpressionNode)alt.Next, target);
                   break;
 
-               case NodeType.Alternative:
+               case NodeType.Term:
                   throw new Exception("Programming Error: an alternative should never follow an alternative");
 
                case NodeType.ProdRef:
-                  target.Add(_productions[((IProdRefNode)node).ProdName].AltHead.FirstSet);
+                  target.Add(_productions[((IProdRefNode)node).ProdName].Expression.FirstSet);
                   break;
 
                case NodeType.TermName:
@@ -78,20 +78,20 @@ namespace EbnfCompiler.CodeGenerator
                   break;
 
                case NodeType.BeginOption:
-                  FirstOf((IAltHeadNode)node.Next, target);
+                  FirstOf((IExpressionNode)node.Next, target);
                   break;
 
                case NodeType.EndOption:
                   break;
 
                case NodeType.BeginKleene:
-                  FirstOf((IAltHeadNode)node.Next, target);
+                  FirstOf((IExpressionNode)node.Next, target);
                   break;
 
                case NodeType.EndKleene:
                   break;
             }
-            alt = alt.NextAlt;
+            alt = alt.NextTerm;
          }
       }
 
@@ -150,10 +150,10 @@ namespace EbnfCompiler.CodeGenerator
          {
             switch (node.NodeType)
             {
-               case NodeType.AltHead:
+               case NodeType.Expression:
                   break;
 
-               case NodeType.Alternative:
+               case NodeType.Term:
                   break;
 
                case NodeType.ProdRef:
@@ -177,7 +177,7 @@ namespace EbnfCompiler.CodeGenerator
                   {
                      AppendLine("CheckTokenOneOf([" + node.Next.FirstSet.DelimitedText() + "]);");
                   }
-                  GenAlt((IAltHeadNode)node.Next);
+                  GenAlt((IExpressionNode)node.Next);
                   break;
 
                case NodeType.RParen:
@@ -189,7 +189,7 @@ namespace EbnfCompiler.CodeGenerator
                   //            end;
                   AppendLine("if token.kind in [" + node.Next.FirstSet.DelimitedText() + "] then begin");
                   Indent();
-                  GenAlt((IAltHeadNode)node.Next);
+                  GenAlt((IExpressionNode)node.Next);
                   break;
 
                case NodeType.EndOption:
@@ -205,7 +205,7 @@ namespace EbnfCompiler.CodeGenerator
                            node.Next.FirstSet.DelimitedText() +
                            "] do begin");
                   Indent();
-                  GenAlt((IAltHeadNode)node.Next);
+                  GenAlt((IExpressionNode)node.Next);
                   break;
 
                case NodeType.EndKleene:
@@ -218,7 +218,7 @@ namespace EbnfCompiler.CodeGenerator
 
       }
 
-      private void GenAltCase(IAlternativeNode node)
+      private void GenAltCase(ITermNode node)
       {
          Indent();
          AppendLine(node.FirstSet.DelimitedText() + " : begin");
@@ -229,50 +229,50 @@ namespace EbnfCompiler.CodeGenerator
          Outdent();
       }
 
-      private void GenAlt(IAltHeadNode altHead)
+      private void GenAlt(IExpressionNode expression)
       {
-         if (altHead.AltCount > 1)
+         if (expression.TermCount > 1)
          {
-            if (!altHead.FirstSet.IncludesEpsilon)
+            if (!expression.FirstSet.IncludesEpsilon)
             {
-               AppendLine("CheckTokenOneOf([" + altHead.FirstSet.DelimitedText() + "]);");
+               AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
             }
 
             AppendLine("case token.kind of");
 
-            var alt = altHead.FirstAlt;
+            var alt = expression.FirstTerm;
             while (alt != null)
             {
                GenAltCase(alt);
-               alt = alt.NextAlt;
+               alt = alt.NextTerm;
             }
 
             AppendLine("end;");
          }
          else
-            GenTerm(altHead.FirstAlt);
+            GenTerm(expression.FirstTerm);
       }
 
       private void GenMethodBody(IProductionInfo prodInfo)
       {
          AppendLine("procedure TParser.Parse" + prodInfo + ";");
-         AppendLine("// First = " + prodInfo.AltHead.FirstSet);
+         AppendLine("// First = " + prodInfo.Expression.FirstSet);
          AppendLine("begin");
 
          Indent();
 
-         var alt = prodInfo.AltHead.FirstAlt;
+         var alt = prodInfo.Expression.FirstTerm;
          while (alt != null)
          {
             if (alt.Next.NodeType != NodeType.TermName)
                break;
-            alt = alt.NextAlt;
+            alt = alt.NextTerm;
          }
 
          if (alt == null)
-            AppendLine("CheckTokenOneOf([" + prodInfo.AltHead.FirstSet.DelimitedText() + "]);");
+            AppendLine("CheckTokenOneOf([" + prodInfo.Expression.FirstSet.DelimitedText() + "]);");
 
-         GenAlt(prodInfo.AltHead);
+         GenAlt(prodInfo.Expression);
          Outdent();
          AppendLine("end;");
          AppendLine();

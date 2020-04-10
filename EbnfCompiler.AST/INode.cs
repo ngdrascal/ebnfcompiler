@@ -4,7 +4,7 @@ namespace EbnfCompiler.AST
 {
    public enum NodeType
    {
-      AltHead, Alternative, ProdRef, TermName, ActName,
+      Expression, Term, ProdRef, TermName, ActName,
       LParen, RParen, BeginOption, EndOption,
       BeginKleene, EndKleene
    };
