@@ -23,6 +23,9 @@ namespace EbnfCompiler.AST
       void BeginTerm(IToken token);
       void EndTerm();
 
+      void BeginFactor(IToken token);
+      void EndFactor();
+
       void BeginParens(IToken token);
       void EndParens(IToken token);
 

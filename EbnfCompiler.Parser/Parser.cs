@@ -145,11 +145,14 @@ namespace EbnfCompiler.Parser
       // <Factor> ::= "IDENTIFIER" | "STRING" | (" <Expression> ")" | "[" <Expression> "]" | "{" <Expression> "}".
       private void ParseFactor()
       {
+         _astBuilder.BeginFactor(_scanner.CurrentToken);
+
          var factorStartTokens = new[]
          {
             TokenKind.Identifier, TokenKind.String, TokenKind.Action, 
             TokenKind.LeftParen, TokenKind.LeftBracket, TokenKind.LeftBrace
          };
+
          CheckTokenOneOf(factorStartTokens);
 
          switch (_scanner.CurrentToken.TokenKind)
@@ -187,6 +190,8 @@ namespace EbnfCompiler.Parser
                _scanner.Advance();
                break;
          }
+
+         _astBuilder.EndFactor();
       }
 
       // First = [Action, <epsilon>]

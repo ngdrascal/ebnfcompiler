@@ -4,60 +4,83 @@ namespace EbnfCompiler.AST
 {
    public abstract class Node : INode
    {
-      protected readonly TerminalSet _firstSet = new TerminalSet();
+      protected readonly IDebugTracer Tracer;
+      protected readonly TerminalSet FirstSetInternal = new TerminalSet();
 
       public ISourceLocation Location { get; set; }
+
       public NodeType NodeType { get; }
+
       public string Image { get; protected set; }
-      public INode Next { get; set; }
 
       public ITerminalSet FirstSet
       {
          get
          {
-            // if (_firstSet.IsEmpty())
-            //    CalcFirstSet();
-            return _firstSet;
+            if (!FirstSetInternal.IsEmpty())
+               return FirstSetInternal;
+
+            Tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
+
+            CalcFirstSet();
+
+            Tracer.EndTrace($"First: {GetType().Name} = {FirstSetInternal} ");
+
+            return FirstSetInternal;
          }
       }
 
-      protected Node(NodeType nodeType, IToken token)
+      protected Node(NodeType nodeType, IToken token, IDebugTracer tracer)
       {
+         Tracer = tracer;
          NodeType = nodeType;
          Location = token.Location;
          Image = token.Image;
       }
 
       protected abstract void CalcFirstSet();
+   }
+
+   public class StatementNode : Node, IStatementNode
+   {
+      public StatementNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Statement, token, tracer)
+      {
+      }
+
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
-         return Image;
+         return $"{Expression} .";
+      }
+
+      protected override void CalcFirstSet()
+      {
       }
    }
 
    public class ExpressionNode : Node, IExpressionNode
    {
-      public int TermCount { get; set; }
-
-      public ITermNode FirstTerm { get; set; }
-
-      public ExpressionNode(IToken token)
-         : base(NodeType.Expression, token)
+      public ExpressionNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Expression, token, tracer)
       {
          Image = string.Empty;
          TermCount = 0;
          FirstTerm = null;
       }
 
+      public int TermCount { get; set; }
+
+      public ITermNode FirstTerm { get; private set; }
+
       public void AppendTerm(ITermNode newTerm)
       {
          TermCount++;
 
-         // if there are not any existing alternatives
          if (FirstTerm == null)
             FirstTerm = newTerm;
-         else // find the last term
+         else
          {
             var t = FirstTerm;
             while (t.NextTerm != null)
@@ -76,66 +99,121 @@ namespace EbnfCompiler.AST
             result += term.ToString();
             term = term.NextTerm;
             if (term != null)
-               result += "|";
+               result += " | ";
          }
+
          return result;
       }
 
       protected override void CalcFirstSet()
       {
-         _firstSet.IncludesEpsilon = false;
-         var alt = FirstTerm;
-         while (alt != null)
+         var allIncludeEpsilon = true;
+
+         var term = FirstTerm;
+         while (term != null)
          {
-            _firstSet.Add(alt.FirstSet);
-            if (alt.FirstSet.IncludesEpsilon)
-            {
-               alt.FirstSet.IncludesEpsilon = true;
-            }
-            alt = alt.NextTerm;
+            FirstSetInternal.Union(term.FirstSet, false);
+            if (!term.FirstSet.IncludesEpsilon)
+               allIncludeEpsilon = false;
+
+            term = term.NextTerm;
          }
+
+         if (allIncludeEpsilon)
+            FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
    }
 
    public class TermNode : Node, ITermNode
    {
-      public TermNode(IToken token)
-         : base(NodeType.Term, token)
+      public TermNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Term, token, tracer)
       {
       }
 
       public ITermNode NextTerm { get; set; }
 
-      protected override void CalcFirstSet()
+      public IFactorNode FirstFactor { get; private set; }
+
+      public void AppendFactor(IFactorNode newFactor)
       {
-         _firstSet.Add(Next.FirstSet);
-         _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
+         if (FirstFactor == null)
+            FirstFactor = newFactor;
+         else
+         {
+            var t = FirstFactor;
+            while (t.NextFactor != null)
+               t = t.NextFactor;
+            t.NextFactor = newFactor;
+         }
       }
 
       public override string ToString()
       {
          var result = string.Empty;
-         var node = Next;
-         while (node != null)
+
+         var factor = FirstFactor;
+         while (factor != null)
          {
-            result += node.ToString();
-            node = node.Next;
+            result += " " + factor.ToString();
+            factor = factor.NextFactor;
          }
+
          return result;
+      }
+
+      protected override void CalcFirstSet()
+      {
+         var allIncludeEpsilon = true;
+
+         var factor = FirstFactor;
+         while (factor != null)
+         {
+            FirstSetInternal.Union(factor.FirstSet, false);
+            if (!factor.FirstSet.IncludesEpsilon)
+               allIncludeEpsilon = false;
+
+            factor = factor.NextFactor;
+         }
+
+         if (allIncludeEpsilon)
+            FirstSetInternal.Add(FirstSetInternal.Epsilon);
+      }
+   }
+
+   public class FactorNode : Node, IFactorNode
+   {
+      public FactorNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Factor, token, tracer)
+      {
+      }
+
+      public INode FactorExpr { get; set; }
+
+      public IFactorNode NextFactor { get; set; }
+
+      public override string ToString()
+      {
+         return FactorExpr.ToString();
+      }
+
+      protected override void CalcFirstSet()
+      {
+         FirstSetInternal.Union(FactorExpr.FirstSet);
       }
    }
 
    public class ProdRefNode : Node, IProdRefNode
    {
-      public string ProdName { get; }
-      public IExpressionNode Expression { get; set; }
-
-      public ProdRefNode(IToken token)
-         : base(NodeType.ProdRef, token)
+      public ProdRefNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.ProdRef, token, tracer)
       {
          ProdName = token.Image;
-         //AltHead = null;
       }
+
+      public string ProdName { get; }
+
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
@@ -144,61 +222,38 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
-         //FirstSet.Add(AltHead.FirstSet);
-         //FirstSet.IncludesEpsilon = AltHead.FirstSet.IncludesEpsilon;
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
    public class TerminalNode : Node, ITerminalNode
    {
-      public string TermName { get; private set; }
-
-      public TerminalNode(IToken token, string enumImage)
-         : base(NodeType.TermName, token)
+      public TerminalNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Terminal, token, tracer)
       {
          Image = '"' + Image + '"';
 
-         TermName = enumImage;
+         TermName = token.Image;
+      }
+
+      public string TermName { get; }
+
+      public override string ToString()
+      {
+         return Image;
       }
 
       protected override void CalcFirstSet()
       {
-         _firstSet.Add(TermName);
-         _firstSet.IncludesEpsilon = false;
+         FirstSetInternal.Add(TermName);
       }
    }
 
-   public class ActionNode : Node, IActionNode
+   public class LParenNode : Node, ILParenNode
    {
-      public string ActName { get; private set; }
-
-      public ActionNode(IToken token)
-         : base(NodeType.ActName, token)
+      public LParenNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.LParen, token, tracer)
       {
-         Image = '#' + Image + '#';
-         ActName = token.Image;
-      }
-
-      protected override void CalcFirstSet()
-      {
-         if (Next != null)
-         {
-            _firstSet.Add(Next.FirstSet);
-            _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
-         }
-         else
-            _firstSet.IncludesEpsilon = false;
-      }
-   }
-
-   public class LParenNode : Node
-   {
-      //public RParenNode Mate { get; set; }
-
-      public LParenNode(IToken token)
-         : base(NodeType.LParen, token)
-      {
-         //Mate = null;
       }
 
       public IExpressionNode Expression { get; set; }
@@ -210,110 +265,76 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
-         _firstSet.Add(Next.FirstSet);
-         _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
-   public class RParenNode : Node
+   public class LOptionNode : Node, ILOptionNode
    {
-      //public LParenNode Mate { get; set; }
-
-      public RParenNode(IToken token)
-         : base(NodeType.RParen, token)
+      public LOptionNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.BeginOption, token, tracer)
       {
-         //Mate = null;
+      }
+
+      public IExpressionNode Expression { get; set; }
+
+      public override string ToString()
+      {
+         return $"[ {Expression} ]";
       }
 
       protected override void CalcFirstSet()
       {
-         // if (!Mate.FirstSet.IncludesEpsilon)
-         //    return;
-         //
-         // if (Next == null)
-         //    return;
-         //
-         // Mate.FirstSet.Add(Next.FirstSet);
-         // Mate.FirstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
+         FirstSetInternal.Union(Expression.FirstSet);
+         FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
    }
 
-   public class LOptionNode : Node
+   public class LKleeneNode : Node, ILKleeneStarNode
    {
-      public ROptionNode Mate { get; set; }
-
-      public LOptionNode(IToken token)
-         : base(NodeType.BeginOption, token)
+      public LKleeneNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.BeginKleeneStar, token, tracer)
       {
-         Mate = null;
+      }
+
+      public IExpressionNode Expression { get; set; }
+
+      public override string ToString()
+      {
+         return "{ " + Expression.ToString() + " }";
       }
 
       protected override void CalcFirstSet()
       {
-         _firstSet.Add(Next.FirstSet);
-         _firstSet.Add(Mate.FirstSet);
-         _firstSet.IncludesEpsilon = Mate.FirstSet.IncludesEpsilon;
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
-   public class ROptionNode : Node
+   public class ActionNode : Node, IActionNode
    {
-      public LOptionNode Mate { get; set; }
-
-      public ROptionNode(IToken token)
-         : base(NodeType.EndOption, token)
+      public ActionNode(IToken token, IDebugTracer tracer)
+         : base(NodeType.Action, token, tracer)
       {
-         Mate = null;
+         Image = '#' + Image + '#';
+         ActionName = token.Image;
+      }
+
+      public string ActionName { get; }
+
+      public override string ToString()
+      {
+         return $"#{ActionName}#";
       }
 
       protected override void CalcFirstSet()
       {
-         if (Next != null)
-         {
-            _firstSet.Add(Next.FirstSet);
-            _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
-         }
-         _firstSet.IncludesEpsilon = true;
-      }
-   }
-
-   public class LKleeneNode : Node
-   {
-      public RKleeneNode Mate { get; set; }
-
-      public LKleeneNode(IToken token)
-         : base(NodeType.BeginKleene, token)
-      {
-         Mate = null;
-      }
-
-      protected override void CalcFirstSet()
-      {
-         _firstSet.Add(Next.FirstSet);
-         _firstSet.Add(Mate.FirstSet);
-         _firstSet.IncludesEpsilon = Mate.FirstSet.IncludesEpsilon;
-      }
-   }
-
-   public class RKleeneNode : Node
-   {
-      public LKleeneNode Mate { get; set; }
-
-      public RKleeneNode(IToken token)
-         : base(NodeType.EndKleene, token)
-      {
-         Mate = null;
-      }
-
-      protected override void CalcFirstSet()
-      {
-         if (Next != null)
-         {
-            _firstSet.Add(Next.FirstSet);
-            _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
-         }
-         else
-            _firstSet.IncludesEpsilon = true;
+         // if (Next != null)
+         // {
+         //    _firstSet.Add(Next.FirstSet);
+         //    _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
+         // }
+         // else
+         //    _firstSet.IncludesEpsilon = false;
       }
    }
 }

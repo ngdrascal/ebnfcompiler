@@ -38,7 +38,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void AppendLine(string s = "")
       {
-         var indent = new String(' ', _indentLevel);
+         var indent = new string(' ', _indentLevel);
          Append(indent);
          Append(s);
          Append("\n");
@@ -46,6 +46,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void FirstOf(IExpressionNode expression, ITerminalSet target)
       {
+         /*
          var alt = expression.FirstTerm;
          while (alt != null)
          {
@@ -69,7 +70,7 @@ namespace EbnfCompiler.CodeGenerator
                   target.Add(_productions[((IProdRefNode)node).ProdName].Expression.FirstSet);
                   break;
 
-               case NodeType.TermName:
+               case NodeType.Terminal:
                   target.Add(((ITerminalNode)node).TermName);
                   break;
 
@@ -84,15 +85,16 @@ namespace EbnfCompiler.CodeGenerator
                case NodeType.EndOption:
                   break;
 
-               case NodeType.BeginKleene:
+               case NodeType.BeginKleeneStar:
                   FirstOf((IExpressionNode)node.Next, target);
                   break;
 
-               case NodeType.EndKleene:
+               case NodeType.EndKleeneStar:
                   break;
             }
             alt = alt.NextTerm;
          }
+         */
       }
 
       private void GenInterface()
@@ -146,6 +148,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void GenTerm(INode node)
       {
+         /*
          while (node != null)
          {
             switch (node.NodeType)
@@ -160,7 +163,7 @@ namespace EbnfCompiler.CodeGenerator
                   AppendLine("Parse" + ((IProdRefNode)node).ProdName + ";");
                   break;
 
-               case NodeType.TermName:
+               case NodeType.Terminal:
                   AppendLine("Match(" + ((ITerminalNode)node).TermName + ");");
                   break;
 
@@ -197,7 +200,7 @@ namespace EbnfCompiler.CodeGenerator
                   AppendLine("end;");
                   break;
 
-               case NodeType.BeginKleene:
+               case NodeType.BeginKleeneStar:
                   //            if node^.next^.firstSetOfHead.IsEmpty then begin
                   //               FirstOf(node^.next, node^.next^.firstSetOfHead);
                   //            end;
@@ -208,18 +211,19 @@ namespace EbnfCompiler.CodeGenerator
                   GenAlt((IExpressionNode)node.Next);
                   break;
 
-               case NodeType.EndKleene:
+               case NodeType.EndKleeneStar:
                   Outdent();
                   AppendLine("end;");
                   break;
             }
             node = node.Next;
          }
-
+         */
       }
 
       private void GenAltCase(ITermNode node)
       {
+         /*
          Indent();
          AppendLine(node.FirstSet.DelimitedText() + " : begin");
          Indent();
@@ -227,6 +231,7 @@ namespace EbnfCompiler.CodeGenerator
          Outdent();
          AppendLine("end;");
          Outdent();
+         */
       }
 
       private void GenAlt(IExpressionNode expression)
@@ -255,6 +260,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void GenMethodBody(IProductionInfo prodInfo)
       {
+         /*
          AppendLine("procedure TParser.Parse" + prodInfo + ";");
          AppendLine("// First = " + prodInfo.Expression.FirstSet);
          AppendLine("begin");
@@ -264,7 +270,7 @@ namespace EbnfCompiler.CodeGenerator
          var alt = prodInfo.Expression.FirstTerm;
          while (alt != null)
          {
-            if (alt.Next.NodeType != NodeType.TermName)
+            if (alt.Next.NodeType != NodeType.Terminal)
                break;
             alt = alt.NextTerm;
          }
@@ -277,6 +283,7 @@ namespace EbnfCompiler.CodeGenerator
          AppendLine("end;");
          AppendLine();
          AppendLine();
+         */
       }
 
       private void GenImplementation()

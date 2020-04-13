@@ -1,42 +1,86 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using EbnfCompiler.AST;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
 namespace EbnfCompiler.Driver
 {
+   /*
+
+      <Syntax>     ::= { <Statement> } "." .
+
+      <Statement>  ::= "IDENTIFIER" "::=" <Expression> "." .
+
+      <Expression> ::= <Term> { "|" <Term> } .
+
+      <Term>       ::= <Factor> { <Factor> } .
+
+      <Factor>     ::= "IDENTIFIER" |
+                       "STRING" |
+                       "(" <Expression> ")" |
+                       "[" <Expression> "]" |
+                       "{" <Expression> "}" .
+
+   */
+
    [TestFixture]
    public class Driver
    {
-      //private const string TestFilePath = @"..\..\..\..\Test Data\";
-
-      private const string TestCase = @"
+      private const string TestCase1 = @"
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            <S> ::= (""a"") | <T> .
-            <T> ::= ""b"" .
+            <S> ::= <T> <U> .
+            <T> ::= [ ""a"" ] ""b"" .
+      ";
+
+      private const string TestCase2 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= <T> <U> .
+            <T> ::= [""a""] .
+            <U> ::= [""b""] .
+      ";
+
+      private const string TestCase3 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= [ ""a"" ] .
       ";
 
       [Test]
       public void Test01()
       {
-         //var stream = new FileStream(TestFilePath + "Ebnf.bnf", FileMode.Open, FileAccess.Read);
+         var loggerFactory = LoggerFactory.Create(builder =>
+         {
+            builder
+               .AddFilter("EBNF", LogLevel.Trace)
+               .AddDebug();
+         });
+         var logger = loggerFactory.CreateLogger("EBNF");
+         var tracer = new DebugTracer(logger);
+
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase));
+         stream.Write(encoding.GetBytes(TestCase2));
          stream.Seek(0, SeekOrigin.Begin);
 
-
          var scanner = new Scanner.Scanner(stream);
-         var astBuilder = new AstBuilder();
+         var astBuilder = new AstBuilder(new AstNodeFactory(tracer), 
+                                         new ProdInfoFactory(tracer), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
          parser.ParseGoal();
 
+         var traverser = new AstTraverser();
          foreach (var prod in astBuilder.Productions.Values)
          {
-            Debug.WriteLine($"{prod.Name}: {prod.Expression.FirstSet}");
+            // Debug.WriteLine($"\nAST for <{prod.Name}>");
+            // traverser.Traverse(prod.Expression);
+            tracer.TraceLine(new string('-', 40));
+            tracer.TraceLine($"First of <{prod.Name}>: {prod.Expression.FirstSet}");
          }
       }
    }

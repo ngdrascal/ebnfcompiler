@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using EbnfCompiler.Compiler;
 
@@ -9,31 +7,35 @@ namespace EbnfCompiler.AST
 {
    public class AstBuilder : IAstBuilder
    {
-      private readonly List<INode> _nodes;
+      private readonly IAstNodeFactory _astNodeFactory;
+      private readonly IProdInfoFactory _prodInfoFactory;
+      private readonly IDebugTracer _tracer;
       private readonly Stack<INode> _stack;
-      private INode _currentNode;
       private IProductionInfo _currentProd; // index into symbol table
       private TokenDefinition _lastTokenInfo;
 
-      public ICollection<ITokenDefinition> TokenDefinitions { get; private set; }
-
-      public IDictionary<string, IProductionInfo> Productions { get; private set; }
-
-      public AstBuilder()
+      public AstBuilder(IAstNodeFactory astNodeFactory, 
+                        IProdInfoFactory prodInfoFactory, IDebugTracer tracer)
       {
-         _nodes = new List<INode>();
+         _astNodeFactory = astNodeFactory;
+         _prodInfoFactory = prodInfoFactory;
+         _tracer = tracer;
+
          _stack = new Stack<INode>();
-         _currentNode = null;
 
          TokenDefinitions = new Collection<ITokenDefinition>();
          Productions = new Dictionary<string, IProductionInfo>();
       }
 
+      public ICollection<ITokenDefinition> TokenDefinitions { get; }
+
+      public IDictionary<string, IProductionInfo> Productions { get; }
+
       public void AddTokenName(IToken token)
       {
          if (TokenDefinitions.Count(p => p.Image == token.Image) == 0)
          {
-            _lastTokenInfo = new TokenDefinition {Image = token.Image};
+            _lastTokenInfo = new TokenDefinition { Image = token.Image };
             TokenDefinitions.Add(_lastTokenInfo);
          }
          else
@@ -47,187 +49,181 @@ namespace EbnfCompiler.AST
 
       public void BeginSyntax()
       {
+         _tracer.BeginTrace(nameof(BeginSyntax));
       }
 
       public void EndSyntax()
       {
+         _tracer.EndTrace(nameof(EndSyntax));
+
+         _tracer.TraceLine(new string(' ', 40));
+
          FixupProdRefNodes();
 
-         foreach (var production in Productions)
-         {
-            BuildReferences(production.Key, production.Value.Expression);
-            ComputeFirst(production.Key);
-         }
-
-         foreach (var production in Productions)
-            Debug.WriteLine(production.Value.ToString());
+         // _tracer.TraceLine(new string('-', 40));
+         // foreach (var production in Productions)
+         //    _tracer.TraceLine(production.Value.ToString());
       }
 
       public void BeginStatement(IToken token)
       {
-         _currentProd = new ProductionInfo(token.Image);
+         _tracer.BeginTrace(nameof(BeginStatement));
+
+         _currentProd = _prodInfoFactory.Create(token.Image);
          Productions.Add(token.Image, _currentProd);
+
+         var statement = _astNodeFactory.Create(NodeType.Statement, token);
+
+         _stack.Push(statement);
       }
 
       public void EndStatement()
       {
-         _currentProd.Expression = (ExpressionNode) _currentNode;
-         _currentNode = null;
+         _tracer.EndTrace(nameof(EndStatement));
+
+         var statement = _stack.Peek().AsStatement();
+         _currentProd.Expression = statement.Expression;
       }
 
       public void BeginExpression(IToken token)
       {
-         BeginTrace("BeginExpression");
+         _tracer.BeginTrace(nameof(BeginExpression));
 
-         var node = new ExpressionNode(token);
-         _nodes.Add(node);
+         var expression = _astNodeFactory.Create(NodeType.Expression, token);
 
-         AppendNode(node);
-
-         _stack.Push(node);
+         _stack.Push(expression);
       }
 
       public void EndExpression()
       {
-         EndTrace("EndExpression");
+         _tracer.EndTrace(nameof(EndExpression));
 
-         _currentNode = _stack.Pop();
+         var expression = _stack.Pop().AsExpression();
+
+         switch (_stack.Peek().NodeType)
+         {
+            case NodeType.Statement:
+               _stack.Peek().AsStatement().Expression = expression;
+               break;
+
+            case NodeType.LParen:
+               _stack.Peek().AsLParen().Expression = expression;
+               break;
+
+            case NodeType.BeginOption:
+               _stack.Peek().AsLOption().Expression = expression;
+               break;
+
+            case NodeType.BeginKleeneStar:
+               _stack.Peek().AsLKleeneStarNode().Expression = expression;
+               break;
+         }
       }
 
       public void BeginTerm(IToken token)
       {
-         BeginTrace("BeginTerm");
+         _tracer.BeginTrace(nameof(BeginTerm));
 
-         var node = new TermNode(token);
-         _nodes.Add(node);
+         var term = _astNodeFactory.Create(NodeType.Term, token).AsTerm();
 
          var expr = _stack.Peek().AsExpression();
-         expr.AppendTerm(node);
+         expr.AppendTerm(term);
 
-         _currentNode = node;
+         _stack.Push(term);
       }
 
       public void EndTerm()
       {
-         EndTrace("EndTerm");
+         _tracer.EndTrace(nameof(EndTerm));
 
-         // point back to the head of the current set of term
-         _currentNode = _stack.Peek();
+         _stack.Pop().AsTerm();
+      }
+
+      public void BeginFactor(IToken token)
+      {
+         _tracer.BeginTrace(nameof(BeginFactor));
+
+         var factor = _astNodeFactory.Create(NodeType.Factor, token);
+
+         _stack.Push(factor);
+      }
+
+      public void EndFactor()
+      {
+         _tracer.EndTrace(nameof(EndFactor));
+
+         var factor = _stack.Pop().AsFactor();
+         _stack.Peek().AsTerm().AppendFactor(factor);
       }
 
       public void BeginParens(IToken token)
       {
-         BeginTrace("BeginParens");
+         _tracer.BeginTrace(nameof(BeginParens));
 
-         var node = new LParenNode(token);
-         _nodes.Add(node);
+         var lParen = _astNodeFactory.Create(NodeType.LParen, token);
 
-         AppendNode(node);
-
-         _stack.Push(node);
-
-         //_stack.Push(new ExpressionNode(token));
+         _stack.Peek().AsFactor().FactorExpr = lParen;
+         _stack.Push(lParen);
       }
 
       public void EndParens(IToken token)
       {
-         EndTrace("EndParens");
-
-         //var node = new RParenNode(token);
-         //_nodes.Add(node);
-
-         //AppendNode(node);
-
-         //node.Mate = (LParenNode)_stack.Peek();
-         //((LParenNode)_stack.Peek()).Mate = node;
-
-         // var expression = _stack.Pop().AsExpression();
-         // ((LParenNode)_stack.Peek()).Expression = expression;
+         _tracer.EndTrace(nameof(EndParens));
 
          _stack.Pop();
       }
 
       public void BeginOption(IToken token)
       {
-         var node = new LOptionNode(token);
-         _nodes.Add(node);
+         _tracer.BeginTrace(nameof(BeginOption));
 
-         AppendNode(node);
+         var lOption = _astNodeFactory.Create(NodeType.BeginOption, token);
 
-         _stack.Push(node);
+         _stack.Peek().AsFactor().FactorExpr = lOption; 
+         _stack.Push(lOption);
       }
 
       public void EndOption(IToken token)
       {
-         var node = new ROptionNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         node.Mate = (LOptionNode) (_stack.Peek());
-         ((LOptionNode) _stack.Peek()).Mate = node;
+         _tracer.EndTrace(nameof(EndOption));
 
          _stack.Pop();
       }
 
       public void BeginKleene(IToken token)
       {
-         var node = new LKleeneNode(token);
-         _nodes.Add(node);
+         _tracer.BeginTrace(nameof(BeginKleene));
 
-         AppendNode(node);
+         var lKleene = _astNodeFactory.Create(NodeType.BeginKleeneStar, token);
 
-         _stack.Push(node);
+         _stack.Peek().AsFactor().FactorExpr = lKleene;
+         _stack.Push(lKleene);
       }
 
       public void EndKleene(IToken token)
       {
-         var node = new RKleeneNode(token);
-         _nodes.Add(node);
-
-         AppendNode(node);
-
-         node.Mate = (LKleeneNode) _stack.Peek();
-         ((LKleeneNode) _stack.Peek()).Mate = node;
+         _tracer.EndTrace(nameof(EndKleene));
 
          _stack.Pop();
       }
 
       public void FoundProduction(IToken token)
       {
-         var node = new ProdRefNode(token);
-         _nodes.Add(node);
-         AppendNode(node);
+         var prodRef = _astNodeFactory.Create(NodeType.ProdRef, token);
+
+         _stack.Peek().AsFactor().FactorExpr = prodRef;
       }
 
       public void FoundTerminal(IToken token)
       {
-         //var enumImage = String.Empty;
+         var terminal = _astNodeFactory.Create(NodeType.Terminal, token);
 
-         //if (_tokens.ContainsKey(token.Image))
-         //   enumImage = _tokens[token.Image].Definition;
-         //else
-         //   Error("Undefined terminal: '" + token.Image + "'", token);
-
-         var node = new TerminalNode(token, token.Image);
-         AppendNode(node);
+         _stack.Peek().AsFactor().FactorExpr = terminal;
       }
 
       public void FoundAction(IToken token)
       {
-         var node = new ActionNode(token);
-         _nodes.Add(node);
-         AppendNode(node);
-      }
-
-      private void Error(string message)
-      {
-         throw new SemanticErrorException(message);
-      }
-
-      private void Error(string message, INode node)
-      {
-         throw new SemanticErrorException(message, node);
+         _astNodeFactory.Create(NodeType.Action, token);
       }
 
       private void Error(string message, IToken token)
@@ -235,251 +231,179 @@ namespace EbnfCompiler.AST
          throw new SemanticErrorException(message, token);
       }
 
-      private void AppendNode(INode node)
-      {
-         if (_currentNode != null)
-            _currentNode.Next = node;
-
-         _currentNode = node;
-      }
-
       private void FixupProdRefNodes()
       {
-         foreach (var node in _nodes.Where(p => p.NodeType == NodeType.ProdRef))
+         foreach (var node in _astNodeFactory.AllNodes.Where(p => p.NodeType == NodeType.ProdRef))
          {
-            var prodRefNode = (ProdRefNode) node;
+            var prodRefNode = (ProdRefNode)node;
             var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
             prodRefNode.Expression = prodInfo.Expression;
          }
       }
 
-      private void Traverse(string prodName, INode node, ITerminalSet firstSet, bool rollup = true)
-      {
-         while (node != null)
-         {
-            switch (node.NodeType)
+      /*
+            private void Traverse(string prodName, INode node, ITerminalSet firstSet, bool rollup = true)
             {
-               case NodeType.Expression:
-                  Debug.WriteLine("AltHead");
-
-                  // figure the first set for each alternative and add them to first set of
-                  // the head
-                  var alt = ((IExpressionNode) node).FirstTerm;
-                  while (alt != null)
-                  {
-                     Traverse(prodName, alt.Next, alt.FirstSet);
-                     Debug.WriteLine("First(alt) = " + alt.FirstSet);
-
-                     try
-                     {
-                        ((ExpressionNode) node).FirstSet.Add(alt.FirstSet);
-                     }
-                     catch (Exception)
-                     {
-                        Error("Duplicate terminal in first set of <" + prodName + "> " + '\n' +
-                              "First(<" + prodName + ">)=[" +
-                              ((ExpressionNode) node).FirstSet.DelimitedText() + ']',
-                           node);
-                     }
-
-                     if (alt.FirstSet.IncludesEpsilon)
-                        ((ExpressionNode) node).FirstSet.IncludesEpsilon = true;
-
-                     Debug.WriteLine("First(head) = " + ((ExpressionNode) node).FirstSet);
-
-                     alt = alt.NextTerm;
-                  }
-
-                  if (rollup)
-                  {
-                     // add the first set of the head to the first set of <firstSet>
-                     try
-                     {
-                        firstSet.Add(((ExpressionNode) node).FirstSet);
-                     }
-                     catch (Exception)
-                     {
-                        Error("Duplicate terminal in first set of <" + prodName + "> " +
-                              '\n' +
-                              "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]",
-                           node);
-                     }
-
-                     if (((ExpressionNode) node).FirstSet.IncludesEpsilon)
-                        firstSet.IncludesEpsilon = true;
-
-                     Debug.WriteLine("First(firstSet) = " + firstSet);
-                  }
-
-                  break;
-
-               case NodeType.ProdRef:
-                  Debug.WriteLine("ProdRef - " + ((ProdRefNode) node).ProdName);
-                  ComputeFirst(((ProdRefNode) node).ProdName);
-                  var prodInfo = Productions.First(p => p.Key == ((ProdRefNode) node).ProdName).Value;
-                  try
-                  {
-                     firstSet.Add(prodInfo.Expression.FirstSet);
-                  }
-                  catch (Exception)
-                  {
-                     Error("Duplicate terminal in first set of <" + prodName + "> " +
-                           "found in <" + ((ProdRefNode) node).ProdName + ">" + '\n' +
-                           "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]" + '\n' +
-                           "First(<" + ((ProdRefNode) node).ProdName + ">)=[" +
-                           prodInfo.Expression.FirstSet.DelimitedText() + "]", node);
-                  }
-
-                  firstSet.IncludesEpsilon = prodInfo.Expression.FirstSet.IncludesEpsilon;
-                  if (!prodInfo.Expression.FirstSet.IncludesEpsilon)
-                     rollup = false;
-                  break;
-
-               case NodeType.TermName:
-                  Debug.WriteLine("TermName - " + ((TerminalNode) node).TermName);
-
-                  if (!firstSet.Includes(((TerminalNode) node).TermName))
-                  {
-                     firstSet.Add(((TerminalNode) node).TermName);
-                     firstSet.IncludesEpsilon = false;
-                     rollup = false;
-                  }
-                  else
-                     Error("Duplicate in first set of <" + prodName + ">: " +
-                           ((TerminalNode) node).TermName, node);
-
-                  break;
-
-               case NodeType.Term:
-                  Debug.WriteLine("Alternative");
-                  // should never get here
-                  break;
-
-               case NodeType.ActName:
-                  Debug.WriteLine("ActName");
-                  // do nothing
-                  break;
-
-               case NodeType.LParen:
-                  Debug.WriteLine("ntLParens");
-                  // do nothing
-                  break;
-
-               case NodeType.BeginOption:
-                  Debug.WriteLine("BeginOption");
-                  // do nothing
-                  break;
-
-               case NodeType.BeginKleene:
-                  Debug.WriteLine("BeginKleene");
-                  // do nothing
-                  break;
-
-               case NodeType.RParen:
-                  Debug.WriteLine("ntRParens");
-                  if (!firstSet.IncludesEpsilon)
-                     rollup = false;
-                  break;
-
-               case NodeType.EndOption:
-               case NodeType.EndKleene:
-                  Debug.WriteLine(node.NodeType == NodeType.EndOption ? "EndOption" : "EndKleene");
-
-                  if (node.Next == null)
-                     firstSet.IncludesEpsilon = true;
-                  break;
-            }
-
-            node = node.Next;
-            if (rollup)
-               continue;
-
-            // skip until no more nodes or a AltHead node
-            while ((node != null) && (node.NodeType != NodeType.Expression))
-               node = node.Next;
-         }
-      }
-
-      private void ComputeFirst(string prodName)
-      {
-         if (!Productions.TryGetValue(prodName, out var prodInfo))
-            Error("Production not defined:" + prodName);
-
-         if (prodInfo == null || !prodInfo.Expression.FirstSet.IsEmpty())
-            return;
-
-         Debug.WriteLine("BEGIN PRODUCTION - " + prodName);
-         Traverse(prodName, prodInfo.Expression, prodInfo.Expression.FirstSet);
-         Debug.WriteLine("END PRODUCTION - " + prodName);
-      }
-
-      private void BuildReferences(string prodName, IExpressionNode expression)
-      {
-         var alt = expression.FirstTerm;
-         while (alt != null)
-         {
-            var node = alt.Next;
-
-            while (node != null)
-            {
-               switch (node.NodeType)
+               while (node != null)
                {
-                  case NodeType.Expression:
-                     BuildReferences(prodName, (ExpressionNode) node);
-                     break;
+                  switch (node.NodeType)
+                  {
+                     case NodeType.Expression:
+                        TraceLine("AltHead");
 
-                  case NodeType.Term:
-                     Error("Programming Error: an alternative should never follow an alternative");
-                     break;
+                        // figure the first set for each alternative and add them to first set of
+                        // the head
+                        var term = node.AsExpression().FirstTerm;
+                        while (term != null)
+                        {
+                           Traverse(prodName, term.Next, term.FirstSet);
+                           TraceLine("First(alt) = " + term.FirstSet);
 
-                  case NodeType.ProdRef:
-                     var name = ((ProdRefNode) node).ProdName;
-                     if (!Productions.ContainsKey(name))
-                        Error("Undefined production: <" + name + ">", node);
+                           try
+                           {
+                              ((ExpressionNode)node).FirstSet.Add(term.FirstSet);
+                           }
+                           catch (Exception)
+                           {
+                              Error("Duplicate terminal in first set of <" + prodName + "> " + '\n' +
+                                    "First(<" + prodName + ">)=[" +
+                                    ((ExpressionNode)node).FirstSet.DelimitedText() + ']',
+                                 node);
+                           }
 
-                     Productions[name].AddReference(prodName);
-                     break;
+                           if (term.FirstSet.IncludesEpsilon)
+                              ((ExpressionNode)node).FirstSet.IncludesEpsilon = true;
 
-                  case NodeType.TermName:
-                     break;
+                           TraceLine("First(head) = " + ((ExpressionNode)node).FirstSet);
 
-                  case NodeType.BeginOption:
-                     break;
+                           term = term.NextTerm;
+                        }
 
-                  case NodeType.EndOption:
-                     break;
+                        if (rollup)
+                        {
+                           // add the first set of the head to the first set of <firstSet>
+                           try
+                           {
+                              firstSet.Add(((ExpressionNode)node).FirstSet);
+                           }
+                           catch (Exception)
+                           {
+                              Error("Duplicate terminal in first set of <" + prodName + "> " +
+                                    '\n' +
+                                    "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]",
+                                 node);
+                           }
 
-                  case NodeType.BeginKleene:
-                     break;
+                           if (((ExpressionNode)node).FirstSet.IncludesEpsilon)
+                              firstSet.IncludesEpsilon = true;
 
-                  case NodeType.EndKleene:
-                     break;
+                           TraceLine("First(firstSet) = " + firstSet);
+                        }
+
+                        break;
+
+                     case NodeType.ProdRef:
+                        TraceLine("ProdRef - " + ((ProdRefNode)node).ProdName);
+                        ComputeFirst(((ProdRefNode)node).ProdName);
+                        var prodInfo = Productions.First(p => p.Key == ((ProdRefNode)node).ProdName).Value;
+                        try
+                        {
+                           firstSet.Add(prodInfo.Expression.FirstSet);
+                        }
+                        catch (Exception)
+                        {
+                           Error("Duplicate terminal in first set of <" + prodName + "> " +
+                                 "found in <" + ((ProdRefNode)node).ProdName + ">" + '\n' +
+                                 "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]" + '\n' +
+                                 "First(<" + ((ProdRefNode)node).ProdName + ">)=[" +
+                                 prodInfo.Expression.FirstSet.DelimitedText() + "]", node);
+                        }
+
+                        firstSet.IncludesEpsilon = prodInfo.Expression.FirstSet.IncludesEpsilon;
+                        if (!prodInfo.Expression.FirstSet.IncludesEpsilon)
+                           rollup = false;
+                        break;
+
+                     case NodeType.Terminal:
+                        TraceLine("TermName - " + ((TerminalNode)node).TermName);
+
+                        if (!firstSet.Includes(((TerminalNode)node).TermName))
+                        {
+                           firstSet.Add(((TerminalNode)node).TermName);
+                           firstSet.IncludesEpsilon = false;
+                           rollup = false;
+                        }
+                        else
+                           Error("Duplicate in first set of <" + prodName + ">: " +
+                                 ((TerminalNode)node).TermName, node);
+
+                        break;
+
+                     case NodeType.Term:
+                        TraceLine("Alternative");
+                        // should never get here
+                        break;
+
+                     case NodeType.ActName:
+                        TraceLine("ActName");
+                        // do nothing
+                        break;
+
+                     case NodeType.LParen:
+                        TraceLine("ntLParens");
+                        // do nothing
+                        break;
+
+                     case NodeType.BeginOption:
+                        TraceLine("BeginOption");
+                        // do nothing
+                        break;
+
+                     case NodeType.BeginKleeneStar:
+                        TraceLine("BeginKleene");
+                        // do nothing
+                        break;
+
+                     case NodeType.RParen:
+                        TraceLine("ntRParens");
+                        if (!firstSet.IncludesEpsilon)
+                           rollup = false;
+                        break;
+
+                     case NodeType.EndOption:
+                     case NodeType.EndKleeneStar:
+                        TraceLine(node.NodeType == NodeType.EndOption ? "EndOption" : "EndKleene");
+
+                        if (node.Next == null)
+                           firstSet.IncludesEpsilon = true;
+                        break;
+                  }
+
+                  node = node.Next;
+                  if (rollup)
+                     continue;
+
+                  // skip until no more nodes or a AltHead node
+                  while ((node != null) && (node.NodeType != NodeType.Expression))
+                     node = node.Next;
                }
-
-               node = node.Next;
             }
 
-            alt = alt.NextTerm;
-         }
-      }
+            private void ComputeFirst(string prodName)
+            {
+               if (!Productions.TryGetValue(prodName, out var prodInfo))
+                  Error("Production not defined:" + prodName);
+
+               if (prodInfo == null || !prodInfo.Expression.FirstSet.IsEmpty())
+                  return;
+
+               TraceLine("BEGIN PRODUCTION - " + prodName);
+               Traverse(prodName, prodInfo.Expression, prodInfo.Expression.FirstSet);
+               TraceLine("END PRODUCTION - " + prodName);
+            }
+
+*/
 
 
-      private int _traceIndent = 0;
-
-      private void BeginTrace(string message)
-      {
-         var ident = new string(' ', _traceIndent);
-         _traceIndent += 2;
-
-         Trace.WriteLine($"{ident}{message}");
-      }
-
-      private void EndTrace(string message)
-      {
-         _traceIndent -= 2;
-         var ident = new string(' ', _traceIndent);
-
-         Trace.WriteLine($"{ident}{message}");
-      }
    }
 }

@@ -5,17 +5,37 @@ namespace EbnfCompiler.AST
 {
    public class ProductionInfo : IProductionInfo
    {
-      private readonly List<string>_referencedBy = new List<string>();
+      private readonly IDebugTracer _tracer;
+      private ITerminalSet _firstSetInternal;
+      private readonly List<string> _referencedBy = new List<string>();
 
-      public string Name { get; }
-      public IExpressionNode Expression { get; set; }
-      public IReadOnlyList<string> ReferencedBy => _referencedBy.AsReadOnly();
-
-      public ProductionInfo(string name)
+      public ProductionInfo(string name, IDebugTracer tracer)
       {
+         _tracer = tracer;
          Name = name;
          Expression = null;
       }
+
+      public string Name { get; }
+
+      public IExpressionNode Expression { get; set; }
+
+      public ITerminalSet FirstSet
+      {
+         get
+         {
+            _tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
+
+            if (_firstSetInternal == null)
+               _firstSetInternal = Expression.FirstSet;
+
+            _tracer.EndTrace($"First: {GetType().Name} = {_firstSetInternal} ");
+
+            return _firstSetInternal;
+         }
+      }
+
+      public IReadOnlyList<string> ReferencedBy => _referencedBy.AsReadOnly();
 
       public void AddReference(string prodName)
       {
