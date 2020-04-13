@@ -80,7 +80,7 @@ namespace EbnfCompiler.Driver
             // Debug.WriteLine($"\nAST for <{prod.Name}>");
             // traverser.Traverse(prod.Expression);
             tracer.TraceLine(new string('-', 40));
-            tracer.TraceLine($"First of <{prod.Name}>: {prod.Expression.FirstSet}");
+            tracer.TraceLine($"First of <{prod.Name}>: {prod.ExpressionAst.FirstSet}");
          }
       }
    }

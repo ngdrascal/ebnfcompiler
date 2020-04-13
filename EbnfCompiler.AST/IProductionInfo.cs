@@ -6,7 +6,7 @@ namespace EbnfCompiler.AST
    {
       string Name { get; }
 
-      IExpressionNode Expression { get; set; }
+      IExpressionAstNode ExpressionAst { get; set; }
 
       ITerminalSet FirstSet { get; }
 

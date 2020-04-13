@@ -6,65 +6,65 @@ namespace EbnfCompiler.AST
 {
    public interface IAstNodeFactory
    {
-      INode Create(NodeType nodeType, IToken token);
+      IAstNode Create(AstNodeType astNodeType, IToken token);
 
-      IReadOnlyCollection<INode> AllNodes { get; }
+      IReadOnlyCollection<IAstNode> AllNodes { get; }
    }
 
    public class AstNodeFactory : IAstNodeFactory
    {
       private readonly IDebugTracer _tracer;
-      private readonly List<INode> _allNodes = new List<INode>();
+      private readonly List<IAstNode> _allNodes = new List<IAstNode>();
 
       public AstNodeFactory(IDebugTracer tracer)
       {
          _tracer = tracer;
       }
 
-      public INode Create(NodeType nodeType, IToken token)
+      public IAstNode Create(AstNodeType astNodeType, IToken token)
       {
-         INode newNode;
+         IAstNode newAstNode;
 
-         switch (nodeType)
+         switch (astNodeType)
          {
-            case NodeType.Statement:
-               newNode = new StatementNode(token, _tracer);
+            case AstNodeType.Statement:
+               newAstNode = new StatementAstNode(token, _tracer);
                break;
-            case NodeType.Expression:
-               newNode = new ExpressionNode(token, _tracer);
+            case AstNodeType.Expression:
+               newAstNode = new ExpressionAstNode(token, _tracer);
                break;
-            case NodeType.Term:
-               newNode = new TermNode(token, _tracer);
+            case AstNodeType.Term:
+               newAstNode = new TermAstNode(token, _tracer);
                break;
-            case NodeType.Factor:
-               newNode = new FactorNode(token, _tracer);
+            case AstNodeType.Factor:
+               newAstNode = new FactorAstNode(token, _tracer);
                break;
-            case NodeType.ProdRef:
-               newNode = new ProdRefNode(token, _tracer);
+            case AstNodeType.ProdRef:
+               newAstNode = new ProdRefAstNode(token, _tracer);
                break;
-            case NodeType.Terminal:
-               newNode = new TerminalNode(token, _tracer);
+            case AstNodeType.Terminal:
+               newAstNode = new TerminalAstNode(token, _tracer);
                break;
-            case NodeType.LParen:
-               newNode = new LParenNode(token, _tracer);
+            case AstNodeType.LParen:
+               newAstNode = new LParenAstNode(token, _tracer);
                break;
-            case NodeType.BeginOption:
-               newNode = new LOptionNode(token, _tracer);
+            case AstNodeType.BeginOption:
+               newAstNode = new LOptionAstNode(token, _tracer);
                break;
-            case NodeType.BeginKleeneStar:
-               newNode = new LKleeneNode(token, _tracer);
+            case AstNodeType.BeginKleeneStar:
+               newAstNode = new LKleeneAstNode(token, _tracer);
                break;
-            case NodeType.Action:
-               newNode = new ActionNode(token, _tracer);
+            case AstNodeType.Action:
+               newAstNode = new ActionAstNode(token, _tracer);
                break;
             default:
-               throw new InvalidOperationException($"Type matching {nodeType} not found.");
+               throw new InvalidOperationException($"Type matching {astNodeType} not found.");
          }
 
-         _allNodes.Add(newNode);
-         return newNode;
+         _allNodes.Add(newAstNode);
+         return newAstNode;
       }
 
-      public IReadOnlyCollection<INode> AllNodes => _allNodes.AsReadOnly();
+      public IReadOnlyCollection<IAstNode> AllNodes => _allNodes.AsReadOnly();
    }
 }

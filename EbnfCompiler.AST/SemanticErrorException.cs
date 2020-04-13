@@ -9,8 +9,8 @@ namespace EbnfCompiler.AST
       {
       }
 
-      public SemanticErrorException(string message, INode node)
-         : base(message, node.Location)
+      public SemanticErrorException(string message, IAstNode astNode)
+         : base(message, astNode.Location)
       {
       }
 
