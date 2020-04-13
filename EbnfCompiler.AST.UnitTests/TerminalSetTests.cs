@@ -1,13 +1,13 @@
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace EbnfCompiler.AST.UnitTests
 {
-   [TestClass]
+   [TestFixture]
    public class TerminalSetTests
    {
-      [TestMethod]
-      public void WhenTerminalIsNotInSet_AddTerminalToSet()
+      [Test]
+      public void Add_WhenTerminalIsNotInSet_AddTerminalToSet()
       {
          // Arrange:
          var ts = new TerminalSet();
@@ -21,8 +21,8 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.IsTrue(ts.AsEnumerable().Contains(terminal));
       }
 
-      [TestMethod]
-      public void WhenTerminalIsAlreadyInSet_DoesNotAddDuplicate()
+      [Test]
+      public void Add_WhenTerminalIsAlreadyInSet_DoesNotAddDuplicate()
       {
          // Arrange:
          var ts = new TerminalSet();
