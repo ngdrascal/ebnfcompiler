@@ -41,18 +41,18 @@ namespace EbnfCompiler.AST
       protected abstract void CalcFirstSet();
    }
 
-   public class StatementAstNode : AstNode, IStatementAstNode
+   public class StatementNode : AstNode, IStatementNode
    {
-      public StatementAstNode(IToken token, IDebugTracer tracer)
+      public StatementNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Statement, token, tracer)
       {
       }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
-         return $"{ExpressionAst} .";
+         return $"{Expression} .";
       }
 
       protected override void CalcFirstSet()
@@ -60,32 +60,32 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class ExpressionAstNode : AstNode, IExpressionAstNode
+   public class ExpressionNode : AstNode, IExpressionNode
    {
-      public ExpressionAstNode(IToken token, IDebugTracer tracer)
+      public ExpressionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Expression, token, tracer)
       {
          Image = string.Empty;
          TermCount = 0;
-         FirstTermAst = null;
+         FirstTerm = null;
       }
 
       public int TermCount { get; set; }
 
-      public ITermAstNode FirstTermAst { get; private set; }
+      public ITermNode FirstTerm { get; private set; }
 
-      public void AppendTerm(ITermAstNode newTermAst)
+      public void AppendTerm(ITermNode newTerm)
       {
          TermCount++;
 
-         if (FirstTermAst == null)
-            FirstTermAst = newTermAst;
+         if (FirstTerm == null)
+            FirstTerm = newTerm;
          else
          {
-            var t = FirstTermAst;
-            while (t.NextTermAst != null)
-               t = t.NextTermAst;
-            t.NextTermAst = newTermAst;
+            var t = FirstTerm;
+            while (t.NextTerm != null)
+               t = t.NextTerm;
+            t.NextTerm = newTerm;
          }
       }
 
@@ -93,11 +93,11 @@ namespace EbnfCompiler.AST
       {
          var result = string.Empty;
 
-         var term = FirstTermAst;
+         var term = FirstTerm;
          while (term != null)
          {
             result += term.ToString();
-            term = term.NextTermAst;
+            term = term.NextTerm;
             if (term != null)
                result += " | ";
          }
@@ -109,14 +109,14 @@ namespace EbnfCompiler.AST
       {
          var allIncludeEpsilon = true;
 
-         var term = FirstTermAst;
+         var term = FirstTerm;
          while (term != null)
          {
             FirstSetInternal.Union(term.FirstSet, false);
             if (!term.FirstSet.IncludesEpsilon)
                allIncludeEpsilon = false;
 
-            term = term.NextTermAst;
+            term = term.NextTerm;
          }
 
          if (allIncludeEpsilon)
@@ -124,27 +124,27 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class TermAstNode : AstNode, ITermAstNode
+   public class TermNode : AstNode, ITermNode
    {
-      public TermAstNode(IToken token, IDebugTracer tracer)
+      public TermNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Term, token, tracer)
       {
       }
 
-      public ITermAstNode NextTermAst { get; set; }
+      public ITermNode NextTerm { get; set; }
 
-      public IFactorAstNode FirstFactorAst { get; private set; }
+      public IFactorNode FirstFactor { get; private set; }
 
-      public void AppendFactor(IFactorAstNode newFactorAst)
+      public void AppendFactor(IFactorNode newFactor)
       {
-         if (FirstFactorAst == null)
-            FirstFactorAst = newFactorAst;
+         if (FirstFactor == null)
+            FirstFactor = newFactor;
          else
          {
-            var t = FirstFactorAst;
-            while (t.NextFactorAst != null)
-               t = t.NextFactorAst;
-            t.NextFactorAst = newFactorAst;
+            var t = FirstFactor;
+            while (t.NextFactor != null)
+               t = t.NextFactor;
+            t.NextFactor = newFactor;
          }
       }
 
@@ -152,11 +152,11 @@ namespace EbnfCompiler.AST
       {
          var result = string.Empty;
 
-         var factor = FirstFactorAst;
+         var factor = FirstFactor;
          while (factor != null)
          {
             result += " " + factor.ToString();
-            factor = factor.NextFactorAst;
+            factor = factor.NextFactor;
          }
 
          return result;
@@ -166,14 +166,14 @@ namespace EbnfCompiler.AST
       {
          var allIncludeEpsilon = true;
 
-         var factor = FirstFactorAst;
+         var factor = FirstFactor;
          while (factor != null)
          {
             FirstSetInternal.Union(factor.FirstSet, false);
             if (!factor.FirstSet.IncludesEpsilon)
                allIncludeEpsilon = false;
 
-            factor = factor.NextFactorAst;
+            factor = factor.NextFactor;
          }
 
          if (allIncludeEpsilon)
@@ -181,16 +181,16 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class FactorAstNode : AstNode, IFactorAstNode
+   public class FactorNode : AstNode, IFactorNode
    {
-      public FactorAstNode(IToken token, IDebugTracer tracer)
+      public FactorNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Factor, token, tracer)
       {
       }
 
       public IAstNode FactorExpr { get; set; }
 
-      public IFactorAstNode NextFactorAst { get; set; }
+      public IFactorNode NextFactor { get; set; }
 
       public override string ToString()
       {
@@ -203,9 +203,9 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class ProdRefAstNode : AstNode, IProdRefAstNode
+   public class ProdRefNode : AstNode, IProdRefNode
    {
-      public ProdRefAstNode(IToken token, IDebugTracer tracer)
+      public ProdRefNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.ProdRef, token, tracer)
       {
          ProdName = token.Image;
@@ -213,7 +213,7 @@ namespace EbnfCompiler.AST
 
       public string ProdName { get; }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
@@ -222,13 +222,13 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
-         FirstSetInternal.Union(ExpressionAst.FirstSet);
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
-   public class TerminalAstNode : AstNode, ITerminalAstNode
+   public class TerminalNode : AstNode, ITerminalNode
    {
-      public TerminalAstNode(IToken token, IDebugTracer tracer)
+      public TerminalNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Terminal, token, tracer)
       {
          Image = '"' + Image + '"';
@@ -249,70 +249,70 @@ namespace EbnfCompiler.AST
       }
    }
 
-   public class LParenAstNode : AstNode, ILParenNode
+   public class LParenNode : AstNode, ILParenNode
    {
-      public LParenAstNode(IToken token, IDebugTracer tracer)
+      public LParenNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.LParen, token, tracer)
       {
       }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
-         return $"( {ExpressionAst} )";
+         return $"( {Expression} )";
       }
 
       protected override void CalcFirstSet()
       {
-         FirstSetInternal.Union(ExpressionAst.FirstSet);
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
-   public class LOptionAstNode : AstNode, ILOptionNode
+   public class LOptionNode : AstNode, ILOptionNode
    {
-      public LOptionAstNode(IToken token, IDebugTracer tracer)
+      public LOptionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.BeginOption, token, tracer)
       {
       }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
-         return $"[ {ExpressionAst} ]";
+         return $"[ {Expression} ]";
       }
 
       protected override void CalcFirstSet()
       {
-         FirstSetInternal.Union(ExpressionAst.FirstSet);
+         FirstSetInternal.Union(Expression.FirstSet);
          FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
    }
 
-   public class LKleeneAstNode : AstNode, ILKleeneStarNode
+   public class LKleeneNode : AstNode, ILKleeneStarNode
    {
-      public LKleeneAstNode(IToken token, IDebugTracer tracer)
+      public LKleeneNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.BeginKleeneStar, token, tracer)
       {
       }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public override string ToString()
       {
-         return "{ " + ExpressionAst.ToString() + " }";
+         return "{ " + Expression.ToString() + " }";
       }
 
       protected override void CalcFirstSet()
       {
-         FirstSetInternal.Union(ExpressionAst.FirstSet);
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
-   public class ActionAstNode : AstNode, IActionNode
+   public class ActionNode : AstNode, IActionNode
    {
-      public ActionAstNode(IToken token, IDebugTracer tracer)
+      public ActionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Action, token, tracer)
       {
          Image = '#' + Image + '#';

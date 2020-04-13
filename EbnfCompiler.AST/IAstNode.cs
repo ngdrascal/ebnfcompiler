@@ -21,59 +21,59 @@ namespace EbnfCompiler.AST
       string ToString();
    }
 
-   public interface IStatementAstNode : IAstNode
+   public interface IStatementNode : IAstNode
    {
-      IExpressionAstNode ExpressionAst { get; set; }
+      IExpressionNode Expression { get; set; }
    }
 
-   public interface IExpressionAstNode : IAstNode
+   public interface IExpressionNode : IAstNode
    {
       int TermCount { get; }
 
-      ITermAstNode FirstTermAst { get; }
+      ITermNode FirstTerm { get; }
 
-      void AppendTerm(ITermAstNode newTermAst);
+      void AppendTerm(ITermNode newTerm);
    }
 
-   public interface ITermAstNode : IAstNode
+   public interface ITermNode : IAstNode
    {
-      ITermAstNode NextTermAst { get; set; }
+      ITermNode NextTerm { get; set; }
 
-      IFactorAstNode FirstFactorAst { get; }
+      IFactorNode FirstFactor { get; }
 
-      void AppendFactor(IFactorAstNode newFactorAst);
+      void AppendFactor(IFactorNode newFactor);
    }
 
-   public interface IFactorAstNode : IAstNode
+   public interface IFactorNode : IAstNode
    {
       IAstNode FactorExpr { get; set; }
       
-      IFactorAstNode NextFactorAst { get; set; }
+      IFactorNode NextFactor { get; set; }
    }
 
-   public interface IProdRefAstNode : IAstNode
+   public interface IProdRefNode : IAstNode
    {
       string ProdName { get; }
    }
 
-   public interface ITerminalAstNode : IAstNode
+   public interface ITerminalNode : IAstNode
    {
       string TermName { get; }
    }
 
    public interface ILParenNode
    {
-      IExpressionAstNode ExpressionAst { get; set; }
+      IExpressionNode Expression { get; set; }
    }
 
    public interface ILOptionNode
    {
-      IExpressionAstNode ExpressionAst { get; set; }
+      IExpressionNode Expression { get; set; }
    }
 
    public interface ILKleeneStarNode
    {
-      IExpressionAstNode ExpressionAst { get; set; }
+      IExpressionNode Expression { get; set; }
    }
 
    public interface IActionNode

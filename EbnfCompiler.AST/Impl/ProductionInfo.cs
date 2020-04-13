@@ -13,12 +13,12 @@ namespace EbnfCompiler.AST
       {
          _tracer = tracer;
          Name = name;
-         ExpressionAst = null;
+         Expression = null;
       }
 
       public string Name { get; }
 
-      public IExpressionAstNode ExpressionAst { get; set; }
+      public IExpressionNode Expression { get; set; }
 
       public ITerminalSet FirstSet
       {
@@ -27,7 +27,7 @@ namespace EbnfCompiler.AST
             _tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
 
             if (_firstSetInternal == null)
-               _firstSetInternal = ExpressionAst.FirstSet;
+               _firstSetInternal = Expression.FirstSet;
 
             _tracer.EndTrace($"First: {GetType().Name} = {_firstSetInternal} ");
 
@@ -47,7 +47,7 @@ namespace EbnfCompiler.AST
 
       public override string ToString()
       {
-         return $"<{Name}> ::= {ExpressionAst?.ToString()}.";
+         return $"<{Name}> ::= {Expression?.ToString()}.";
       }
    }
 }

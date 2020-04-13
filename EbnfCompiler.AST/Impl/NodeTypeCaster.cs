@@ -21,51 +21,51 @@ namespace EbnfCompiler.AST
 
    public static class NodeTypeCaster
    {
-      public static IStatementAstNode AsStatement(this IAstNode astNode)
+      public static IStatementNode AsStatement(this IAstNode astNode)
       {
-         if (!(astNode is IStatementAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IStatementAstNode)));
+         if (!(astNode is IStatementNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IStatementNode)));
 
          return result;
       }
 
 
-      public static IExpressionAstNode AsExpression(this IAstNode astNode)
+      public static IExpressionNode AsExpression(this IAstNode astNode)
       {
-         if (!(astNode is IExpressionAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IExpressionAstNode)));
+         if (!(astNode is IExpressionNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IExpressionNode)));
 
          return result;
       }
 
-      public static ITermAstNode AsTerm(this IAstNode astNode)
+      public static ITermNode AsTerm(this IAstNode astNode)
       {
-         if (!(astNode is ITermAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ITermAstNode)));
+         if (!(astNode is ITermNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ITermNode)));
 
          return result;
       }
 
-      public static IFactorAstNode AsFactor(this IAstNode astNode)
+      public static IFactorNode AsFactor(this IAstNode astNode)
       {
-         if (!(astNode is IFactorAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IFactorAstNode)));
+         if (!(astNode is IFactorNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IFactorNode)));
 
          return result;
       }
 
-      public static IProdRefAstNode AsProdRef(this IAstNode astNode)
+      public static IProdRefNode AsProdRef(this IAstNode astNode)
       {
-         if (!(astNode is IProdRefAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IProdRefAstNode)));
+         if (!(astNode is IProdRefNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IProdRefNode)));
 
          return result;
       }
 
-      public static ITerminalAstNode AsTerminal(this IAstNode astNode)
+      public static ITerminalNode AsTerminal(this IAstNode astNode)
       {
-         if (!(astNode is ITerminalAstNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ITerminalAstNode)));
+         if (!(astNode is ITerminalNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ITerminalNode)));
 
          return result;
       }

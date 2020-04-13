@@ -11,12 +11,12 @@ namespace EbnfCompiler.AST
             case AstNodeType.Expression:
                BeginTrace("Expression");
 
-               var term = astNode.AsExpression().FirstTermAst;
+               var term = astNode.AsExpression().FirstTerm;
                while (term != null)
                {
                   Traverse(term);
 
-                  term = term.NextTermAst;
+                  term = term.NextTerm;
                }
 
                EndTrace("Expression");
@@ -25,11 +25,11 @@ namespace EbnfCompiler.AST
             case AstNodeType.Term:
                BeginTrace("Term");
 
-               var factor = astNode.AsTerm().FirstFactorAst;
+               var factor = astNode.AsTerm().FirstFactor;
                while (factor != null)
                {
                   Traverse(factor);
-                  factor = factor.NextFactorAst;
+                  factor = factor.NextFactor;
                }
 
                EndTrace("Term");
@@ -38,9 +38,9 @@ namespace EbnfCompiler.AST
             case AstNodeType.Factor:
                BeginTrace(astNode.AstNodeType.ToString());
 
-               if (astNode.AsFactor().FactorExpr is IProdRefAstNode)
+               if (astNode.AsFactor().FactorExpr is IProdRefNode)
                   TraceLine($"Production: {astNode.Image}");
-               else if (astNode.AsFactor().FactorExpr is ITerminalAstNode)
+               else if (astNode.AsFactor().FactorExpr is ITerminalNode)
                   TraceLine($"Terminal: {astNode.Image}");
                else if (astNode.AsFactor().FactorExpr is ILParenNode)
                   Traverse(astNode.AsFactor().FactorExpr);
@@ -68,7 +68,7 @@ namespace EbnfCompiler.AST
             case AstNodeType.LParen:
                BeginTrace("LParens");
 
-               Traverse(astNode.AsLParen().ExpressionAst);
+               Traverse(astNode.AsLParen().Expression);
 
                EndTrace("LParens");
                break;
@@ -76,7 +76,7 @@ namespace EbnfCompiler.AST
             case AstNodeType.BeginOption:
                BeginTrace("BeginOption");
 
-               Traverse(astNode.AsLOption().ExpressionAst);
+               Traverse(astNode.AsLOption().Expression);
 
                EndTrace("BeginOption");
                break;

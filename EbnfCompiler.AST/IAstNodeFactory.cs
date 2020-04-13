@@ -28,34 +28,34 @@ namespace EbnfCompiler.AST
          switch (astNodeType)
          {
             case AstNodeType.Statement:
-               newAstNode = new StatementAstNode(token, _tracer);
+               newAstNode = new StatementNode(token, _tracer);
                break;
             case AstNodeType.Expression:
-               newAstNode = new ExpressionAstNode(token, _tracer);
+               newAstNode = new ExpressionNode(token, _tracer);
                break;
             case AstNodeType.Term:
-               newAstNode = new TermAstNode(token, _tracer);
+               newAstNode = new TermNode(token, _tracer);
                break;
             case AstNodeType.Factor:
-               newAstNode = new FactorAstNode(token, _tracer);
+               newAstNode = new FactorNode(token, _tracer);
                break;
             case AstNodeType.ProdRef:
-               newAstNode = new ProdRefAstNode(token, _tracer);
+               newAstNode = new ProdRefNode(token, _tracer);
                break;
             case AstNodeType.Terminal:
-               newAstNode = new TerminalAstNode(token, _tracer);
+               newAstNode = new TerminalNode(token, _tracer);
                break;
             case AstNodeType.LParen:
-               newAstNode = new LParenAstNode(token, _tracer);
+               newAstNode = new LParenNode(token, _tracer);
                break;
             case AstNodeType.BeginOption:
-               newAstNode = new LOptionAstNode(token, _tracer);
+               newAstNode = new LOptionNode(token, _tracer);
                break;
             case AstNodeType.BeginKleeneStar:
-               newAstNode = new LKleeneAstNode(token, _tracer);
+               newAstNode = new LKleeneNode(token, _tracer);
                break;
             case AstNodeType.Action:
-               newAstNode = new ActionAstNode(token, _tracer);
+               newAstNode = new ActionNode(token, _tracer);
                break;
             default:
                throw new InvalidOperationException($"Type matching {astNodeType} not found.");

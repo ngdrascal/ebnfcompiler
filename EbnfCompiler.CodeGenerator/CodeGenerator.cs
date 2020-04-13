@@ -44,7 +44,7 @@ namespace EbnfCompiler.CodeGenerator
          Append("\n");
       }
 
-      private void FirstOf(IExpressionAstNode expressionAst, ITerminalSet target)
+      private void FirstOf(IExpressionNode expression, ITerminalSet target)
       {
          /*
          var alt = expression.FirstTerm;
@@ -221,7 +221,7 @@ namespace EbnfCompiler.CodeGenerator
          */
       }
 
-      private void GenAltCase(ITermAstNode astNode)
+      private void GenAltCase(ITermNode node)
       {
          /*
          Indent();
@@ -234,28 +234,28 @@ namespace EbnfCompiler.CodeGenerator
          */
       }
 
-      private void GenAlt(IExpressionAstNode expressionAst)
+      private void GenAlt(IExpressionNode expression)
       {
-         if (expressionAst.TermCount > 1)
+         if (expression.TermCount > 1)
          {
-            if (!expressionAst.FirstSet.IncludesEpsilon)
+            if (!expression.FirstSet.IncludesEpsilon)
             {
-               AppendLine("CheckTokenOneOf([" + expressionAst.FirstSet.DelimitedText() + "]);");
+               AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
             }
 
             AppendLine("case token.kind of");
 
-            var alt = expressionAst.FirstTermAst;
+            var alt = expression.FirstTerm;
             while (alt != null)
             {
                GenAltCase(alt);
-               alt = alt.NextTermAst;
+               alt = alt.NextTerm;
             }
 
             AppendLine("end;");
          }
          else
-            GenTerm(expressionAst.FirstTermAst);
+            GenTerm(expression.FirstTerm);
       }
 
       private void GenMethodBody(IProductionInfo prodInfo)

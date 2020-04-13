@@ -56,7 +56,7 @@ namespace EbnfCompiler.AST
       {
          _tracer.EndTrace(nameof(EndSyntax));
 
-         _tracer.TraceLine(new string(' ', 40));
+         _tracer.TraceLine(new string('-', 40));
 
          FixupProdRefNodes();
 
@@ -82,7 +82,7 @@ namespace EbnfCompiler.AST
          _tracer.EndTrace(nameof(EndStatement));
 
          var statement = _stack.Peek().AsStatement();
-         _currentProd.ExpressionAst = statement.ExpressionAst;
+         _currentProd.Expression = statement.Expression;
       }
 
       public void BeginExpression(IToken token)
@@ -103,19 +103,19 @@ namespace EbnfCompiler.AST
          switch (_stack.Peek().AstNodeType)
          {
             case AstNodeType.Statement:
-               _stack.Peek().AsStatement().ExpressionAst = expression;
+               _stack.Peek().AsStatement().Expression = expression;
                break;
 
             case AstNodeType.LParen:
-               _stack.Peek().AsLParen().ExpressionAst = expression;
+               _stack.Peek().AsLParen().Expression = expression;
                break;
 
             case AstNodeType.BeginOption:
-               _stack.Peek().AsLOption().ExpressionAst = expression;
+               _stack.Peek().AsLOption().Expression = expression;
                break;
 
             case AstNodeType.BeginKleeneStar:
-               _stack.Peek().AsLKleeneStarNode().ExpressionAst = expression;
+               _stack.Peek().AsLKleeneStarNode().Expression = expression;
                break;
          }
       }
@@ -235,9 +235,9 @@ namespace EbnfCompiler.AST
       {
          foreach (var node in _astNodeFactory.AllNodes.Where(p => p.AstNodeType == AstNodeType.ProdRef))
          {
-            var prodRefNode = (ProdRefAstNode)node;
+            var prodRefNode = (ProdRefNode)node;
             var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
-            prodRefNode.ExpressionAst = prodInfo.ExpressionAst;
+            prodRefNode.Expression = prodInfo.Expression;
          }
       }
 
