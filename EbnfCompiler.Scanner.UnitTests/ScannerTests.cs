@@ -1,10 +1,11 @@
-﻿using System.IO;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using EbnfCompiler.Compiler;
 using NUnit.Framework;
 
 namespace EbnfCompiler.Scanner.UnitTests
 {
-   [TestFixture]
+   [TestFixture, ExcludeFromCodeCoverage]
    public class ScannerTests
    {
       [TestCase("<SomeIdentifer>", TokenKind.Identifier, "SomeIdentifer")]
