@@ -70,25 +70,25 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      public static ILParenNode AsLParen(this IAstNode astNode)
+      public static IParenNode AsLParen(this IAstNode astNode)
       {
-         if (!(astNode is ILParenNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ILParenNode)));
+         if (!(astNode is IParenNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IParenNode)));
          return result;
       }
 
-      public static ILOptionNode AsLOption(this IAstNode astNode)
+      public static AST.OptionNode AsLOption(this IAstNode astNode)
       {
-         if (!(astNode is ILOptionNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ILOptionNode)));
+         if (!(astNode is AST.OptionNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(AST.OptionNode)));
 
          return result;
       }
 
-      public static ILKleeneStarNode AsLKleeneStarNode(this IAstNode astNode)
+      public static IKleeneStarNode AsLKleeneStarNode(this IAstNode astNode)
       {
-         if (!(astNode is ILKleeneStarNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ILKleeneStarNode)));
+         if (!(astNode is IKleeneStarNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IKleeneStarNode)));
 
          return result;
       }

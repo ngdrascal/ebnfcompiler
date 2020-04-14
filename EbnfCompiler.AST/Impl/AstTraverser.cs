@@ -42,11 +42,11 @@ namespace EbnfCompiler.AST.Impl
                   TraceLine($"Production: {astNode.Image}");
                else if (astNode.AsFactor().FactorExpr is ITerminalNode)
                   TraceLine($"Terminal: {astNode.Image}");
-               else if (astNode.AsFactor().FactorExpr is ILParenNode)
+               else if (astNode.AsFactor().FactorExpr is IParenNode)
                   Traverse(astNode.AsFactor().FactorExpr);
-               else if (astNode.AsFactor().FactorExpr is ILOptionNode)
+               else if (astNode.AsFactor().FactorExpr is AST.OptionNode)
                   Traverse(astNode.AsFactor().FactorExpr);
-               else if (astNode.AsFactor().FactorExpr is ILKleeneStarNode)
+               else if (astNode.AsFactor().FactorExpr is IKleeneStarNode)
                   Traverse(astNode.AsFactor().FactorExpr);
 
                EndTrace(astNode.AstNodeType.ToString());

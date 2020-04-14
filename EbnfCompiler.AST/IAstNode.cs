@@ -59,17 +59,17 @@ namespace EbnfCompiler.AST
       string TermName { get; }
    }
 
-   public interface ILParenNode
+   public interface IParenNode
    {
       IExpressionNode Expression { get; set; }
    }
 
-   public interface ILOptionNode
+   public interface OptionNode
    {
       IExpressionNode Expression { get; set; }
    }
 
-   public interface ILKleeneStarNode
+   public interface IKleeneStarNode
    {
       IExpressionNode Expression { get; set; }
    }
