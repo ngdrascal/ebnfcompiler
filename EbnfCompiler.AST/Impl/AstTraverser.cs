@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace EbnfCompiler.AST
+namespace EbnfCompiler.AST.Impl
 {
    public class AstTraverser
    {

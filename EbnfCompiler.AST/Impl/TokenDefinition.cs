@@ -1,4 +1,4 @@
-﻿namespace EbnfCompiler.AST
+﻿namespace EbnfCompiler.AST.Impl
 {
    public class TokenDefinition : ITokenDefinition
    {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace EbnfCompiler.AST
+namespace EbnfCompiler.AST.Impl
 {
    public class TerminalSet : ITerminalSet
    {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EbnfCompiler.AST.Impl;
 using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.AST

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using EbnfCompiler.AST;
+using EbnfCompiler.AST.Impl;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 

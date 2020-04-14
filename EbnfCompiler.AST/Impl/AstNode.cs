@@ -1,6 +1,6 @@
 ﻿using EbnfCompiler.Compiler;
 
-namespace EbnfCompiler.AST
+namespace EbnfCompiler.AST.Impl
 {
    public abstract class AstNode : IAstNode
    {

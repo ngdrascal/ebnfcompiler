@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using EbnfCompiler.Compiler;
 
-namespace EbnfCompiler.AST
+namespace EbnfCompiler.AST.Impl
 {
    public class AstBuilder : IAstBuilder
    {

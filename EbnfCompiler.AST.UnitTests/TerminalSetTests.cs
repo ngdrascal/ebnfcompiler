@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using EbnfCompiler.AST.Impl;
 using NUnit.Framework;
 
 namespace EbnfCompiler.AST.UnitTests
