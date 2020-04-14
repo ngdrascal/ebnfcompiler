@@ -82,7 +82,7 @@ namespace EbnfCompiler.AST
          _tracer.EndTrace(nameof(EndStatement));
 
          var statement = _stack.Peek().AsStatement();
-         _currentProd.Expression = statement.Expression;
+         _currentProd.RightHandSide = statement.Expression;
       }
 
       public void BeginExpression(IToken token)
@@ -237,7 +237,7 @@ namespace EbnfCompiler.AST
          {
             var prodRefNode = (ProdRefNode)node;
             var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
-            prodRefNode.Expression = prodInfo.Expression;
+            prodRefNode.Expression = prodInfo.RightHandSide;
          }
       }
 

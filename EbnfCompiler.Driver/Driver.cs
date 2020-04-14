@@ -8,15 +8,15 @@ namespace EbnfCompiler.Driver
 {
    /*
 
-      <Syntax>     ::= { <Statement> } "." .
+      <Syntax>     ::= <Statement> { <Statement> } .
 
-      <Statement>  ::= "IDENTIFIER" "::=" <Expression> "." .
+      <Statement>  ::= "PRODNAME" "::=" <Expression> "." .
 
       <Expression> ::= <Term> { "|" <Term> } .
 
       <Term>       ::= <Factor> { <Factor> } .
 
-      <Factor>     ::= "IDENTIFIER" |
+      <Factor>     ::= "PRODNAME" |
                        "STRING" |
                        "(" <Expression> ")" |
                        "[" <Expression> "]" |
@@ -38,17 +38,37 @@ namespace EbnfCompiler.Driver
       private const string TestCase2 = @"
          %TOKENS%
             ""a"" = ""tkA""
+            ""b"" = ""tkB""
          %EBNF%
-            <S> ::= <T> <U> .
+            <S> ::= <U> | <T> .
             <T> ::= [""a""] .
-            <U> ::= [""b""] .
+            <U> ::= ""b"" .
       ";
 
       private const string TestCase3 = @"
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            <S> ::= [ ""a"" ] .
+            <S>  ::= ""a"" ""b"" | ""c"" .
+      ";
+
+      private const string TestCase4 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <Syntax>     ::= <Statement> { <Statement> } .
+
+            <Statement>  ::= ""PRODNAME"" ""::="" <Expression> ""."" .
+
+            <Expression> ::= <Term> { ""|"" <Term> } .
+
+            <Term>       ::= <Factor> { <Factor> } .
+
+            <Factor>     ::= ""PRODNAME"" |
+                             ""STRING"" |
+                             ""("" <Expression> "")"" |
+                             ""["" <Expression> ""]"" |
+                             ""{"" <Expression> ""}"" .
       ";
 
       [Test]
@@ -69,7 +89,7 @@ namespace EbnfCompiler.Driver
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
-         var astBuilder = new AstBuilder(new AstNodeFactory(tracer), 
+         var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
                                          new ProdInfoFactory(tracer), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
          parser.ParseGoal();
@@ -80,7 +100,7 @@ namespace EbnfCompiler.Driver
             // Debug.WriteLine($"\nAST for <{prod.Name}>");
             // traverser.Traverse(prod.Expression);
             tracer.TraceLine(new string('-', 40));
-            tracer.TraceLine($"First of <{prod.Name}>: {prod.Expression.FirstSet}");
+            tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
          }
       }
    }

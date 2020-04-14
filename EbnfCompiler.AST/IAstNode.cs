@@ -28,8 +28,6 @@ namespace EbnfCompiler.AST
 
    public interface IExpressionNode : IAstNode
    {
-      int TermCount { get; }
-
       ITermNode FirstTerm { get; }
 
       void AppendTerm(ITermNode newTerm);

@@ -6,19 +6,18 @@ namespace EbnfCompiler.AST
    public class ProductionInfo : IProductionInfo
    {
       private readonly IDebugTracer _tracer;
-      private ITerminalSet _firstSetInternal;
       private readonly List<string> _referencedBy = new List<string>();
 
       public ProductionInfo(string name, IDebugTracer tracer)
       {
          _tracer = tracer;
          Name = name;
-         Expression = null;
+         RightHandSide = null;
       }
 
       public string Name { get; }
 
-      public IExpressionNode Expression { get; set; }
+      public IExpressionNode RightHandSide { get; set; }
 
       public ITerminalSet FirstSet
       {
@@ -26,12 +25,9 @@ namespace EbnfCompiler.AST
          {
             _tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
 
-            if (_firstSetInternal == null)
-               _firstSetInternal = Expression.FirstSet;
+            _tracer.EndTrace($"First: {GetType().Name} = {RightHandSide.FirstSet} ");
 
-            _tracer.EndTrace($"First: {GetType().Name} = {_firstSetInternal} ");
-
-            return _firstSetInternal;
+            return RightHandSide.FirstSet;
          }
       }
 
@@ -47,7 +43,7 @@ namespace EbnfCompiler.AST
 
       public override string ToString()
       {
-         return $"<{Name}> ::= {Expression?.ToString()}.";
+         return $"<{Name}> ::= {RightHandSide?.ToString()}.";
       }
    }
 }

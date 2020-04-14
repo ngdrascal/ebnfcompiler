@@ -236,26 +236,26 @@ namespace EbnfCompiler.CodeGenerator
 
       private void GenAlt(IExpressionNode expression)
       {
-         if (expression.TermCount > 1)
-         {
-            if (!expression.FirstSet.IncludesEpsilon)
-            {
-               AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
-            }
-
-            AppendLine("case token.kind of");
-
-            var alt = expression.FirstTerm;
-            while (alt != null)
-            {
-               GenAltCase(alt);
-               alt = alt.NextTerm;
-            }
-
-            AppendLine("end;");
-         }
-         else
-            GenTerm(expression.FirstTerm);
+         // if (expression.TermCount > 1)
+         // {
+         //    if (!expression.FirstSet.IncludesEpsilon)
+         //    {
+         //       AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
+         //    }
+         //
+         //    AppendLine("case token.kind of");
+         //
+         //    var alt = expression.FirstTerm;
+         //    while (alt != null)
+         //    {
+         //       GenAltCase(alt);
+         //       alt = alt.NextTerm;
+         //    }
+         //
+         //    AppendLine("end;");
+         // }
+         // else
+         //    GenTerm(expression.FirstTerm);
       }
 
       private void GenMethodBody(IProductionInfo prodInfo)

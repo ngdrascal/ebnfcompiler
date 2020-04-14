@@ -57,6 +57,7 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
+         FirstSetInternal.Union(Expression.FirstSet);
       }
    }
 
@@ -66,18 +67,13 @@ namespace EbnfCompiler.AST
          : base(AstNodeType.Expression, token, tracer)
       {
          Image = string.Empty;
-         TermCount = 0;
          FirstTerm = null;
       }
-
-      public int TermCount { get; set; }
 
       public ITermNode FirstTerm { get; private set; }
 
       public void AppendTerm(ITermNode newTerm)
       {
-         TermCount++;
-
          if (FirstTerm == null)
             FirstTerm = newTerm;
          else
@@ -107,20 +103,14 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
-         var allIncludeEpsilon = true;
-
          var term = FirstTerm;
          while (term != null)
          {
-            FirstSetInternal.Union(term.FirstSet, false);
-            if (!term.FirstSet.IncludesEpsilon)
-               allIncludeEpsilon = false;
+            // ReSharper disable once RedundantArgumentDefaultValue
+            FirstSetInternal.Union(term.FirstSet, true);
 
             term = term.NextTerm;
          }
-
-         if (allIncludeEpsilon)
-            FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
    }
 
@@ -173,7 +163,8 @@ namespace EbnfCompiler.AST
             if (!factor.FirstSet.IncludesEpsilon)
                allIncludeEpsilon = false;
 
-            factor = factor.NextFactor;
+            // keep going as long as FirstSet includes Epsilon
+            factor = factor.FactorExpr.FirstSet.IncludesEpsilon ? factor.NextFactor : null;
          }
 
          if (allIncludeEpsilon)
@@ -328,13 +319,6 @@ namespace EbnfCompiler.AST
 
       protected override void CalcFirstSet()
       {
-         // if (Next != null)
-         // {
-         //    _firstSet.Add(Next.FirstSet);
-         //    _firstSet.IncludesEpsilon = Next.FirstSet.IncludesEpsilon;
-         // }
-         // else
-         //    _firstSet.IncludesEpsilon = false;
       }
    }
 }
