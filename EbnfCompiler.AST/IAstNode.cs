@@ -5,7 +5,7 @@ namespace EbnfCompiler.AST
    public enum AstNodeType
    {
       Statement, Expression, Term, Factor, ProdRef, Terminal, Action,
-      LParen, BeginOption, BeginKleeneStar
+      Paren, Option, KleeneStar
    };
 
    public interface IAstNode

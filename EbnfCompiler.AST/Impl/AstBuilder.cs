@@ -106,15 +106,15 @@ namespace EbnfCompiler.AST.Impl
                _stack.Peek().AsStatement().Expression = expression;
                break;
 
-            case AstNodeType.LParen:
+            case AstNodeType.Paren:
                _stack.Peek().AsLParen().Expression = expression;
                break;
 
-            case AstNodeType.BeginOption:
+            case AstNodeType.Option:
                _stack.Peek().AsLOption().Expression = expression;
                break;
 
-            case AstNodeType.BeginKleeneStar:
+            case AstNodeType.KleeneStar:
                _stack.Peek().AsLKleeneStarNode().Expression = expression;
                break;
          }
@@ -160,7 +160,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginParens));
 
-         var lParen = _astNodeFactory.Create(AstNodeType.LParen, token);
+         var lParen = _astNodeFactory.Create(AstNodeType.Paren, token);
 
          _stack.Peek().AsFactor().FactorExpr = lParen;
          _stack.Push(lParen);
@@ -177,7 +177,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginOption));
 
-         var lOption = _astNodeFactory.Create(AstNodeType.BeginOption, token);
+         var lOption = _astNodeFactory.Create(AstNodeType.Option, token);
 
          _stack.Peek().AsFactor().FactorExpr = lOption; 
          _stack.Push(lOption);
@@ -194,7 +194,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginKleene));
 
-         var lKleene = _astNodeFactory.Create(AstNodeType.BeginKleeneStar, token);
+         var lKleene = _astNodeFactory.Create(AstNodeType.KleeneStar, token);
 
          _stack.Peek().AsFactor().FactorExpr = lKleene;
          _stack.Push(lKleene);

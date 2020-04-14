@@ -65,7 +65,7 @@ namespace EbnfCompiler.AST.Impl
 
                break;
 
-            case AstNodeType.LParen:
+            case AstNodeType.Paren:
                BeginTrace("LParens");
 
                Traverse(astNode.AsLParen().Expression);
@@ -73,7 +73,7 @@ namespace EbnfCompiler.AST.Impl
                EndTrace("LParens");
                break;
 
-            case AstNodeType.BeginOption:
+            case AstNodeType.Option:
                BeginTrace("BeginOption");
 
                Traverse(astNode.AsLOption().Expression);
@@ -81,7 +81,7 @@ namespace EbnfCompiler.AST.Impl
                EndTrace("BeginOption");
                break;
 
-            case AstNodeType.BeginKleeneStar:
+            case AstNodeType.KleeneStar:
                BeginTrace("BeginKleene");
 
                EndTrace("BeginKleene");

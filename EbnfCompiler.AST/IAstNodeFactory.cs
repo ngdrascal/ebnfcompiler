@@ -46,13 +46,13 @@ namespace EbnfCompiler.AST
             case AstNodeType.Terminal:
                newAstNode = new TerminalNode(token, _tracer);
                break;
-            case AstNodeType.LParen:
+            case AstNodeType.Paren:
                newAstNode = new LParenNode(token, _tracer);
                break;
-            case AstNodeType.BeginOption:
+            case AstNodeType.Option:
                newAstNode = new LOptionNode(token, _tracer);
                break;
-            case AstNodeType.BeginKleeneStar:
+            case AstNodeType.KleeneStar:
                newAstNode = new LKleeneNode(token, _tracer);
                break;
             case AstNodeType.Action:

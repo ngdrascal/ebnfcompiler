@@ -44,59 +44,6 @@ namespace EbnfCompiler.CodeGenerator
          Append("\n");
       }
 
-      private void FirstOf(IExpressionNode expression, ITerminalSet target)
-      {
-         /*
-         var alt = expression.FirstTerm;
-         while (alt != null)
-         {
-            var node = alt.Next;
-            while ((node != null) && (node.NodeType == NodeType.ActName))
-               node = node.Next;
-
-            if (node == null)
-               break;
-
-            switch (node.NodeType)
-            {
-               case NodeType.Expression:
-                  FirstOf((IExpressionNode)alt.Next, target);
-                  break;
-
-               case NodeType.Term:
-                  throw new Exception("Programming Error: an alternative should never follow an alternative");
-
-               case NodeType.ProdRef:
-                  target.Add(_productions[((IProdRefNode)node).ProdName].Expression.FirstSet);
-                  break;
-
-               case NodeType.Terminal:
-                  target.Add(((ITerminalNode)node).TermName);
-                  break;
-
-               case NodeType.ActName:
-                  //FirstOf(node^.next, target);
-                  break;
-
-               case NodeType.BeginOption:
-                  FirstOf((IExpressionNode)node.Next, target);
-                  break;
-
-               case NodeType.EndOption:
-                  break;
-
-               case NodeType.BeginKleeneStar:
-                  FirstOf((IExpressionNode)node.Next, target);
-                  break;
-
-               case NodeType.EndKleeneStar:
-                  break;
-            }
-            alt = alt.NextTerm;
-         }
-         */
-      }
-
       private void GenInterface()
       {
          AppendLine();

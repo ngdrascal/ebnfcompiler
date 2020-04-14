@@ -243,7 +243,7 @@ namespace EbnfCompiler.AST.Impl
    public class LParenNode : AstNode, ILParenNode
    {
       public LParenNode(IToken token, IDebugTracer tracer)
-         : base(AstNodeType.LParen, token, tracer)
+         : base(AstNodeType.Paren, token, tracer)
       {
       }
 
@@ -263,7 +263,7 @@ namespace EbnfCompiler.AST.Impl
    public class LOptionNode : AstNode, ILOptionNode
    {
       public LOptionNode(IToken token, IDebugTracer tracer)
-         : base(AstNodeType.BeginOption, token, tracer)
+         : base(AstNodeType.Option, token, tracer)
       {
       }
 
@@ -284,7 +284,7 @@ namespace EbnfCompiler.AST.Impl
    public class LKleeneNode : AstNode, ILKleeneStarNode
    {
       public LKleeneNode(IToken token, IDebugTracer tracer)
-         : base(AstNodeType.BeginKleeneStar, token, tracer)
+         : base(AstNodeType.KleeneStar, token, tracer)
       {
       }
 
