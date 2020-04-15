@@ -77,10 +77,10 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      public static AST.OptionNode AsLOption(this IAstNode astNode)
+      public static IOptionNode AsLOption(this IAstNode astNode)
       {
-         if (!(astNode is AST.OptionNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(AST.OptionNode)));
+         if (!(astNode is IOptionNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IOptionNode)));
 
          return result;
       }

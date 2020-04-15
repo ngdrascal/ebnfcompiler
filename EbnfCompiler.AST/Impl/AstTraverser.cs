@@ -44,7 +44,7 @@ namespace EbnfCompiler.AST.Impl
                   TraceLine($"Terminal: {astNode.Image}");
                else if (astNode.AsFactor().FactorExpr is IParenNode)
                   Traverse(astNode.AsFactor().FactorExpr);
-               else if (astNode.AsFactor().FactorExpr is AST.OptionNode)
+               else if (astNode.AsFactor().FactorExpr is AST.IOptionNode)
                   Traverse(astNode.AsFactor().FactorExpr);
                else if (astNode.AsFactor().FactorExpr is IKleeneStarNode)
                   Traverse(astNode.AsFactor().FactorExpr);

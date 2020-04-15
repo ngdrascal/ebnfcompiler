@@ -260,7 +260,7 @@ namespace EbnfCompiler.AST.Impl
       }
    }
 
-   public class OptionNode : AstNode, AST.OptionNode
+   public class OptionNode : AstNode, IOptionNode
    {
       public OptionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Option, token, tracer)

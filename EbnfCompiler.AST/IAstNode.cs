@@ -64,7 +64,7 @@ namespace EbnfCompiler.AST
       IExpressionNode Expression { get; set; }
    }
 
-   public interface OptionNode
+   public interface IOptionNode
    {
       IExpressionNode Expression { get; set; }
    }
