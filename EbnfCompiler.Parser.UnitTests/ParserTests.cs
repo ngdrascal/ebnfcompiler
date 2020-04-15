@@ -60,27 +60,6 @@ namespace EbnfCompiler.Parser.UnitTests
                              ""{"" <Expression> ""}"" .
       ";
 
-      private const string BadTestCase1 = @"
-         %TOKENS%
-            ""a"" = ""tkA""
-         %EBNF%
-            <S> := ""a"" .
-      "; 
-      
-      private const string BadTestCase2 = @"
-         %TOKENS%
-            ""a"" = ""tkA""
-         %EBNF%
-            <S> ::= ""a""
-      ";
-
-      private const string BadTestCase3 = @"
-         %TOKENS%
-            ""a"" = ""tkA""
-         %EBNF%
-            <S> ::= ""a"" }
-      ";
-
       private Mock<IAstBuilder> _astBuilderMock;
 
       [SetUp]
@@ -103,6 +82,7 @@ namespace EbnfCompiler.Parser.UnitTests
       [TestCase(GoodTestCase2)]
       [TestCase(GoodTestCase3)]
       [TestCase(GoodTestCase4)]
+      [TestCase(GoodTestCase5)]
       public void Parser_WhenValidInput_DoesNotThrowException(string input)
       {
          // Arrange:
@@ -116,6 +96,27 @@ namespace EbnfCompiler.Parser.UnitTests
          // Assert:
          Assert.DoesNotThrow(ParseGoal);
       }
+
+      private const string BadTestCase1 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> := ""a"" .
+      ";
+
+      private const string BadTestCase2 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= ""a""
+      ";
+
+      private const string BadTestCase3 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= ""a"" }
+      ";
 
       [TestCase(BadTestCase1, ":")]
       [TestCase(BadTestCase2, "<eof>")]

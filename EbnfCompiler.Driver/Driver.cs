@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
@@ -25,7 +26,7 @@ namespace EbnfCompiler.Driver
 
    */
 
-   [TestFixture]
+   [TestFixture, ExcludeFromCodeCoverage]
    public class Driver
    {
       private const string TestCase1 = @"
