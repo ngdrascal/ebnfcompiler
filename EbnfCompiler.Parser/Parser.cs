@@ -17,28 +17,21 @@ namespace EbnfCompiler.Parser
          _astBuilder = astBuilder;
       }
 
-      private void CheckTokenOneOf(ICollection<TokenKind> tokens)
-      {
-         if (tokens.Contains(_scanner.CurrentToken.TokenKind))
-            return;
-
-         var msg = tokens.Aggregate(string.Empty, (current, t) => current + (t.ToString() + ", "));
-
-         throw new SyntaxErrorException("Expecting on of the following: " + msg, _scanner.CurrentToken);
-      }
-
       private void Match(TokenKind tokenKind)
       {
          if (_scanner.CurrentToken.TokenKind != tokenKind)
             throw new SyntaxErrorException($"Expecting: {tokenKind}", _scanner.CurrentToken);
       }
 
-      public void ParseGoal()
+      public (ICollection<ITokenDefinition> TokenDefinitions, 
+              IDictionary<string, IProductionInfo> Productions) ParseGoal()
       {
          _scanner.Advance();
          ParseInput();
          Match(TokenKind.Eof);
          _scanner.Advance();
+
+         return (_astBuilder.TokenDefinitions, _astBuilder.Productions);
       }
 
       // <Input> ::= <Tokens> <Grammar>
@@ -78,10 +71,12 @@ namespace EbnfCompiler.Parser
          ParseSyntax();
       }
 
-      // <Syntax> ::= {<Statement>} "." .
+      // <Syntax> ::= <statement> { <Statement> } .
       private void ParseSyntax()
       {
          _astBuilder.BeginSyntax();
+
+         ParseStatement();
 
          while (_scanner.CurrentToken.TokenKind == TokenKind.Identifier)
             ParseStatement();
@@ -89,11 +84,9 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndSyntax();
       }
 
-      // <Statement> ::= "IDENTIFIER" "::=" <Expression> ".".
+      // <Statement> ::= "PRODNAME" "::=" <Expression> ".".
       private void ParseStatement()
       {
-         CheckTokenOneOf(new List<TokenKind> { TokenKind.Identifier });
-
          _astBuilder.BeginStatement(_scanner.CurrentToken);
          _scanner.Advance();
 
@@ -142,18 +135,14 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndTerm();
       }
 
-      // <Factor> ::= "IDENTIFIER" | "STRING" | (" <Expression> ")" | "[" <Expression> "]" | "{" <Expression> "}".
+      // <Factor> ::= "PRODNAME" |
+      //              "STRING" |
+      //              "(" <Expression> ")" |
+      //              "[" <Expression> "]" |
+      //              "{" <Expression> "}".
       private void ParseFactor()
       {
          _astBuilder.BeginFactor(_scanner.CurrentToken);
-
-         var factorStartTokens = new[]
-         {
-            TokenKind.Identifier, TokenKind.String, TokenKind.Action, 
-            TokenKind.LeftParen, TokenKind.LeftBracket, TokenKind.LeftBrace
-         };
-
-         CheckTokenOneOf(factorStartTokens);
 
          switch (_scanner.CurrentToken.TokenKind)
          {
