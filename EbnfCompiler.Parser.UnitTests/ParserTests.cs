@@ -132,7 +132,7 @@ namespace EbnfCompiler.Parser.UnitTests
          void ParseGoal() => parser.ParseGoal();
 
          // Assert:
-         SyntaxErrorException ex = Assert.Throws<SyntaxErrorException>(ParseGoal);
+         var ex = Assert.Throws<SyntaxErrorException>(ParseGoal);
          Assert.That(ex.Token.Image, Is.EqualTo(image));
       }
    }
