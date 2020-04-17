@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EbnfCompiler.AST\EbnfCompiler.AST.csproj" />
-    <ProjectReference Include="..\EbnfCompiler.Scanner\EbnfCompiler.Scanner.csproj" />
   </ItemGroup>
 
 </Project>

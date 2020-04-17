@@ -23,6 +23,7 @@ namespace EbnfCompiler.AST
 
    public interface IStatementNode : IAstNode
    {
+      string ProdName { get; }
       IExpressionNode Expression { get; set; }
    }
 
@@ -45,7 +46,7 @@ namespace EbnfCompiler.AST
    public interface IFactorNode : IAstNode
    {
       IAstNode FactorExpr { get; set; }
-      
+
       IFactorNode NextFactor { get; set; }
    }
 

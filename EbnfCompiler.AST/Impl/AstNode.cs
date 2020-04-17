@@ -48,6 +48,8 @@ namespace EbnfCompiler.AST.Impl
       {
       }
 
+      public string ProdName => Image;
+
       public IExpressionNode Expression { get; set; }
 
       public override string ToString()

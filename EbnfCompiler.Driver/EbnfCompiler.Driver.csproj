@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EbnfCompiler.AST\EbnfCompiler.AST.csproj" />
-    <ProjectReference Include="..\EbnfCompiler.CodeGenerator\EbnfCompiler.CodeGenerator.csproj" />
     <ProjectReference Include="..\EbnfCompiler.Parser\EbnfCompiler.Parser.csproj" />
     <ProjectReference Include="..\EbnfCompiler.Scanner\EbnfCompiler.Scanner.csproj" />
   </ItemGroup>

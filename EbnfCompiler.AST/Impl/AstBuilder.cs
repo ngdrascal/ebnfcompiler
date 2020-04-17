@@ -11,17 +11,18 @@ namespace EbnfCompiler.AST.Impl
       private readonly IProdInfoFactory _prodInfoFactory;
       private readonly IDebugTracer _tracer;
       private readonly Stack<IAstNode> _stack;
-      private IProductionInfo _currentProd; // index into symbol table
       private TokenDefinition _lastTokenInfo;
 
       public AstBuilder(IAstNodeFactory astNodeFactory, 
-                        IProdInfoFactory prodInfoFactory, IDebugTracer tracer)
+                        IProdInfoFactory prodInfoFactory,
+                        Stack<IAstNode> stack,
+                        IDebugTracer tracer)
       {
          _astNodeFactory = astNodeFactory;
          _prodInfoFactory = prodInfoFactory;
          _tracer = tracer;
 
-         _stack = new Stack<IAstNode>();
+         _stack = stack;
 
          TokenDefinitions = new Collection<ITokenDefinition>();
          Productions = new Dictionary<string, IProductionInfo>();
@@ -69,9 +70,6 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginStatement));
 
-         _currentProd = _prodInfoFactory.Create(token.Image);
-         Productions.Add(token.Image, _currentProd);
-
          var statement = _astNodeFactory.Create(AstNodeType.Statement, token);
 
          _stack.Push(statement);
@@ -81,8 +79,12 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndStatement));
 
-         var statement = _stack.Peek().AsStatement();
-         _currentProd.RightHandSide = statement.Expression;
+         var statement = _stack.Pop().AsStatement();
+
+         var prodInfo = _prodInfoFactory.Create(statement.ProdName);
+         prodInfo.RightHandSide = statement.Expression;
+
+         Productions.Add(prodInfo.Name, prodInfo);
       }
 
       public void BeginExpression(IToken token)

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using EbnfCompiler.AST;
@@ -92,7 +93,7 @@ namespace EbnfCompiler.Driver
 
          var scanner = new Scanner.Scanner(stream);
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
-                                         new ProdInfoFactory(tracer), tracer);
+                                         new ProdInfoFactory(tracer), new Stack<IAstNode>(), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
          parser.ParseGoal();
 
