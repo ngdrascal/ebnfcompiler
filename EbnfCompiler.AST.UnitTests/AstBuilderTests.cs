@@ -147,7 +147,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Assert:
          Assert.That(stack.Count, Is.EqualTo(1));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
-         Assert.That((stack.Peek() as IExpressionNode)?.Image, Is.EqualTo(string.Empty));
+         Assert.That((stack.Peek() as IExpressionNode)?.Image, Is.EqualTo(token.Image));
          Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Null);
       }
 
@@ -250,6 +250,105 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IKleeneStarNode)));
          Assert.That((stack.Peek() as IKleeneStarNode)?.Expression, Is.Not.Null);
       }
+
+      [Test]
+      public void BeginTerm_WhenGivenAToken_PushesTermNode()
+      {
+         // Arrange:
+         var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
+                                                                        It.IsAny<IToken>()))
+                         .Returns(new TermNode(token, _tracerMock.Object));
+
+         var stack = new Stack<IAstNode>();
+
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.BeginTerm(token);
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(ITermNode)));
+         Assert.That((stack.Peek() as ITermNode)?.Image, Is.EqualTo(token.Image));
+         Assert.That((stack.Peek() as ITermNode)?.FirstFactor, Is.Null);
+      }
+
+      [Test]
+      public void EndTerm_WhenInsideExpression_AppendsTerm()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
+         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         stack.Push(expr);
+
+         var termToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var term = new TermNode(termToken, _tracerMock.Object);
+         stack.Push(term);
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndTerm();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
+         Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Not.Null);
+      }
+
+      [Test]
+      public void BeginFactor_WhenGivenAToken_PushesFactorNode()
+      {
+         // Arrange:
+         var token = new Token { TokenKind = TokenKind.String, Image = "<F>" };
+         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
+                                                                        It.IsAny<IToken>()))
+                         .Returns(new FactorNode(token, _tracerMock.Object));
+
+         var stack = new Stack<IAstNode>();
+
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.BeginFactor(token);
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IFactorNode)));
+         Assert.That((stack.Peek() as IFactorNode)?.Image, Is.EqualTo(token.Image));
+         Assert.That((stack.Peek() as IFactorNode)?.NextFactor, Is.Null);
+      }
+
+      [Test]
+      public void EndFactor_WhenInsideTerm_AppendsFactor()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var termToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var term = new TermNode(termToken, _tracerMock.Object);
+         stack.Push(term);
+
+
+         var factorToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
+         var factor = new FactorNode(factorToken, _tracerMock.Object);
+         stack.Push(factor);
+
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndFactor();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(ITermNode)));
+         Assert.That((stack.Peek() as ITermNode)?.FirstFactor, Is.Not.Null);
+      }
+
       [Test, Ignore("For use as template")]
       public void XYZ_WhenGivenToken_AddToTokenDefinition()
       {

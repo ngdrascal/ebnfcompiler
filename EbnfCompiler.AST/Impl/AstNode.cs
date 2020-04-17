@@ -68,8 +68,6 @@ namespace EbnfCompiler.AST.Impl
       public ExpressionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Expression, token, tracer)
       {
-         Image = string.Empty;
-         FirstTerm = null;
       }
 
       public ITermNode FirstTerm { get; private set; }

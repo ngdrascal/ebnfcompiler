@@ -143,7 +143,6 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginFactor));
 
          var factor = _astNodeFactory.Create(AstNodeType.Factor, token);
-
          _stack.Push(factor);
       }
 
