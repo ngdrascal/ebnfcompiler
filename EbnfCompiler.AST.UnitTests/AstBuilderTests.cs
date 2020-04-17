@@ -29,7 +29,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          const string actualImage = "a";
-         var token = new Token { Image = actualImage };
+         var token = new Token { TokenKind = TokenKind.String, Image = actualImage };
 
          // Act:
          builder.AddTokenName(token);
@@ -45,7 +45,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          const string actualImage = "a";
-         var token = new Token { Image = actualImage };
+         var token = new Token { TokenKind = TokenKind.String, Image = actualImage };
          builder.AddTokenName(token);
 
          // Act:
@@ -61,7 +61,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          const string actualDefinition = "tkA";
-         var token = new Token { Image = actualDefinition };
+         var token = new Token { TokenKind = TokenKind.String, Image = actualDefinition };
 
          // Act:
          builder.AddTokenName(token);
@@ -76,15 +76,15 @@ namespace EbnfCompiler.AST.UnitTests
       public void BeginStatement_WhenGivenToken_PushesStatementNode()
       {
          // Arrange:
-         var token = new Token { Image = "<S>" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(), 
+         var token = new Token { TokenKind = TokenKind.String, Image = "<S>" };
+         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
                                                                         It.IsAny<IToken>()))
                          .Returns(new StatementNode(token, _tracerMock.Object));
 
-         _prodInfoFactoryMock.Setup(m=>m.Create(It.IsAny<string>()));
+         _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
 
          var stack = new Stack<IAstNode>();
-         
+
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
          // Act:
@@ -100,7 +100,7 @@ namespace EbnfCompiler.AST.UnitTests
       public void EndStatement_WhenGivenToken_SetsProductionsRhs()
       {
          // Arrange:
-         var token = new Token { Image = "<S>" };
+         var token = new Token { TokenKind = TokenKind.String, Image = "<S>" };
          _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
                It.IsAny<IToken>()))
             .Returns(new StatementNode(token, _tracerMock.Object));
@@ -111,7 +111,7 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
          var statement = new StatementNode(token, _tracerMock.Object)
          {
-            Expression = new ExpressionNode(new Token {Image = "\"a\""}, _tracerMock.Object)
+            Expression = new ExpressionNode(new Token { Image = "\"a\"" }, _tracerMock.Object)
          };
          stack.Push(statement);
 
@@ -126,6 +126,62 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(builder.Productions.First().Value.RightHandSide, Is.InstanceOf(typeof(IExpressionNode)));
       }
 
+      [Test]
+      public void BeginExpression_WhenGivenAToken_PushesExpressionNode()
+      {
+         // Arrange:
+         var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
+                                                                        It.IsAny<IToken>()))
+            .Returns(new ExpressionNode(token, _tracerMock.Object));
+
+         _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
+
+         var stack = new Stack<IAstNode>();
+
+         var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
+
+         // Act:
+         builder.BeginExpression(token);
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
+         Assert.That((stack.Peek() as IExpressionNode)?.Image, Is.EqualTo(string.Empty));
+         Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Null);
+      }
+
+      [Test]
+      public void EndExpression_WhenInsideStatement_SetsStatementsExpression()
+      {
+         // Arrange:
+
+         // _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
+         //                                                                It.IsAny<IToken>()))
+         //    .Returns(new ExpressionNode(token, _tracerMock.Object));
+         //
+         // _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
+
+         var stack = new Stack<IAstNode>();
+         var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
+         var stmt = new StatementNode(stmtToken, _tracerMock.Object);
+         stack.Push(stmt);
+
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         stack.Push(expr);
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndExpression();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IStatementNode)));
+         Assert.That((stack.Peek() as IStatementNode)?.Expression, Is.Not.Null);
+      }
+
       [Test, Ignore("For use as template")]
       public void XYZ_WhenGivenToken_AddToTokenDefinition()
       {
@@ -133,7 +189,7 @@ namespace EbnfCompiler.AST.UnitTests
          var nodeFactory = new AstNodeFactory(_tracerMock.Object);
          var prodFactory = new ProdInfoFactory(_tracerMock.Object);
          var stack = new Stack<IAstNode>();
-         var builder = new AstBuilder(nodeFactory, prodFactory,  stack, _tracerMock.Object);
+         var builder = new AstBuilder(nodeFactory, prodFactory, stack, _tracerMock.Object);
          const string actualImage = "a";
          var token = new Token { Image = actualImage };
 
