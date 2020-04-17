@@ -152,17 +152,11 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       [Test]
-      public void EndExpression_WhenInsideStatement_SetsStatementsExpression()
+      public void EndExpression_WhenInsideStatement_SetsExpression()
       {
          // Arrange:
-
-         // _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-         //                                                                It.IsAny<IToken>()))
-         //    .Returns(new ExpressionNode(token, _tracerMock.Object));
-         //
-         // _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
-
          var stack = new Stack<IAstNode>();
+
          var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
          var stmt = new StatementNode(stmtToken, _tracerMock.Object);
          stack.Push(stmt);
@@ -182,6 +176,80 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That((stack.Peek() as IStatementNode)?.Expression, Is.Not.Null);
       }
 
+      [Test]
+      public void EndExpression_WhenInsideParen_SetsExpression()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var parenToken = new Token { TokenKind = TokenKind.LeftParen, Image = "(" };
+         var paren = new ParenNode(parenToken, _tracerMock.Object);
+         stack.Push(paren);
+
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         stack.Push(expr);
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndExpression();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IParenNode)));
+         Assert.That((stack.Peek() as IParenNode)?.Expression, Is.Not.Null);
+      }
+
+      [Test]
+      public void EndExpression_WhenInsideOption_SetsExpression()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var optionToken = new Token { TokenKind = TokenKind.LeftBracket, Image = "[" };
+         var option = new OptionNode(optionToken, _tracerMock.Object);
+         stack.Push(option);
+
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         stack.Push(expr);
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndExpression();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IOptionNode)));
+         Assert.That((stack.Peek() as IOptionNode)?.Expression, Is.Not.Null);
+      }
+
+      [Test]
+      public void EndExpression_WhenInsideKleene_SetsExpression()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var kleeneToken = new Token { TokenKind = TokenKind.LeftBrace, Image = "{" };
+         var kleene = new KleeneNode(kleeneToken, _tracerMock.Object);
+         stack.Push(kleene);
+
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
+         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         stack.Push(expr);
+
+         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.EndExpression();
+
+         // Assert:
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf(typeof(IKleeneStarNode)));
+         Assert.That((stack.Peek() as IKleeneStarNode)?.Expression, Is.Not.Null);
+      }
       [Test, Ignore("For use as template")]
       public void XYZ_WhenGivenToken_AddToTokenDefinition()
       {

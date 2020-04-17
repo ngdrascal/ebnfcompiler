@@ -127,10 +127,6 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginTerm));
 
          var term = _astNodeFactory.Create(AstNodeType.Term, token).AsTerm();
-
-         var expr = _stack.Peek().AsExpression();
-         expr.AppendTerm(term);
-
          _stack.Push(term);
       }
 
@@ -138,7 +134,8 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndTerm));
 
-         _stack.Pop().AsTerm();
+         var term = _stack.Pop().AsTerm();
+         _stack.Peek().AsExpression().AppendTerm(term);
       }
 
       public void BeginFactor(IToken token)
