@@ -98,7 +98,7 @@ namespace EbnfCompiler.Driver
          parser.ParseGoal();
 
          var traverser = new AstTraverser();
-         foreach (var prod in astBuilder.Productions.Values)
+         foreach (var prod in astBuilder.Productions)
          {
             // Debug.WriteLine($"\nAST for <{prod.Name}>");
             // traverser.Traverse(prod.Expression);

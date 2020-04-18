@@ -23,8 +23,8 @@ namespace EbnfCompiler.Parser
             throw new SyntaxErrorException($"Expecting: {tokenKind}", _scanner.CurrentToken);
       }
 
-      public (ICollection<ITokenDefinition> TokenDefinitions, 
-              IDictionary<string, IProductionInfo> Productions) ParseGoal()
+      public (ICollection<ITokenDefinition> TokenDefinitions,
+              IReadOnlyCollection<IProductionInfo> Productions) ParseGoal()
       {
          _scanner.Advance();
          ParseInput();
@@ -124,7 +124,7 @@ namespace EbnfCompiler.Parser
          ParseActions();
          var factorStartTokens = new[]
          {
-            TokenKind.Identifier, TokenKind.String, TokenKind.Action, 
+            TokenKind.Identifier, TokenKind.String, TokenKind.Action,
             TokenKind.LeftParen, TokenKind.LeftBracket, TokenKind.LeftBrace
          };
          while (factorStartTokens.Contains(_scanner.CurrentToken.TokenKind))
@@ -159,7 +159,7 @@ namespace EbnfCompiler.Parser
                _scanner.Advance();
                ParseExpression();
                Match(TokenKind.RightParen);
-               _astBuilder.EndParens(_scanner.CurrentToken);
+               _astBuilder.EndParens();
                _scanner.Advance();
                break;
             case TokenKind.LeftBracket:
@@ -167,7 +167,7 @@ namespace EbnfCompiler.Parser
                _scanner.Advance();
                ParseExpression();
                Match(TokenKind.RightBracket);
-               _astBuilder.EndOption(_scanner.CurrentToken);
+               _astBuilder.EndOption();
                _scanner.Advance();
                break;
             case TokenKind.LeftBrace:
@@ -175,7 +175,7 @@ namespace EbnfCompiler.Parser
                _scanner.Advance();
                ParseExpression();
                Match(TokenKind.RightBrace);
-               _astBuilder.EndKleene(_scanner.CurrentToken);
+               _astBuilder.EndKleene();
                _scanner.Advance();
                break;
          }

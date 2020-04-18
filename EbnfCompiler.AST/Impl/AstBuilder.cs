@@ -25,12 +25,11 @@ namespace EbnfCompiler.AST.Impl
          _stack = stack;
 
          TokenDefinitions = new Collection<ITokenDefinition>();
-         Productions = new Dictionary<string, IProductionInfo>();
+         //Productions = new Dictionary<string, IProductionInfo>();
       }
 
       public ICollection<ITokenDefinition> TokenDefinitions { get; }
-
-      public IDictionary<string, IProductionInfo> Productions { get; }
+      public IReadOnlyCollection<IProductionInfo> Productions => _prodInfoFactory.AllProductions;
 
       public void AddTokenName(IToken token)
       {
@@ -60,10 +59,6 @@ namespace EbnfCompiler.AST.Impl
          _tracer.TraceLine(new string('-', 40));
 
          FixupProdRefNodes();
-
-         // _tracer.TraceLine(new string('-', 40));
-         // foreach (var production in Productions)
-         //    _tracer.TraceLine(production.Value.ToString());
       }
 
       public void BeginStatement(IToken token)
@@ -83,8 +78,6 @@ namespace EbnfCompiler.AST.Impl
 
          var prodInfo = _prodInfoFactory.Create(statement.ProdName);
          prodInfo.RightHandSide = statement.Expression;
-
-         Productions.Add(prodInfo.Name, prodInfo);
       }
 
       public void BeginExpression(IToken token)
@@ -159,33 +152,31 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginParens));
 
          var lParen = _astNodeFactory.Create(AstNodeType.Paren, token);
-
-         _stack.Peek().AsFactor().FactorExpr = lParen;
          _stack.Push(lParen);
       }
 
-      public void EndParens(IToken token)
+      public void EndParens()
       {
          _tracer.EndTrace(nameof(EndParens));
 
-         _stack.Pop();
+         var lParen = _stack.Pop();
+         _stack.Peek().AsFactor().FactorExpr = lParen;
       }
 
       public void BeginOption(IToken token)
       {
          _tracer.BeginTrace(nameof(BeginOption));
 
-         var lOption = _astNodeFactory.Create(AstNodeType.Option, token);
-
-         _stack.Peek().AsFactor().FactorExpr = lOption; 
-         _stack.Push(lOption);
+         var option = _astNodeFactory.Create(AstNodeType.Option, token);
+         _stack.Push(option);
       }
 
-      public void EndOption(IToken token)
+      public void EndOption()
       {
          _tracer.EndTrace(nameof(EndOption));
 
-         _stack.Pop();
+         var option =  _stack.Pop();
+         _stack.Peek().AsFactor().FactorExpr = option;
       }
 
       public void BeginKleene(IToken token)
@@ -193,16 +184,15 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginKleene));
 
          var lKleene = _astNodeFactory.Create(AstNodeType.KleeneStar, token);
-
-         _stack.Peek().AsFactor().FactorExpr = lKleene;
          _stack.Push(lKleene);
       }
 
-      public void EndKleene(IToken token)
+      public void EndKleene()
       {
          _tracer.EndTrace(nameof(EndKleene));
 
-         _stack.Pop();
+         var lKleene = _stack.Pop();
+         _stack.Peek().AsFactor().FactorExpr = lKleene;
       }
 
       public void FoundProduction(IToken token)
@@ -233,8 +223,8 @@ namespace EbnfCompiler.AST.Impl
       {
          foreach (var node in _astNodeFactory.AllNodes.Where(p => p.AstNodeType == AstNodeType.ProdRef))
          {
-            var prodRefNode = (ProdRefNode)node;
-            var prodInfo = Productions.First(p => p.Key == prodRefNode.ProdName).Value;
+            var prodRefNode = (IProdRefNode)node;
+            var prodInfo = Productions.First(p => p.Name == prodRefNode.ProdName);
             prodRefNode.Expression = prodInfo.RightHandSide;
          }
       }

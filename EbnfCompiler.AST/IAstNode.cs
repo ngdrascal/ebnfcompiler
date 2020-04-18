@@ -53,6 +53,7 @@ namespace EbnfCompiler.AST
    public interface IProdRefNode : IAstNode
    {
       string ProdName { get; }
+      IExpressionNode Expression { get; set; }
    }
 
    public interface ITerminalNode : IAstNode

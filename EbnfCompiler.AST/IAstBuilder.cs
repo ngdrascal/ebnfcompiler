@@ -6,7 +6,8 @@ namespace EbnfCompiler.AST
    public interface IAstBuilder
    {
       ICollection<ITokenDefinition> TokenDefinitions { get; }
-      IDictionary<string, IProductionInfo> Productions { get; }
+      //IDictionary<string, IProductionInfo> Productions { get; }
+      IReadOnlyCollection<IProductionInfo> Productions { get; }
 
       void AddTokenName(IToken token);
       void SetTokenDef(IToken token);
@@ -27,13 +28,13 @@ namespace EbnfCompiler.AST
       void EndFactor();
 
       void BeginParens(IToken token);
-      void EndParens(IToken token);
+      void EndParens();
 
       void BeginOption(IToken token);
-      void EndOption(IToken token);
+      void EndOption();
 
       void BeginKleene(IToken token);
-      void EndKleene(IToken token);
+      void EndKleene();
 
       void FoundProduction(IToken token);
       void FoundTerminal(IToken token);
