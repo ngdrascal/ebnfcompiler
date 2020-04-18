@@ -50,10 +50,9 @@ namespace EbnfCompiler.AST.UnitTests
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Statement),
                   It.IsAny<IToken>()))
-            .Returns(() =>
+            .Returns((AstNodeType nodeType, IToken token) =>
             {
-               var node = new StatementNode(new Token { TokenKind = TokenKind.String, Image = "<S>" },
-                  _tracerMock.Object);
+               var node = new StatementNode(token, _tracerMock.Object);
                _allNodes.Add(node);
                return node;
             });
@@ -62,10 +61,9 @@ namespace EbnfCompiler.AST.UnitTests
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Expression),
                   It.IsAny<IToken>()))
-            .Returns(() =>
+            .Returns((AstNodeType nodeType, IToken token) =>
             {
-               var node = new ExpressionNode(new Token { TokenKind = TokenKind.String, Image = "<E>" },
-                  _tracerMock.Object);
+               var node = new ExpressionNode(token, _tracerMock.Object);
                _allNodes.Add(node);
                return node;
             });
@@ -74,9 +72,9 @@ namespace EbnfCompiler.AST.UnitTests
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Term),
                   It.IsAny<IToken>()))
-            .Returns(() =>
+            .Returns((AstNodeType nodeType, IToken token) =>
             {
-               var node = new TermNode(new Token { TokenKind = TokenKind.String, Image = "<T>" }, _tracerMock.Object);
+               var node = new TermNode(token, _tracerMock.Object);
                _allNodes.Add(node);
                return node;
             });
@@ -85,9 +83,45 @@ namespace EbnfCompiler.AST.UnitTests
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Factor),
                   It.IsAny<IToken>()))
-            .Returns(() =>
+            .Returns((AstNodeType nodeType, IToken token) =>
             {
-               var node = new FactorNode(new Token { TokenKind = TokenKind.String, Image = "Factor" }, _tracerMock.Object);
+               var node = new FactorNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            });
+
+         // Factor
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Paren),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new ParenNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            });
+
+         // Option
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Option),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new OptionNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            });
+
+         // Kleene
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.KleeneStar),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new KleeneNode(token, _tracerMock.Object);
                _allNodes.Add(node);
                return node;
 
@@ -102,9 +136,10 @@ namespace EbnfCompiler.AST.UnitTests
       public void AddTokenName_WhenFirstOccurrencesOfToken_AddToTokenDefinition()
       {
          // Arrange:
-         var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          const string actualImage = "a";
          var token = new Token { TokenKind = TokenKind.String, Image = actualImage };
+
+         var builder = new AstBuilder(null, null, null, _tracerMock.Object);
 
          // Act:
          builder.AddTokenName(token);
@@ -118,9 +153,10 @@ namespace EbnfCompiler.AST.UnitTests
       public void AddTokenName_WhenNotFirstOccurrencesOfToken_ThrowsSemanticErrorException()
       {
          // Arrange:
-         var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          const string actualImage = "a";
          var token = new Token { TokenKind = TokenKind.String, Image = actualImage };
+
+         var builder = new AstBuilder(null, null, null, _tracerMock.Object);
          builder.AddTokenName(token);
 
          // Act:
@@ -165,13 +201,10 @@ namespace EbnfCompiler.AST.UnitTests
       [Test]
       public void EndSyntax_WhenGivenAToken_FixupOnProdRef()
       {
-         // Arrange:
-         // _nodeFactoryMock.Setup(m => m.AllNodes)
-         //    .Returns(new IAstNode[] { new ProdRefNode(new Token() { Image = "<S>" }, _tracerMock.Object) });
-
          var prodInfo = _prodInfoFactoryMock.Object.Create("<S>");
-         var expr = _nodeFactoryMock.Object
-            .Create(AstNodeType.Expression, new Token() { TokenKind = TokenKind.String, Image = "a" });
+
+         var exprToken = new Token() { TokenKind = TokenKind.String, Image = "a" };
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          prodInfo.RightHandSide = (IExpressionNode)expr;
 
          var stack = new Stack<IAstNode>();
@@ -196,14 +229,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<S>" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                        It.IsAny<IToken>()))
-                         .Returns(new StatementNode(token, _tracerMock.Object));
-
-         _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
          // Act:
@@ -219,13 +245,12 @@ namespace EbnfCompiler.AST.UnitTests
       public void EndStatement_WhenGivenToken_SetsProductionsRhs()
       {
          // Arrange:
-         var token = new Token { TokenKind = TokenKind.String, Image = "<S>" };
+         var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
+         var statement = (StatementNode)_nodeFactoryMock.Object.Create(AstNodeType.Statement, stmtToken);
+         var exprToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
+         statement.Expression = (ExpressionNode)_nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
 
          var stack = new Stack<IAstNode>();
-         var statement = new StatementNode(token, _tracerMock.Object)
-         {
-            Expression = new ExpressionNode(new Token { Image = "\"a\"" }, _tracerMock.Object)
-         };
          stack.Push(statement);
 
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
@@ -235,7 +260,7 @@ namespace EbnfCompiler.AST.UnitTests
 
          // Assert:
          Assert.That(stack.Count, Is.EqualTo(0));
-         Assert.That(builder.Productions.First().Name, Is.EqualTo(token.Image));
+         Assert.That(builder.Productions.First().Name, Is.EqualTo(stmtToken.Image));
          Assert.That(builder.Productions.First().RightHandSide, Is.InstanceOf(typeof(IExpressionNode)));
       }
 
@@ -244,14 +269,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                        It.IsAny<IToken>()))
-            .Returns(new ExpressionNode(token, _tracerMock.Object));
-
-         _prodInfoFactoryMock.Setup(m => m.Create(It.IsAny<string>()));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
          // Act:
@@ -271,11 +289,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
-         var stmt = new StatementNode(stmtToken, _tracerMock.Object);
+         var stmt = _nodeFactoryMock.Object.Create(AstNodeType.Statement, stmtToken);
          stack.Push(stmt);
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          stack.Push(expr);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -369,12 +387,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                        It.IsAny<IToken>()))
-                         .Returns(new TermNode(token, _tracerMock.Object));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
@@ -417,12 +430,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<F>" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                        It.IsAny<IToken>()))
-                         .Returns(new FactorNode(token, _tracerMock.Object));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
@@ -466,12 +474,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.LeftParen, Image = "(" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                         It.IsAny<IToken>()))
-                         .Returns(new ParenNode(token, _tracerMock.Object));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
@@ -513,12 +516,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.LeftBracket, Image = "[" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                        It.IsAny<IToken>()))
-                         .Returns(new OptionNode(token, _tracerMock.Object));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
@@ -560,12 +558,7 @@ namespace EbnfCompiler.AST.UnitTests
       {
          // Arrange:
          var token = new Token { TokenKind = TokenKind.LeftBrace, Image = "{" };
-         _nodeFactoryMock.Setup(m => m.Create(It.IsAny<AstNodeType>(),
-                                                                         It.IsAny<IToken>()))
-                         .Returns(new KleeneNode(token, _tracerMock.Object));
-
          var stack = new Stack<IAstNode>();
-
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:

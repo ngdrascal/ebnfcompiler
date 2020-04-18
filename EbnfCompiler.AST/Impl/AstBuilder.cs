@@ -66,7 +66,6 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginStatement));
 
          var statement = _astNodeFactory.Create(AstNodeType.Statement, token);
-
          _stack.Push(statement);
       }
 
@@ -85,7 +84,6 @@ namespace EbnfCompiler.AST.Impl
          _tracer.BeginTrace(nameof(BeginExpression));
 
          var expression = _astNodeFactory.Create(AstNodeType.Expression, token);
-
          _stack.Push(expression);
       }
 
