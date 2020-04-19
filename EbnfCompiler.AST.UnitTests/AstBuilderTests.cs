@@ -91,7 +91,7 @@ namespace EbnfCompiler.AST.UnitTests
 
             });
 
-         // Factor
+         // Paren
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Paren),
                   It.IsAny<IToken>()))
@@ -127,6 +127,17 @@ namespace EbnfCompiler.AST.UnitTests
 
             });
 
+         // ProdRef
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.ProdRef),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new ProdRefNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            });
          mock.Setup(factory => factory.AllNodes).Returns(_allNodes);
 
          return mock;
@@ -220,7 +231,7 @@ namespace EbnfCompiler.AST.UnitTests
 
          // Assert:
          Assert.That(stack.Count, Is.EqualTo(0));
-
+         Assert.That(_nodeFactoryMock.Object.AllNodes.Count(p => p.AstNodeType == AstNodeType.ProdRef), Is.EqualTo(1));
          foreach (var node in _nodeFactoryMock.Object.AllNodes.Where(p => p.AstNodeType == AstNodeType.ProdRef))
          {
             Assert.That(((IProdRefNode)node).Expression, Is.Not.Null);
