@@ -207,6 +207,9 @@ namespace EbnfCompiler.AST.UnitTests
          var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          prodInfo.RightHandSide = (IExpressionNode)expr;
 
+         var prodRefToken = new Token() { TokenKind = TokenKind.String, Image = "<S>" };
+         _nodeFactoryMock.Object.Create(AstNodeType.ProdRef, prodRefToken);
+
          var stack = new Stack<IAstNode>();
 
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object,
@@ -314,11 +317,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var parenToken = new Token { TokenKind = TokenKind.LeftParen, Image = "(" };
-         var paren = new ParenNode(parenToken, _tracerMock.Object);
+         var paren = _nodeFactoryMock.Object.Create(AstNodeType.Paren, parenToken);
          stack.Push(paren);
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         var expr =  _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          stack.Push(expr);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -339,11 +342,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var optionToken = new Token { TokenKind = TokenKind.LeftBracket, Image = "[" };
-         var option = new OptionNode(optionToken, _tracerMock.Object);
+         var option = _nodeFactoryMock.Object.Create(AstNodeType.Option, optionToken);
          stack.Push(option);
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          stack.Push(expr);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -368,7 +371,8 @@ namespace EbnfCompiler.AST.UnitTests
          stack.Push(kleene);
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
+
          stack.Push(expr);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -407,11 +411,13 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
-         var expr = new ExpressionNode(exprToken, _tracerMock.Object);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
+
          stack.Push(expr);
 
          var termToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var term = new TermNode(termToken, _tracerMock.Object);
+         var term = _nodeFactoryMock.Object.Create(AstNodeType.Term, termToken);
+
          stack.Push(term);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -450,11 +456,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var termToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var term = new TermNode(termToken, _tracerMock.Object);
+         var term = _nodeFactoryMock.Object.Create(AstNodeType.Term, termToken);
          stack.Push(term);
 
          var factorToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
-         var factor = new FactorNode(factorToken, _tracerMock.Object);
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
          stack.Push(factor);
 
 
@@ -493,11 +499,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var factorToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
-         var factor = new FactorNode(factorToken, _tracerMock.Object);
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
          stack.Push(factor);
 
          var lParenToken = new Token { TokenKind = TokenKind.LeftParen, Image = "(" };
-         var paren = new ParenNode(lParenToken, _tracerMock.Object);
+         var paren = _nodeFactoryMock.Object.Create(AstNodeType.Paren, lParenToken);
          stack.Push(paren);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -535,11 +541,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var factorToken = new Token { TokenKind = TokenKind.String, Image = "<F>" };
-         var factor = new FactorNode(factorToken, _tracerMock.Object);
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
          stack.Push(factor);
 
          var lBracketToken = new Token { TokenKind = TokenKind.LeftBracket, Image = "[" };
-         var option = new OptionNode(lBracketToken, _tracerMock.Object);
+         var option = _nodeFactoryMock.Object.Create(AstNodeType.Option, lBracketToken);
          stack.Push(option);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -577,11 +583,11 @@ namespace EbnfCompiler.AST.UnitTests
          var stack = new Stack<IAstNode>();
 
          var factorToken = new Token { TokenKind = TokenKind.String, Image = "<F>" };
-         var factor = new FactorNode(factorToken, _tracerMock.Object);
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
          stack.Push(factor);
 
-         var lBracketToken = new Token { TokenKind = TokenKind.LeftBrace, Image = "{" };
-         var kleene = new KleeneNode(lBracketToken, _tracerMock.Object);
+         var lBraceToken = new Token { TokenKind = TokenKind.LeftBrace, Image = "{" };
+         var kleene = _nodeFactoryMock.Object.Create(AstNodeType.KleeneStar, lBraceToken);
          stack.Push(kleene);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
