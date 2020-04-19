@@ -645,5 +645,26 @@ namespace EbnfCompiler.AST.UnitTests
          // Assert:
          Assert.That(((IFactorNode)factor).FactorExpr, Is.Not.Null);
       }
+
+      [Test]
+      public void FoundProduction_WhenGivenAProduction_SetsFactorExpression()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var factorToken = new Token { TokenKind = TokenKind.String, Image = "<F>" };
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
+         stack.Push(factor);
+
+         var terminalToken = new Token { TokenKind = TokenKind.Identifier, Image = "<E>" };
+
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.FoundProduction(terminalToken);
+
+         // Assert:
+         Assert.That(((IFactorNode)factor).FactorExpr, Is.Not.Null);
+      }
    }
 }
