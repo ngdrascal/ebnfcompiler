@@ -151,7 +151,17 @@ namespace EbnfCompiler.AST.UnitTests
 
             });
 
-         mock.Setup(factory => factory.AllNodes).Returns(_allNodes);
+         // Action
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Action),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new ActionNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            }); mock.Setup(factory => factory.AllNodes).Returns(_allNodes);
 
          return mock;
       }
@@ -665,6 +675,23 @@ namespace EbnfCompiler.AST.UnitTests
 
          // Assert:
          Assert.That(((IFactorNode)factor).FactorExpr, Is.Not.Null);
+      }
+
+      [Test]
+      public void FoundAction_WhenGivenAnAction_AddsAnActionNode()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var actionToken = new Token { TokenKind = TokenKind.Action, Image = "#JustDoIt#" };
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.FoundAction(actionToken);
+
+         // Assert:
+         Assert.That(_nodeFactoryMock.Object.AllNodes.Count(p=>p.AstNodeType == AstNodeType.Action), Is.EqualTo(1));
+
       }
    }
 }
