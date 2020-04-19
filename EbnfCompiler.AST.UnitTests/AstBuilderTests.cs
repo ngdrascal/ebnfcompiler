@@ -138,6 +138,19 @@ namespace EbnfCompiler.AST.UnitTests
                return node;
 
             });
+
+         // Terminal
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Terminal),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new TerminalNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+
+            });
+
          mock.Setup(factory => factory.AllNodes).Returns(_allNodes);
 
          return mock;
@@ -610,6 +623,27 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(stack.Count, Is.EqualTo(1));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IFactorNode)));
          Assert.That((stack.Peek() as IFactorNode)?.FactorExpr, Is.EqualTo(kleene));
+      }
+
+      [Test]
+      public void FoundTerminal_WhenGivenATerminal_SetsFactorExpression()
+      {
+         // Arrange:
+         var stack = new Stack<IAstNode>();
+
+         var factorToken = new Token { TokenKind = TokenKind.String, Image = "<F>" };
+         var factor = _nodeFactoryMock.Object.Create(AstNodeType.Factor, factorToken);
+         stack.Push(factor);
+
+         var terminalToken = new Token { TokenKind = TokenKind.String, Image = "a" };
+
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
+
+         // Act:
+         builder.FoundTerminal(terminalToken);
+
+         // Assert:
+         Assert.That(((IFactorNode)factor).FactorExpr, Is.Not.Null);
       }
    }
 }
