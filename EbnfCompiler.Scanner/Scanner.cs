@@ -10,7 +10,6 @@ namespace EbnfCompiler.Scanner
       {
          Start,
          Done,
-         Error,
          Ident,
          String,
          Action,
@@ -24,7 +23,7 @@ namespace EbnfCompiler.Scanner
       private const char ChCr = '\r';
       private const char ChLf = '\n';
       private const char ChZero = '\u0000';
-      private const char ChEof = '\u0026';
+      private const char ChEof = '\u001A';
       private const char ChSpace = ' ';
 
       private readonly StreamReader _input;
@@ -139,7 +138,7 @@ namespace EbnfCompiler.Scanner
 
                      default:
                         CurrentToken.TokenKind = TokenKind.Error;
-                        _state = State.Error;
+                        _state = State.Done;
                         break;
                   }
                   SetStartPosition(CurrentToken);
@@ -149,7 +148,7 @@ namespace EbnfCompiler.Scanner
                case State.Ident:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_%]$"))
                   {
-                     CurrentToken.Image = CurrentToken.Image + _currentCh;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                   }
                   else if (_currentCh == '>')
@@ -168,7 +167,7 @@ namespace EbnfCompiler.Scanner
 
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[\x20-!#-~]$"))
                   {
-                     CurrentToken.Image = CurrentToken.Image + _currentCh;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                   }
                   else if (_currentCh == '"')
@@ -179,14 +178,14 @@ namespace EbnfCompiler.Scanner
                   else
                   {
                      CurrentToken.TokenKind = TokenKind.Error;
-                     _state = State.Error;
+                     _state = State.Done;
                   }
                   break;
 
                case State.Action:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_(),\x20]$"))
                   {
-                     CurrentToken.Image = CurrentToken.Image + _currentCh;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                   }
                   else if (_currentCh == '#')
@@ -204,7 +203,7 @@ namespace EbnfCompiler.Scanner
                case State.Tag:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_(),\x20]$"))
                   {
-                     CurrentToken.Image = CurrentToken.Image + _currentCh;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                   }
                   else if (_currentCh == '%')
@@ -236,7 +235,7 @@ namespace EbnfCompiler.Scanner
                   switch (_currentCh)
                   {
                      case ':':
-                        CurrentToken.Image = CurrentToken.Image + _currentCh;
+                        CurrentToken.Image += _currentCh;
                         _currentCh = NextChar();
                         _state = State.Assign2;
                         break;
@@ -251,7 +250,7 @@ namespace EbnfCompiler.Scanner
                   switch (_currentCh)
                   {
                      case '=':
-                        CurrentToken.Image = CurrentToken.Image + _currentCh;
+                        CurrentToken.Image += _currentCh;
                         _currentCh = NextChar();
                         _state = State.Done;
                         break;
@@ -267,7 +266,7 @@ namespace EbnfCompiler.Scanner
                   {
                      case '/':
                         _currentCh = NextChar();
-                        while (_currentCh != ChCr)
+                        while (_currentCh != ChCr && _currentCh != ChEof)
                            _currentCh = NextChar();
 
                         SkipWhiteSpace();
@@ -279,17 +278,6 @@ namespace EbnfCompiler.Scanner
                         break;
                   }
                   break;
-
-               case State.Error:
-                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_.]$"))
-                  {
-                     CurrentToken.Image = CurrentToken.Image + _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else
-                     _state = State.Done;
-                  break;
-
             }
          } while (_state != State.Done);
 
@@ -322,15 +310,15 @@ namespace EbnfCompiler.Scanner
          if (_input.EndOfStream)
             return ChEof;
 
-         if (_input.Peek() == ChCr)
+         if (_input.Peek() == ChLf)
          {
             _input.Read();
-            _input.Read();
+            //_input.Read();
 
             Line++;
             Column = 0;
 
-            return ChCr;
+            return ChLf;
          }
 
          Column++;

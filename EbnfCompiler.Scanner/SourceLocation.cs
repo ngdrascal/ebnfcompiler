@@ -1,7 +1,9 @@
-﻿using EbnfCompiler.Compiler;
+﻿using System.Diagnostics.CodeAnalysis;
+using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.Scanner
 {
+   [ExcludeFromCodeCoverage]
    internal class SourceLocation : ISourceLocation
    {
       public int StartLine { get; set; }
