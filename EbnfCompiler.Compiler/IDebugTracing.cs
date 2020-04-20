@@ -21,25 +21,25 @@ namespace EbnfCompiler.AST
 
       public void BeginTrace(string message)
       {
-         var ident = new string(' ', _traceIndent);
+         var leader = new string(' ', _traceIndent);
          _traceIndent += 2;
 
-         _log.LogTrace($"{ident}->{message}");
+         _log.LogTrace($"{leader}->{message}");
       }
 
       public void EndTrace(string message)
       {
          _traceIndent -= 2;
-         var ident = new string(' ', _traceIndent);
+         var leader = new string(' ', _traceIndent);
 
-         _log.LogTrace($"{ident}<-{message}");
+         _log.LogTrace($"{leader}<-{message}");
       }
 
       public void TraceLine(string message)
       {
-         var ident = new string(' ', _traceIndent);
+         var leader = new string(' ', _traceIndent);
 
-         _log.LogTrace($"{ident}{message}");
+         _log.LogTrace($"{leader}{message}");
       }
    }
 }
