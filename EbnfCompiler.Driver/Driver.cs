@@ -74,7 +74,7 @@ namespace EbnfCompiler.Driver
                              ""{"" <Expression> ""}"" .
       ";
 
-      [Test]
+      [Test, Ignore("Just for experimenting")]
       public void Test01()
       {
          var loggerFactory = LoggerFactory.Create(builder =>
