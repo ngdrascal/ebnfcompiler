@@ -74,7 +74,7 @@ namespace EbnfCompiler.Driver
                              ""{"" <Expression> ""}"" .
       ";
 
-      [Test, Ignore("Just for experimenting")]
+      [Test/*, Ignore("Just for experimenting")*/]
       public void Test01()
       {
          var loggerFactory = LoggerFactory.Create(builder =>
@@ -88,7 +88,7 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase2));
+         stream.Write(encoding.GetBytes(TestCase4));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
@@ -97,13 +97,17 @@ namespace EbnfCompiler.Driver
          var parser = new Parser.Parser(scanner, astBuilder);
          parser.ParseGoal();
 
-         var traverser = new AstTraverser();
+         var traverser = new AstTraverser(tracer);
+         traverser.PreProcess += (node) => { tracer.TraceLine($"Push({node.AstNodeType})"); };
+         traverser.PostProcess += () => { tracer.TraceLine($"Pop()"); };
+
          foreach (var prod in astBuilder.Productions)
          {
-            // Debug.WriteLine($"\nAST for <{prod.Name}>");
-            // traverser.Traverse(prod.Expression);
-            tracer.TraceLine(new string('-', 40));
-            tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
+            tracer.TraceLine($"\nAST for <{prod.Name}>");
+            traverser.Traverse(prod.RightHandSide);
+            
+            // tracer.TraceLine(new string('-', 40));
+            // tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
          }
       }
    }
