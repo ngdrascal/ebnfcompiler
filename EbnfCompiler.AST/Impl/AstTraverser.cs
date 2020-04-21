@@ -2,7 +2,7 @@
 
 namespace EbnfCompiler.AST.Impl
 {
-   public class AstTraverser: IAstTraverser
+   public class AstTraverser : IAstTraverser
    {
       private readonly IDebugTracer _tracer;
 
@@ -59,16 +59,7 @@ namespace EbnfCompiler.AST.Impl
             case AstNodeType.Factor:
                _tracer.BeginTrace(astNode.AstNodeType.ToString());
 
-               if (astNode.AsFactor().FactorExpr is IProdRefNode)
-                  _tracer.TraceLine($"Production: {astNode.Image}");
-               else if (astNode.AsFactor().FactorExpr is ITerminalNode)
-                  _tracer.TraceLine($"Terminal: {astNode.Image}");
-               else if (astNode.AsFactor().FactorExpr is IParenNode)
-                  Traverse(astNode.AsFactor().FactorExpr);
-               else if (astNode.AsFactor().FactorExpr is IOptionNode)
-                  Traverse(astNode.AsFactor().FactorExpr);
-               else if (astNode.AsFactor().FactorExpr is IKleeneStarNode)
-                  Traverse(astNode.AsFactor().FactorExpr);
+               Traverse(astNode.AsFactor().FactorExpr);
 
                _tracer.EndTrace(astNode.AstNodeType.ToString());
                break;
@@ -82,7 +73,7 @@ namespace EbnfCompiler.AST.Impl
                break;
 
             case AstNodeType.Action:
-               _tracer.TraceLine("ActName - {}");
+               _tracer.TraceLine("Action - {}");
 
                break;
 
@@ -104,6 +95,8 @@ namespace EbnfCompiler.AST.Impl
 
             case AstNodeType.KleeneStar:
                _tracer.BeginTrace("BeginKleene");
+
+               Traverse(astNode.AsLKleeneStarNode().Expression);
 
                _tracer.EndTrace("BeginKleene");
                break;

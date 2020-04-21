@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EbnfCompiler.AST;
+using EbnfCompiler.AST.Impl;
 
 namespace EbnfCompiler.CodeGenerator
 {
@@ -93,164 +94,169 @@ namespace EbnfCompiler.CodeGenerator
          AppendLine();
       }
 
-      private void GenTerm(IAstNode astNode)
+      private void GenTerm(IAstNode node)
       {
-         /*
          while (node != null)
          {
-            switch (node.NodeType)
+            switch (node.AstNodeType)
             {
-               case NodeType.Expression:
+               case AstNodeType.Expression:
                   break;
 
-               case NodeType.Term:
+               case AstNodeType.Term:
                   break;
 
-               case NodeType.ProdRef:
-                  AppendLine("Parse" + ((IProdRefNode)node).ProdName + ";");
+               case AstNodeType.ProdRef:
+                  AppendLine("Parse" + ((IProdRefNode)node).ProdName + "();");
                   break;
 
-               case NodeType.Terminal:
+               case AstNodeType.Terminal:
                   AppendLine("Match(" + ((ITerminalNode)node).TermName + ");");
                   break;
 
-               case NodeType.ActName:
-                  AppendLine("semantics." + ((IActionNode)node).ActName + ";");
+               case AstNodeType.Action:
+                  AppendLine("semantics." + ((IActionNode)node).ActionName + "();");
                   break;
 
-               case NodeType.LParen:
+               case AstNodeType.Paren:
                   //            if node^.next^.firstSetOfHead.IsEmpty then begin
                   //               FirstOf(node^.next, node^.next^.firstSetOfHead);
                   //            end;
 
-                  if (!node.Next.FirstSet.IncludesEpsilon)
+                  var parenNode = ((IParenNode) (node));
+                  if (!parenNode.Expression.FirstSet.IncludesEpsilon)
                   {
-                     AppendLine("CheckTokenOneOf([" + node.Next.FirstSet.DelimitedText() + "]);");
+                     AppendLine("CheckTokenOneOf([" + parenNode.Expression.FirstSet.DelimitedText() + "]);");
                   }
-                  GenAlt((IExpressionNode)node.Next);
+                  GenAlt((IExpressionNode)node.AsExpression());
                   break;
 
-               case NodeType.RParen:
-                  break;
-
-               case NodeType.BeginOption:
+               case AstNodeType.Option:
                   //            if node^.next^.firstSetOfHead.IsEmpty then begin
                   //               FirstOf(node^.next, node^.next^.firstSetOfHead);
                   //            end;
-                  AppendLine("if token.kind in [" + node.Next.FirstSet.DelimitedText() + "] then begin");
+                  var optionNode = ((IOptionNode)(node));
+                  AppendLine("if token.kind in [" + optionNode.Expression.FirstSet.DelimitedText() + "] then begin");
                   Indent();
-                  GenAlt((IExpressionNode)node.Next);
-                  break;
-
-               case NodeType.EndOption:
+                  GenAlt(optionNode.Expression);
                   Outdent();
-                  AppendLine("end;");
+                  AppendLine("}");
                   break;
 
-               case NodeType.BeginKleeneStar:
+               case AstNodeType.KleeneStar:
                   //            if node^.next^.firstSetOfHead.IsEmpty then begin
                   //               FirstOf(node^.next, node^.next^.firstSetOfHead);
                   //            end;
+                  var kleeneNode = ((IKleeneStarNode)(node));
                   AppendLine("while token.kind in [" +
-                           node.Next.FirstSet.DelimitedText() +
+                             kleeneNode.Expression.FirstSet.DelimitedText() +
                            "] do begin");
                   Indent();
-                  GenAlt((IExpressionNode)node.Next);
-                  break;
-
-               case NodeType.EndKleeneStar:
+                  GenAlt(kleeneNode.Expression);
                   Outdent();
-                  AppendLine("end;");
+                  AppendLine("}");
                   break;
             }
-            node = node.Next;
+            //node = node.Next;
          }
-         */
       }
 
       private void GenAltCase(ITermNode node)
       {
-         /*
          Indent();
-         AppendLine(node.FirstSet.DelimitedText() + " : begin");
+         AppendLine("case " + node.FirstSet.DelimitedText() + " :");
          Indent();
-         GenTerm(node.Next);
+         GenTerm(node.NextTerm);
          Outdent();
-         AppendLine("end;");
+         AppendLine("}");
          Outdent();
-         */
       }
 
       private void GenAlt(IExpressionNode expression)
       {
-         // if (expression.TermCount > 1)
-         // {
-         //    if (!expression.FirstSet.IncludesEpsilon)
-         //    {
-         //       AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
-         //    }
-         //
-         //    AppendLine("case token.kind of");
-         //
-         //    var alt = expression.FirstTerm;
-         //    while (alt != null)
-         //    {
-         //       GenAltCase(alt);
-         //       alt = alt.NextTerm;
-         //    }
-         //
-         //    AppendLine("end;");
-         // }
-         // else
-         //    GenTerm(expression.FirstTerm);
+         // if there is more than one term
+         if (expression.FirstTerm?.NextTerm != null)
+         {
+            if (!expression.FirstSet.IncludesEpsilon)
+            {
+               AppendLine("CheckTokenOneOf([" + expression.FirstSet.DelimitedText() + "]);");
+            }
+         
+            AppendLine("case token.kind of");
+         
+            var term = expression.FirstTerm;
+            while (term != null)
+            {
+               GenAltCase(term);
+               term = term.NextTerm;
+            }
+         
+            AppendLine("}");
+         }
+         else
+            GenTerm(expression.FirstTerm);
       }
 
       private void GenMethodBody(IProductionInfo prodInfo)
       {
-         /*
-         AppendLine("procedure TParser.Parse" + prodInfo + ";");
-         AppendLine("// First = " + prodInfo.Expression.FirstSet);
-         AppendLine("begin");
+         AppendLine("// First = " + prodInfo.RightHandSide.FirstSet);
+         AppendLine("void Parse" + prodInfo.Name + ";");
+         AppendLine("{");
 
          Indent();
 
-         var alt = prodInfo.Expression.FirstTerm;
-         while (alt != null)
+         var term = prodInfo.RightHandSide.FirstTerm;
+         while (term != null)
          {
-            if (alt.Next.NodeType != NodeType.Terminal)
+            if (term.NextTerm.AstNodeType != AstNodeType.Terminal)
                break;
-            alt = alt.NextTerm;
+            term = term.NextTerm;
          }
 
-         if (alt == null)
-            AppendLine("CheckTokenOneOf([" + prodInfo.Expression.FirstSet.DelimitedText() + "]);");
+         if (term == null)
+            AppendLine("CheckTokenOneOf([" + prodInfo.RightHandSide.FirstSet.DelimitedText() + "]);");
 
-         GenAlt(prodInfo.Expression);
+         GenAlt(prodInfo.RightHandSide);
          Outdent();
-         AppendLine("end;");
+         AppendLine("}");
          AppendLine();
-         AppendLine();
-         */
       }
 
       private void GenImplementation()
       {
-         AppendLine("implementation");
+         AppendLine("using System.Collections.Generic;");
+         AppendLine("using System.Linq;");
+         AppendLine("using EbnfCompiler.AST;");
+         AppendLine("using EbnfCompiler.Compiler;");
+         AppendLine("using EbnfCompiler.Scanner;");
          AppendLine();
-         AppendLine("{------------------------------------------------------------------------------}");
-         AppendLine("{ CLASS: ESyntaxError                                                          }");
-         AppendLine("{------------------------------------------------------------------------------}");
+         AppendLine("namespace Compiler.Parser");
          AppendLine();
-         AppendLine("constructor ESyntaxError.CreateFromToken(msg : String; token: TToken);");
-         AppendLine("begin");
-         AppendLine("   inherited Create(msg, token.startLine, token.startColumn,");
-         AppendLine("                         token.stopLine, token.stopColumn);");
-         AppendLine("end;");
+         AppendLine("////////////////////////////////////////////////////////////////////////////////");
+         AppendLine("// CLASS: SyntaxErrorException");
+         AppendLine("////////////////////////////////////////////////////////////////////////////////");
          AppendLine();
-         AppendLine("{------------------------------------------------------------------------------}");
-         AppendLine("{ CLASS: TParser                                                               }");
-         AppendLine("{------------------------------------------------------------------------------}");
+         AppendLine("   public class SyntaxErrorException : Exception");
+         AppendLine("   {");
+         AppendLine("      private readonly IToken _token;");
          AppendLine();
+         AppendLine("      public SyntaxErrorException(string message, IToken token)");
+         AppendLine("         : base(message)");
+         AppendLine("      {");
+         AppendLine("         _token = token;");
+         AppendLine("      }");
+         AppendLine();
+         AppendLine("      public IToken Token => _token;");
+         AppendLine("   }");
+         AppendLine();
+         AppendLine();
+         AppendLine("////////////////////////////////////////////////////////////////////////////////");
+         AppendLine("// CLASS: Parser");
+         AppendLine("////////////////////////////////////////////////////////////////////////////////");
+         AppendLine();
+         AppendLine("   public class SyntaxErrorException : Exception");
+         AppendLine("   {");
+
          AppendLine("procedure TParser.CheckTokenOneOf(const tokens : TTokenKindSet);");
          AppendLine("var");
          AppendLine("   msg : string;");

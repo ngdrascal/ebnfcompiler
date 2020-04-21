@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
+using EbnfCompiler.CodeGenerator;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 
@@ -30,11 +32,47 @@ namespace EbnfCompiler.Driver
    [TestFixture, ExcludeFromCodeCoverage]
    public class Driver
    {
+      private const string TestCase1A = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= ""a"" .
+      ";
+
+      private const string TestCase1B = @"
+         %TOKENS%" + @"
+            ""a"" = ""tkA""
+            ""b"" = ""tkB""
+         %EBNF%
+            <S> ::= ""a"" ""b"".
+      ";
+
+      private const string TestCase1C = @"
+         %TOKENS%" + @"
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= ( ""a"" ).
+      ";
+
+      private const string TestCase1D = @"
+         %TOKENS%" + @"
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= [ ""a"" ].
+      ";
+
+      private const string TestCase1E = @"
+         %TOKENS%" + @"
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= { ""a"" }.
+      ";
+
       private const string TestCase1 = @"
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            <S> ::= <T> <U> .
+            <S> ::= <T> .
             <T> ::= [ ""a"" ] ""b"" .
       ";
 
@@ -80,34 +118,38 @@ namespace EbnfCompiler.Driver
          var loggerFactory = LoggerFactory.Create(builder =>
          {
             builder
-               .AddFilter("EBNF", LogLevel.Trace)
+               .AddFilter("PARSER", LogLevel.Information)
+               .AddFilter("CSGEN", LogLevel.Trace)
                .AddDebug();
          });
-         var logger = loggerFactory.CreateLogger("EBNF");
+         var logger = loggerFactory.CreateLogger("PARSER");
          var tracer = new DebugTracer(logger);
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase4));
+         stream.Write(encoding.GetBytes(TestCase1D));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
                                          new ProdInfoFactory(tracer), new Stack<IAstNode>(), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
-         parser.ParseGoal();
+         var (tokenDefs, productions) = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         traverser.PreProcess += (node) => { tracer.TraceLine($"Push({node.AstNodeType})"); };
-         traverser.PostProcess += () => { tracer.TraceLine($"Pop()"); };
+         var fc = new IcSharpGenerator(traverser, loggerFactory.CreateLogger("CSGEN"));
+         fc.Calculate(productions.First());
 
          foreach (var prod in astBuilder.Productions)
          {
-            tracer.TraceLine($"\nAST for <{prod.Name}>");
-            traverser.Traverse(prod.RightHandSide);
-            
-            // tracer.TraceLine(new string('-', 40));
-            // tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
+            fc.Calculate(prod);
+
+
+            //    tracer.TraceLine($"\nAST for <{prod.Name}>");
+            //    traverser.Traverse(prod.RightHandSide);
+            //    
+            //    // tracer.TraceLine(new string('-', 40));
+            //    // tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
          }
       }
    }
