@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using EbnfCompiler.AST;
+using EbnfCompiler.AST.Impl;
 using Microsoft.Extensions.Logging;
 
 namespace EbnfCompiler.CodeGenerator
 {
    public interface ICSharpGenerator
    {
-      void Calculate(IProductionInfo productionInfo);
+      void Run();
    }
 
-   internal class Context
+   internal class ContextBase
    {
-      public Context(AstNodeType nodeType)
+      public ContextBase(AstNodeType nodeType)
       {
          NodeType = nodeType;
       }
@@ -23,96 +24,256 @@ namespace EbnfCompiler.CodeGenerator
       {
          return NodeType.ToString();
       }
+
+      public bool GenerateSwitch { get; set; }
    }
+
+   // internal class ExpressionContext : ContextBase
+   // {
+   //    public ExpressionContext(bool generateSwitch)
+   //       : base(AstNodeType.Expression)
+   //    {
+   //       GenerateSwitch = generateSwitch;
+   //    }
+   //
+   //    public bool GenerateSwitch { get; }
+   // }
 
    public class IcSharpGenerator : ICSharpGenerator
    {
+      private readonly IReadOnlyCollection<IProductionInfo> _productions;
+      private readonly IReadOnlyCollection<ITokenDefinition> _tokens;
       private readonly IAstTraverser _traverser;
       private readonly ILogger _log;
-      private readonly Stack<Context> _stack;
+      private readonly Stack<ContextBase> _stack;
       private int _indentLevel;
       public string Output { get; private set; }
 
-      public IcSharpGenerator(IAstTraverser traverser, ILogger log)
+      public IcSharpGenerator(IReadOnlyCollection<IProductionInfo> productions, IReadOnlyCollection<ITokenDefinition> tokens,
+                              IAstTraverser traverser, ILogger log)
       {
+         _productions = productions;
+         _tokens = tokens;
          _traverser = traverser;
          _log = log;
-         _stack = new Stack<Context>();
+         _stack = new Stack<ContextBase>();
       }
 
-      public void Calculate(IProductionInfo productionInfo)
+      public void Run()
       {
-         _traverser.PreProcess += node =>
+         _traverser.PreProcess += PreProcess;
+         _traverser.PostProcess += PostProcess;
+
+         PrintUsings();
+         PrintNamespaceHeader();
+         PrintMatchMethod();
+
+         foreach (var prod in _productions)
          {
-            _stack.Push(new Context(node.AstNodeType));
+            PrintMethodHeader(prod.Name);
 
-            switch (node.AstNodeType)
-            {
-               case AstNodeType.Expression:
-                  break;
+            _traverser.Traverse(prod.RightHandSide);
 
-               case AstNodeType.Term:
-                  break;
+            PrintMethodFooter();
+         }
 
-               case AstNodeType.Factor:
-                  break;
+         PrintNamespaceFooter();
+      }
 
-               case AstNodeType.ProdRef:
-                  AppendLine($"Parse{((IProdRefNode) node).ProdName}();");
-                  break;
-
-               case AstNodeType.Terminal:
-                  AppendLine($"Match(\"{((ITerminalNode) node).TermName}\");");
-                  break;
-
-               case AstNodeType.Action:
-                  AppendLine($"semantics.{((IActionNode) node).ActionName}();");
-                  break;
-
-               case AstNodeType.Paren:
-                  break;
-
-               case AstNodeType.Option:
-                  AppendLine($"if (node.FirstSet.Includes(\"\"))");
-                  AppendLine("{");
-                  Indent();
-                  break;
-
-               case AstNodeType.KleeneStar:
-                  AppendLine($"while (node.FirstSet.Includes(\"\"))");
-                  AppendLine("{");
-                  break;
-            }
-         };
-
-         _traverser.PostProcess += () =>
+      private void PreProcess(IAstNode node)
+      {
+         
+         switch (node.AstNodeType)
          {
-            var context = _stack.Pop();
-            if (context.NodeType == AstNodeType.Option || context.NodeType == AstNodeType.KleeneStar)
-            {
-               Outdent();
-               AppendLine("}");
-            }
-         };
+            case AstNodeType.Expression:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               _stack.Peek().GenerateSwitch = node.AsExpression().TermCount > 1;
 
-         Indent();
-         AppendLine($"void Parse{productionInfo.Name}()");
-         AppendLine("{");
+               if (node.AsExpression().TermCount > 1)
+                  PrintTermSwitch();
+               break;
 
-         _traverser.Traverse(productionInfo.RightHandSide);
+            case AstNodeType.Term:
+               var context = new ContextBase(node.AstNodeType);
+               context.GenerateSwitch = _stack.Peek().GenerateSwitch;
+               _stack.Push(context);
 
-         AppendLine("}");
+               if (context.GenerateSwitch)
+                  PrintTermCase();
+               break;
+
+            case AstNodeType.Factor:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               break;
+
+            case AstNodeType.ProdRef:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               PrintProdRef(node.AsProdRef().ProdName);
+               break;
+
+            case AstNodeType.Terminal:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               PrintMatchTerminal(node.AsTerminal().TermName);
+               break;
+
+            case AstNodeType.Action:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               PrintActionNode(node.AsActionNode().ActionName);
+               break;
+
+            case AstNodeType.Paren:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               break;
+
+            case AstNodeType.Option:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               PrintOption(node.FirstSet);
+               break;
+
+            case AstNodeType.KleeneStar:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               PrintKleene(node.FirstSet);
+               break;
+         }
+      }
+
+      private void PostProcess()
+      {
+         var context = _stack.Pop();
+         if (context.NodeType != AstNodeType.Option && context.NodeType != AstNodeType.KleeneStar)
+            return;
+
          Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintUsings()
+      {
+         PrintLine("using System.Collections.Generic;");
+         PrintLine("using System.Linq;");
+         PrintLine("using EbnfCompiler.AST;");
+         PrintLine("using EbnfCompiler.Compiler;");
+         PrintLine("using EbnfCompiler.Scanner;");
+         PrintLine();
+      }
+
+      private void PrintNamespaceHeader()
+      {
+         PrintLine("namespace EbnfCompiler.Parser");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintNamespaceFooter()
+      {
+         Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintMatchMethod()
+      {
+         PrintLine("private void Match(TokenKind tokenKind)");
+         PrintLine("{");
+         Indent();
+         PrintLine("if (_scanner.CurrentToken.TokenKind != tokenKind)");
+         Indent();
+         PrintLine("throw new SyntaxErrorException(\"Expecting: {tokenKind}\", _scanner.CurrentToken);");
+         Outdent();
+         Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintMethodHeader(string name)
+      {
+         PrintLine();
+         PrintLine($"void Parse{name}()");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintMethodFooter()
+      {
+         Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintProdRef(string name)
+      {
+         PrintLine($"Parse{name}();");
+      }
+
+      private void PrintMatchTerminal(string name)
+      {
+         var tokenDef = _tokens.FirstOrDefault(p => p.Image.Equals(name))?.Definition;
+         if (tokenDef == null)
+            throw new SemanticErrorException($"Token definition for \"{name}\" not found.");
+
+         PrintLine($"Match({tokenDef});");
+      }
+
+      private void PrintActionNode(string name)
+      {
+         PrintLine($"semantics.{name}();");
+      }
+
+      private void PrintOption(ITerminalSet firstSet)
+      {
+         PrintFirstSet(firstSet);
+
+         PrintLine($"if (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintKleene(ITerminalSet firstSet)
+      {
+         PrintFirstSet(firstSet);
+
+         PrintLine("while (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintFirstSet(ITerminalSet firstSet)
+      {
+         var tokens = new List<string>();
+         foreach (var token in firstSet.AsEnumerable())
+         {
+            var tokenDef = _tokens.FirstOrDefault(p => p.Image.Equals(token))?.Definition;
+            if (tokenDef == null)
+               throw new SemanticErrorException($"Token definition for \"{token}\" not found.");
+
+            tokens.Add(tokenDef);
+         }
+
+         PrintLine("var startTokens = new[]");
+         PrintLine("{");
+         Indent();
+         PrintLine(string.Join(", ", tokens));
+         Outdent();
+         PrintLine("};");
+      }
+
+      private void PrintTermSwitch()
+      {
+         PrintLine("switch (_scanner.CurrentToken.TokenKind)");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintTermCase()
+      {
+         PrintLine("case ???:");
       }
 
       private void Indent()
       {
-         _indentLevel++;
+         _indentLevel += 3;
       }
 
       private void Outdent()
       {
-         _indentLevel--;
+         _indentLevel -= 3;
       }
 
       private void Append(string s)
@@ -120,13 +281,16 @@ namespace EbnfCompiler.CodeGenerator
          Output += s;
       }
 
-      private void AppendLine(string s = "")
+      private void PrintLine(string s = "")
       {
          var indent = new string(' ', _indentLevel);
          Append($"{indent}{s}");
 
+         if (Output.Equals(string.Empty))
+            Output = " ";
+
          _log.LogDebug(Output);
-         Output = String.Empty;
+         Output = string.Empty;
       }
    }
 }

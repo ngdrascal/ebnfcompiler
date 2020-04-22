@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using EbnfCompiler.Compiler;
 
@@ -10,6 +9,7 @@ namespace EbnfCompiler.AST.Impl
       private readonly IAstNodeFactory _astNodeFactory;
       private readonly IProdInfoFactory _prodInfoFactory;
       private readonly IDebugTracer _tracer;
+      private readonly List<ITokenDefinition> _tokenDefinitions;
       private readonly Stack<IAstNode> _stack;
       private TokenDefinition _lastTokenInfo;
 
@@ -22,13 +22,13 @@ namespace EbnfCompiler.AST.Impl
          _prodInfoFactory = prodInfoFactory;
          _tracer = tracer;
 
+         _tokenDefinitions = new List<ITokenDefinition>();
          _stack = stack;
 
-         TokenDefinitions = new Collection<ITokenDefinition>();
-         //Productions = new Dictionary<string, IProductionInfo>();
+         _tokenDefinitions = new List<ITokenDefinition>();
       }
 
-      public ICollection<ITokenDefinition> TokenDefinitions { get; }
+      public IReadOnlyCollection<ITokenDefinition> TokenDefinitions => _tokenDefinitions.AsReadOnly();
       public IReadOnlyCollection<IProductionInfo> Productions => _prodInfoFactory.AllProductions;
 
       public void AddTokenName(IToken token)
@@ -36,7 +36,7 @@ namespace EbnfCompiler.AST.Impl
          if (TokenDefinitions.Count(p => p.Image == token.Image) == 0)
          {
             _lastTokenInfo = new TokenDefinition { Image = token.Image };
-            TokenDefinitions.Add(_lastTokenInfo);
+            _tokenDefinitions.Add(_lastTokenInfo);
          }
          else
             Error("Token already defined: " + token.Image, token);

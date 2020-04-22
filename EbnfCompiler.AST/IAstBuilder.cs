@@ -5,8 +5,7 @@ namespace EbnfCompiler.AST
 {
    public interface IAstBuilder
    {
-      ICollection<ITokenDefinition> TokenDefinitions { get; }
-      //IDictionary<string, IProductionInfo> Productions { get; }
+      IReadOnlyCollection<ITokenDefinition> TokenDefinitions { get; }
       IReadOnlyCollection<IProductionInfo> Productions { get; }
 
       void AddTokenName(IToken token);

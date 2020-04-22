@@ -65,6 +65,7 @@ namespace EbnfCompiler.AST.Impl
 
    public class ExpressionNode : AstNode, IExpressionNode
    {
+      private int _termCount;
       public ExpressionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Expression, token, tracer)
       {
@@ -83,7 +84,11 @@ namespace EbnfCompiler.AST.Impl
                t = t.NextTerm;
             t.NextTerm = newTerm;
          }
+
+         _termCount++;
       }
+
+      public int TermCount => _termCount;
 
       public override string ToString()
       {

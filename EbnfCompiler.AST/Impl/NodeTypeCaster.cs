@@ -93,6 +93,14 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
+      public static IActionNode AsActionNode(this IAstNode astNode)
+      {
+         if (!(astNode is IActionNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IActionNode)));
+
+         return result;
+      }
+
       private static string ErrorMessage(AstNodeType fromType, Type toType)
       {
          if (toType == null) 

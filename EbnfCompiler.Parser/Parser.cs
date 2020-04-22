@@ -23,7 +23,7 @@ namespace EbnfCompiler.Parser
             throw new SyntaxErrorException($"Expecting: {tokenKind}", _scanner.CurrentToken);
       }
 
-      public (ICollection<ITokenDefinition> TokenDefinitions,
+      public (IReadOnlyCollection<ITokenDefinition> TokenDefinitions,
               IReadOnlyCollection<IProductionInfo> Productions) ParseGoal()
       {
          _scanner.Advance();

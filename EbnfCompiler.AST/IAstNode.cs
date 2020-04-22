@@ -32,6 +32,8 @@ namespace EbnfCompiler.AST
       ITermNode FirstTerm { get; }
 
       void AppendTerm(ITermNode newTerm);
+
+      int TermCount { get; }
    }
 
    public interface ITermNode : IAstNode

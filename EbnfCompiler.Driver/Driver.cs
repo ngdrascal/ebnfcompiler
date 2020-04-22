@@ -57,8 +57,10 @@ namespace EbnfCompiler.Driver
       private const string TestCase1D = @"
          %TOKENS%" + @"
             ""a"" = ""tkA""
+            ""b"" = ""tkB""
          %EBNF%
-            <S> ::= [ ""a"" ].
+            <S> ::= [ ""a"" ] <T> .
+            <T> ::= ""b"" .
       ";
 
       private const string TestCase1E = @"
@@ -66,6 +68,24 @@ namespace EbnfCompiler.Driver
             ""a"" = ""tkA""
          %EBNF%
             <S> ::= { ""a"" }.
+      ";
+
+      private const string TestCase1F = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+            ""b"" = ""tkB""
+         %EBNF%
+            <S> ::= <T> <U>.
+            <T> ::= ""a"" .
+            <U> ::= ""b"" .
+      ";
+
+      private const string TestCase1G = @"
+         %TOKENS%" + @"
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= { <T> }.
+            <T> ::= ""a"" .
       ";
 
       private const string TestCase1 = @"
@@ -76,7 +96,15 @@ namespace EbnfCompiler.Driver
             <T> ::= [ ""a"" ] ""b"" .
       ";
 
-      private const string TestCase2 = @"
+      private const string TestCase2A = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+            ""b"" = ""tkB""
+         %EBNF%
+            <S> ::= ""a"" | ""b"" .
+      ";
+
+      private const string TestCase2B = @"
          %TOKENS%
             ""a"" = ""tkA""
             ""b"" = ""tkB""
@@ -89,23 +117,38 @@ namespace EbnfCompiler.Driver
       private const string TestCase3 = @"
          %TOKENS%
             ""a"" = ""tkA""
+            ""b"" = ""tkB""
          %EBNF%
             <S>  ::= ""a"" ""b"" | ""c"" .
       ";
 
       private const string TestCase4 = @"
          %TOKENS%
-            ""a"" = ""tkA""
+            ""IDENTIFIER"" = ""tkIdent""
+            ""STRING""     = ""tkString""
+            ""ACTION""     = ""tkAction""
+            ""%TOKENS%""   = ""tkTokens""
+            ""%EBNF%""     = ""tkEbnf""
+            "".""          = ""tkPeriod""
+            ""|""          = ""tkOr""
+            ""(""          = ""tkLParen""
+            "")""          = ""tkRParen""
+            ""{""          = ""tkLBrace""
+            ""}""          = ""tkRBrace""
+            ""[""          = ""tkLBracket""
+            ""]""          = ""tkRBracket""
+            ""::=""        = ""tkAssign""
+            ""=""          = ""tkEqual""
          %EBNF%
             <Syntax>     ::= <Statement> { <Statement> } .
 
-            <Statement>  ::= ""PRODNAME"" ""::="" <Expression> ""."" .
+            <Statement>  ::= ""IDENTIFIER"" ""::="" <Expression> ""."" .
 
             <Expression> ::= <Term> { ""|"" <Term> } .
 
             <Term>       ::= <Factor> { <Factor> } .
 
-            <Factor>     ::= ""PRODNAME"" |
+            <Factor>     ::= ""IDENTIFIER"" |
                              ""STRING"" |
                              ""("" <Expression> "")"" |
                              ""["" <Expression> ""]"" |
@@ -127,24 +170,21 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase1D));
+         stream.Write(encoding.GetBytes(TestCase2A));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
                                          new ProdInfoFactory(tracer), new Stack<IAstNode>(), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
-         var (tokenDefs, productions) = parser.ParseGoal();
+         var (tokens, productions) = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var fc = new IcSharpGenerator(traverser, loggerFactory.CreateLogger("CSGEN"));
-         fc.Calculate(productions.First());
+         var fc = new IcSharpGenerator(productions, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
+         fc.Run();
 
          foreach (var prod in astBuilder.Productions)
          {
-            fc.Calculate(prod);
-
-
             //    tracer.TraceLine($"\nAST for <{prod.Name}>");
             //    traverser.Traverse(prod.RightHandSide);
             //    
