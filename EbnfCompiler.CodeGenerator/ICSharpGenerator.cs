@@ -6,11 +6,6 @@ using Microsoft.Extensions.Logging;
 
 namespace EbnfCompiler.CodeGenerator
 {
-   public interface ICSharpGenerator
-   {
-      void Run();
-   }
-
    internal class ContextBase
    {
       public ContextBase(AstNodeType nodeType)
@@ -39,7 +34,7 @@ namespace EbnfCompiler.CodeGenerator
    //    public bool GenerateSwitch { get; }
    // }
 
-   public class IcSharpGenerator : ICSharpGenerator
+   public class IcSharpGenerator : ICodeGenerator
    {
       private readonly IReadOnlyCollection<IProductionInfo> _productions;
       private readonly IReadOnlyCollection<ITokenDefinition> _tokens;
@@ -61,8 +56,8 @@ namespace EbnfCompiler.CodeGenerator
 
       public void Run()
       {
-         _traverser.PreProcess += PreProcess;
-         _traverser.PostProcess += PostProcess;
+         _traverser.ProcessNode += ProcessNode;
+         _traverser.PostProcessNode += PostProcessNode;
 
          PrintUsings();
          PrintNamespaceHeader();
@@ -80,9 +75,8 @@ namespace EbnfCompiler.CodeGenerator
          PrintNamespaceFooter();
       }
 
-      private void PreProcess(IAstNode node)
+      private void ProcessNode(IAstNode node)
       {
-         
          switch (node.AstNodeType)
          {
             case AstNodeType.Expression:
@@ -99,7 +93,10 @@ namespace EbnfCompiler.CodeGenerator
                _stack.Push(context);
 
                if (context.GenerateSwitch)
-                  PrintTermCase();
+               {
+                  PrintTermCase(node.FirstSet);
+                  Indent();
+               }
                break;
 
             case AstNodeType.Factor:
@@ -137,14 +134,49 @@ namespace EbnfCompiler.CodeGenerator
          }
       }
 
-      private void PostProcess()
+      private void PostProcessNode()
       {
          var context = _stack.Pop();
-         if (context.NodeType != AstNodeType.Option && context.NodeType != AstNodeType.KleeneStar)
-            return;
 
-         Outdent();
-         PrintLine("}");
+         switch (context.NodeType)
+         {
+            case AstNodeType.Expression:
+               break;
+
+            case AstNodeType.Term:
+               if (context.GenerateSwitch)
+               {
+                  PrintLine("break;");
+                  Outdent();
+                  PrintLine("}");
+               }
+               break;
+
+            case AstNodeType.Factor:
+               break;
+
+            case AstNodeType.ProdRef:
+               break;
+
+            case AstNodeType.Terminal:
+               break;
+
+            case AstNodeType.Action:
+               break;
+
+            case AstNodeType.Paren:
+               break;
+
+            case AstNodeType.Option:
+               Outdent();
+               PrintLine("}");
+               break;
+
+            case AstNodeType.KleeneStar:
+               Outdent();
+               PrintLine("}");
+               break;
+         }
       }
 
       private void PrintUsings()
@@ -208,7 +240,8 @@ namespace EbnfCompiler.CodeGenerator
          if (tokenDef == null)
             throw new SemanticErrorException($"Token definition for \"{name}\" not found.");
 
-         PrintLine($"Match({tokenDef});");
+         PrintLine($"Match(TokenKind.{tokenDef});");
+         PrintLine("_scanner.Advance()");
       }
 
       private void PrintActionNode(string name)
@@ -227,14 +260,34 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintKleene(ITerminalSet firstSet)
       {
-         PrintFirstSet(firstSet);
+         if (firstSet.AsEnumerable().Count() > 1)
+         {
+            PrintFirstSet(firstSet);
+            PrintLine("while (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+         }
+         else
+         {
+            var defs = SetAsTokenDefinitions(firstSet);
+            PrintLine($"while (_scanner.CurrentToken.TokenKind == TokenKind.{defs.First()})");
+         }
 
-         PrintLine("while (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
          PrintLine("{");
          Indent();
       }
 
       private void PrintFirstSet(ITerminalSet firstSet)
+      {
+         var tokens = SetAsTokenDefinitions(firstSet);
+
+         PrintLine("var startTokens = new[]");
+         PrintLine("{");
+         Indent();
+         PrintLine(string.Join(", ", tokens.Select(s => "TokenKind." + s)));
+         Outdent();
+         PrintLine("};");
+      }
+
+      private List<string> SetAsTokenDefinitions(ITerminalSet firstSet)
       {
          var tokens = new List<string>();
          foreach (var token in firstSet.AsEnumerable())
@@ -246,12 +299,7 @@ namespace EbnfCompiler.CodeGenerator
             tokens.Add(tokenDef);
          }
 
-         PrintLine("var startTokens = new[]");
-         PrintLine("{");
-         Indent();
-         PrintLine(string.Join(", ", tokens));
-         Outdent();
-         PrintLine("};");
+         return tokens;
       }
 
       private void PrintTermSwitch()
@@ -261,9 +309,13 @@ namespace EbnfCompiler.CodeGenerator
          Indent();
       }
 
-      private void PrintTermCase()
+      private void PrintTermCase(ITerminalSet firstSet)
       {
-         PrintLine("case ???:");
+         var tokens = SetAsTokenDefinitions(firstSet);
+         foreach (var token in tokens)
+         {
+            PrintLine($"case TokenKind.{token}:");
+         }
       }
 
       private void Indent()

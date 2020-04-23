@@ -124,21 +124,21 @@ namespace EbnfCompiler.Driver
 
       private const string TestCase4 = @"
          %TOKENS%
-            ""IDENTIFIER"" = ""tkIdent""
-            ""STRING""     = ""tkString""
-            ""ACTION""     = ""tkAction""
-            ""%TOKENS%""   = ""tkTokens""
-            ""%EBNF%""     = ""tkEbnf""
-            "".""          = ""tkPeriod""
-            ""|""          = ""tkOr""
-            ""(""          = ""tkLParen""
-            "")""          = ""tkRParen""
-            ""{""          = ""tkLBrace""
-            ""}""          = ""tkRBrace""
-            ""[""          = ""tkLBracket""
-            ""]""          = ""tkRBracket""
-            ""::=""        = ""tkAssign""
-            ""=""          = ""tkEqual""
+            ""IDENTIFIER"" = ""Identifier""
+            ""STRING""     = ""String""
+            ""ACTION""     = ""Action""
+            ""%TOKENS%""   = ""TokenTag""
+            ""%EBNF%""     = ""EbnfTag""
+            "".""          = ""Period""
+            ""|""          = ""Or""
+            ""(""          = ""LeftParen""
+            "")""          = ""RightParen""
+            ""{""          = ""LeftBrace""
+            ""}""          = ""RightBrace""
+            ""[""          = ""LeftBracket""
+            ""]""          = ""RightBracket""
+            ""::=""        = ""Assign""
+            ""=""          = ""Equal""
          %EBNF%
             <Syntax>     ::= <Statement> { <Statement> } .
 
@@ -170,7 +170,7 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase2A));
+         stream.Write(encoding.GetBytes(TestCase4));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);

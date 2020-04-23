@@ -4,9 +4,9 @@ namespace EbnfCompiler.AST
 {
    public interface IAstTraverser
    {
-      event Action<IAstNode> PreProcess;
+      event Action<IAstNode> ProcessNode;
 
-      event Action PostProcess;
+      event Action PostProcessNode;
 
       void Traverse(IAstNode astNode);
    }

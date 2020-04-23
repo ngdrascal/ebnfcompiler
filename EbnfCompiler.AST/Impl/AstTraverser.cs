@@ -11,13 +11,13 @@ namespace EbnfCompiler.AST.Impl
          _tracer = tracer;
       }
 
-      public event Action<IAstNode> PreProcess;
+      public event Action<IAstNode> ProcessNode;
 
-      public event Action PostProcess;
+      public event Action PostProcessNode;
 
       public void Traverse(IAstNode astNode)
       {
-         PreProcess?.Invoke(astNode);
+         ProcessNode?.Invoke(astNode);
 
          switch (astNode.AstNodeType)
          {
@@ -102,7 +102,7 @@ namespace EbnfCompiler.AST.Impl
                break;
          }
 
-         PostProcess?.Invoke();
+         PostProcessNode?.Invoke();
       }
    }
 }
