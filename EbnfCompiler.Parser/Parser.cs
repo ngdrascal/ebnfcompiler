@@ -26,7 +26,6 @@ namespace EbnfCompiler.Parser
       public (IReadOnlyCollection<ITokenDefinition> TokenDefinitions,
               IReadOnlyCollection<IProductionInfo> Productions) ParseGoal()
       {
-         _scanner.Advance();
          ParseInput();
          Match(TokenKind.Eof);
          _scanner.Advance();

@@ -39,6 +39,8 @@ namespace EbnfCompiler.Scanner
          _currentCh = ' ';
          Line = 1;
          Column = 0;
+
+         Advance();
       }
 
       public IToken CurrentToken { get; private set; }

@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 using EbnfCompiler.AST;
+using EbnfCompiler.Compiler;
+using EbnfCompiler.Scanner;
 using Moq;
 using NUnit.Framework;
 
@@ -134,6 +136,50 @@ namespace EbnfCompiler.Parser.UnitTests
          // Assert:
          var ex = Assert.Throws<SyntaxErrorException>(ParseGoal);
          Assert.That(ex.Token.Image, Is.EqualTo(image));
+      }
+
+      private static readonly IToken[] TestData1 =
+      {
+         new Token() {TokenKind = TokenKind.TokensTag,  Image = "%TOKENS%"},
+         new Token() {TokenKind = TokenKind.String,     Image = "a"},
+         new Token() {TokenKind = TokenKind.Equal,      Image = "="},
+         new Token() {TokenKind = TokenKind.String,     Image = "tkA"},
+         new Token() {TokenKind = TokenKind.EbnfTag,    Image = "%EBNF%"},
+         new Token() {TokenKind = TokenKind.Identifier, Image = "S"},
+         new Token() {TokenKind = TokenKind.Assign,     Image = "::="},
+         new Token() {TokenKind = TokenKind.String,     Image = "a"},
+         new Token() {TokenKind = TokenKind.Period,     Image = "."},
+         new Token() {TokenKind = TokenKind.Eof,        Image = "<eof>"}
+      };
+
+      private static IToken[][] allTests = {TestData1};
+
+      [TestCaseSource(nameof(allTests))]
+      public void Parser_(IToken[] testData)
+      {
+         // Arrange:
+         var scanner = new Mock<IScanner>();
+         var currentIndex = 0;
+
+         scanner.Setup(s => s.Advance())
+            .Callback(() =>
+            {
+               if (testData[currentIndex].TokenKind == TokenKind.Eof)
+                  return;
+
+               currentIndex++;
+            });
+         scanner.Setup(s => s.CurrentToken).Returns(()=>
+            testData[currentIndex]
+            );
+
+         var parser = new Parser(scanner.Object, _astBuilderMock.Object);
+
+         // Act:
+         void ParseGoal() => parser.ParseGoal();
+
+         // Assert:
+         Assert.DoesNotThrow(ParseGoal);
       }
    }
 }
