@@ -104,24 +104,6 @@ namespace EbnfCompiler.Parser.UnitTests
          Assert.Throws<SyntaxErrorException>(ParseGoal);
       }
 
-      // [TestCase(BadTestCase1, ":")]
-      // [TestCase(BadTestCase2, "<eof>")]
-      // [TestCase(BadTestCase3, "}")]
-      // public void Parser_WhenInvalidInput_ThrowsException(string input, string image)
-      // {
-      //    // Arrange:
-      //    using var stream = PrepareStream(input);
-      //    var scanner = new Scanner.Scanner(stream);
-      //    var parser = new Parser(scanner, _astBuilderMock.Object);
-      //
-      //    // Act:
-      //    void ParseGoal() => parser.ParseGoal();
-      //
-      //    // Assert:
-      //    var ex = Assert.Throws<SyntaxErrorException>(ParseGoal);
-      //    Assert.That(ex.Token.Image, Is.EqualTo(image));
-      // }
-
       // %TOKENS%
       //    "a" = "tkA"
       // %EBNF%
@@ -239,12 +221,12 @@ namespace EbnfCompiler.Parser.UnitTests
       //                     "{" <Expression> "}" .
       private static readonly IToken[] PassingTest5 =
       {
-         new Token(TokenKind.TokensTag,   "%TOKENS%"),          // 0
+         new Token(TokenKind.TokensTag,   "%TOKENS%"),
          new Token(TokenKind.String,      "a"),
          new Token(TokenKind.Equal,       "="),
          new Token(TokenKind.String,      "tkA"),
          
-         new Token(TokenKind.EbnfTag,     "%EBNF%"),            // 4 
+         new Token(TokenKind.EbnfTag,     "%EBNF%"), 
          new Token(TokenKind.Identifier,  "<Syntax>"),
          new Token(TokenKind.Assign,      "::="),
          new Token(TokenKind.Identifier,  "<Statement>"),
@@ -253,7 +235,7 @@ namespace EbnfCompiler.Parser.UnitTests
          new Token(TokenKind.RightBrace,  "}"),
          new Token(TokenKind.Period,      "."),
 
-         new Token(TokenKind.Identifier,  "<Statement>"),       // 12
+         new Token(TokenKind.Identifier,  "<Statement>"),
          new Token(TokenKind.Assign,      "::="),
          new Token(TokenKind.String,      "PRODNAME"),          
          new Token(TokenKind.String,      "::="),
@@ -261,7 +243,7 @@ namespace EbnfCompiler.Parser.UnitTests
          new Token(TokenKind.String,      "."),
          new Token(TokenKind.Period,      "."),
 
-         new Token(TokenKind.Identifier,  "<Expression>"),      // 19
+         new Token(TokenKind.Identifier,  "<Expression>"),
          new Token(TokenKind.Assign,      "::="),
          new Token(TokenKind.Identifier,  "<Term>"),
          new Token(TokenKind.LeftBrace,   "{"),
