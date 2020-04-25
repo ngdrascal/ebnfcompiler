@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Text;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
@@ -170,7 +169,7 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase4));
+         stream.Write(encoding.GetBytes(TestCase1A));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);

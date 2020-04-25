@@ -40,7 +40,7 @@ namespace EbnfCompiler.Parser
          ParseGrammar();
       }
 
-      // <tokens> ::= "%TOKENS%" {<TokenDef>}
+      // <tokens> ::= "%TOKENS%" { <TokenDef> }
       private void ParseTokens()
       {
          Match(TokenKind.TokensTag);
@@ -100,7 +100,7 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndStatement();
       }
 
-      // <Expression> ::= <Term> {"|" <Term>}.
+      // <Expression> ::= <Term> { "|" <Term> }.
       private void ParseExpression()
       {
          _astBuilder.BeginExpression(_scanner.CurrentToken);
@@ -114,7 +114,7 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndExpression();
       }
 
-      // <Term> ::= <Action> <Factor> <Action> {<Factor> <Action>}
+      // <Term> ::= <Action> <Factor> <Action> { <Factor> <Action> }
       private void ParseTerm()
       {
          _astBuilder.BeginTerm(_scanner.CurrentToken);

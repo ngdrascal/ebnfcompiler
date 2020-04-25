@@ -36,7 +36,7 @@ namespace EbnfCompiler.Scanner.UnitTests
          var scanner = new Scanner(stream);
 
          // Act:
-         scanner.Advance();
+         // scanner.Advance();
 
          // Assert:
          Assert.AreEqual(expectedTokenImage, scanner.CurrentToken.Image);
@@ -68,7 +68,7 @@ namespace EbnfCompiler.Scanner.UnitTests
          var scanner = new Scanner(stream);
 
          // Act:
-         scanner.Advance();
+         // scanner.Advance();
 
          // Assert:
          Assert.That(scanner.CurrentToken.Image, Is.EqualTo(expectedTokenImage));
@@ -93,7 +93,7 @@ namespace EbnfCompiler.Scanner.UnitTests
          var scanner = new Scanner(stream);
 
          // Act:
-         scanner.Advance();
+         // scanner.Advance();
 
          // Assert:
          Assert.That(scanner.CurrentToken.TokenKind, Is.EqualTo(TokenKind.Identifier));
@@ -113,7 +113,7 @@ namespace EbnfCompiler.Scanner.UnitTests
          var scanner = new Scanner(stream);
 
          // Act:
-         scanner.Advance();
+         // scanner.Advance();
 
          // Assert:
          Assert.That(scanner.CurrentToken.Image, Is.EqualTo("<eof>"));

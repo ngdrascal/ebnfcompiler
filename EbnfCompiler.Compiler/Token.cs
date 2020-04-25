@@ -12,5 +12,11 @@
          Image = string.Empty;
          TokenKind = TokenKind.Error;
       }
+
+      public Token(TokenKind tokenKind, string image) : this()
+      {
+         TokenKind = tokenKind;
+         Image = image;
+      }
    }
 }
