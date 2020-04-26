@@ -11,7 +11,7 @@ namespace EbnfCompiler.AST
       void AddTokenName(IToken token);
       void SetTokenDef(IToken token);
 
-      void BeginSyntax();
+      void BeginSyntax(IToken token);
       void EndSyntax();
 
       void BeginStatement(IToken token);

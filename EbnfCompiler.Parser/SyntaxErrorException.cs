@@ -7,8 +7,8 @@ namespace EbnfCompiler.Parser
    {
       private readonly IToken _token;
 
-      public SyntaxErrorException(string message, IToken token)
-         : base(message)
+      public SyntaxErrorException(TokenKind expecting, IToken token)
+         : base($"Expecting: {expecting}. Found: {token.TokenKind} At: {token.Location.StartLine} {token.Location.StartColumn}")
       {
          _token = token;
       }

@@ -1,45 +1,41 @@
 %TOKENS%
-
-"IDENTIFIER" = "tkIdent"
-"STRING"     = "tkString"
-"ACTION"     = "tkAction"
-"%TOKENS%"   = "tkTokens"
-"%EBNF%"     = "tkEbnf"
-"."          = "tkPeriod"
-"|"          = "tkOr"
-"("          = "tkLParen"
-")"          = "tkRParen"
-"{"          = "tkLBrace"
-"}"          = "tkRBrace"
-"["          = "tkLBracket"
-"]"          = "tkRBracket"
-"::="        = "tkAssign"
-"="          = "tkEqual"
-
+	"IDENTIFIER" = "Identifier"
+	"STRING"     = "String"
+	"ACTION"     = "Action"
+	"%TOKENS%"   = "Tokens"
+	"%EBNF%"     = "Ebnf"
+	"."          = "Period"
+	"|"          = "Or"
+	"("          = "LeftParen"
+	")"          = "RightParen"
+	"{"          = "LeftBrace"
+	"}"          = "RightBrace"
+	"["          = "LeftBracket"
+	"]"          = "RightBracket"
+	"::="        = "Assign"
+	"="          = "Equal"
 
 %EBNF%
+	<Input>      ::= <Tokens> <Grammar> .
 
-<Input>      ::= <Tokens> <Grammar> .
+	<Tokens>     ::= "%TOKENS%" { <TokenDef> } .
 
-<Tokens>     ::= "%TOKENS%" {<TokenDef>} .
+	<TokenDef>   ::= #AddTokenName# "STRING" "=" #SetTokenDef# "STRING" .
 
-<TokenDef>   ::= #AddTokenName(token)# "STRING" "=" #SetTokenDef(token)# "STRING" .
+	<Grammar>    ::= "%EBNF%" <Syntax> .
 
-<Grammar>    ::= "%EBNF%" <Syntax> .
+	<Syntax>     ::= #BeginSyntax# <Statement> { <Statement> } #EndSyntax# .
 
-<Syntax>     ::= #BeginSyntax# {<Statement>} "." #EndSyntax# .
+	<Statement>  ::= #BeginStatement# "IDENTIFIER" "::=" <Expression> "." #EndStatement# .
 
-<Statement>  ::= "IDENTIFIER" #BeginStatement#  "::=" <Expression> "." #EndStatement# .
+	<Expression> ::= #BeginExpression# <Term> { "|" <Term> } #EndExpression# .
 
-<Expression> ::= #BeginExpression# <Term> {"|" <Term>} #EndExpression# .
+	<Term>       ::= #BeginTerm# <Factor> { <Factor> #EndTerm# .
 
-<Term>       ::= #BeginTerm# <Actions> <Factor> <Actions> {<Factor> <Actions>} #EndTerm# .
+	<Factor>     ::= #FoundProduction(token)# "IDENTIFIER" |
+					 #FoundTerminal(token)# "STRING" |
+					 #BeginParens# "(" <Expression> ")" #EndParens# |
+					 #BeginOption# "[" <Expression> "]" #EndOption# |
+					 #BeginKleene# "{" <Expression> "}" #EndKleene# .
 
-<Factor>     ::= #FoundProduction(token)# "IDENTIFIER" |
-                 #FoundTerminal(token)# "STRING" |
-                 "(" <Expression> ")" |
-                 "[" <Expression> "]" |
-                 "{" <Expression> "}" .
-
-<Actions>    ::= {#FoundAction(token)# "ACTION"} .
-
+	<Actions>    ::= [ #FoundAction# "ACTION" ] .

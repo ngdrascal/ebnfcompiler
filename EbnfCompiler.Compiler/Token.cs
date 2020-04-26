@@ -18,5 +18,10 @@
          TokenKind = tokenKind;
          Image = image;
       }
+
+      public override string ToString()
+      {
+         return $"Image: {Image}, TokenKind: {TokenKind}, Locations: {Location.StartLine}, {Location.StartColumn}";
+      }
    }
 }

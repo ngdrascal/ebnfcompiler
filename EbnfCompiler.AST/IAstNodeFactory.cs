@@ -24,43 +24,21 @@ namespace EbnfCompiler.AST
 
       public IAstNode Create(AstNodeType astNodeType, IToken token)
       {
-         IAstNode newAstNode;
-
-         switch (astNodeType)
+         IAstNode newAstNode = astNodeType switch
          {
-            case AstNodeType.Statement:
-               newAstNode = new StatementNode(token, _tracer);
-               break;
-            case AstNodeType.Expression:
-               newAstNode = new ExpressionNode(token, _tracer);
-               break;
-            case AstNodeType.Term:
-               newAstNode = new TermNode(token, _tracer);
-               break;
-            case AstNodeType.Factor:
-               newAstNode = new FactorNode(token, _tracer);
-               break;
-            case AstNodeType.ProdRef:
-               newAstNode = new ProdRefNode(token, _tracer);
-               break;
-            case AstNodeType.Terminal:
-               newAstNode = new TerminalNode(token, _tracer);
-               break;
-            case AstNodeType.Paren:
-               newAstNode = new ParenNode(token, _tracer);
-               break;
-            case AstNodeType.Option:
-               newAstNode = new Impl.OptionNode(token, _tracer);
-               break;
-            case AstNodeType.KleeneStar:
-               newAstNode = new KleeneNode(token, _tracer);
-               break;
-            case AstNodeType.Action:
-               newAstNode = new ActionNode(token, _tracer);
-               break;
-            default:
-               throw new InvalidOperationException($"Type matching {astNodeType} not found.");
-         }
+            AstNodeType.Syntax => new SyntaxNode(token, _tracer),
+            AstNodeType.Statement => new StatementNode(token, _tracer),
+            AstNodeType.Expression => new ExpressionNode(token, _tracer),
+            AstNodeType.Term => new TermNode(token, _tracer),
+            AstNodeType.Factor => new FactorNode(token, _tracer),
+            AstNodeType.ProdRef => new ProdRefNode(token, _tracer),
+            AstNodeType.Terminal => new TerminalNode(token, _tracer),
+            AstNodeType.Paren => new ParenNode(token, _tracer),
+            AstNodeType.Option => new OptionNode(token, _tracer),
+            AstNodeType.KleeneStar => new KleeneNode(token, _tracer),
+            AstNodeType.Action => new ActionNode(token, _tracer),
+            _ => throw new InvalidOperationException($"Type matching {astNodeType} not found.")
+         };
 
          _allNodes.Add(newAstNode);
          return newAstNode;

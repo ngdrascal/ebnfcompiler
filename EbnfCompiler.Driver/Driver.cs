@@ -123,35 +123,61 @@ namespace EbnfCompiler.Driver
 
       private const string TestCase4 = @"
          %TOKENS%
-            ""IDENTIFIER"" = ""Identifier""
-            ""STRING""     = ""String""
-            ""ACTION""     = ""Action""
-            ""%TOKENS%""   = ""TokenTag""
-            ""%EBNF%""     = ""EbnfTag""
-            "".""          = ""Period""
-            ""|""          = ""Or""
-            ""(""          = ""LeftParen""
-            "")""          = ""RightParen""
-            ""{""          = ""LeftBrace""
-            ""}""          = ""RightBrace""
-            ""[""          = ""LeftBracket""
-            ""]""          = ""RightBracket""
-            ""::=""        = ""Assign""
-            ""=""          = ""Equal""
+	         ""IDENTIFIER"" = ""Identifier""
+	         ""STRING""     = ""String""
+	         ""ACTION""     = ""Action""
+	         ""%TOKENS%""   = ""Tokens""
+	         ""%EBNF%""     = ""Ebnf""
+	         "".""          = ""Period""
+	         ""|""          = ""Or""
+	         ""(""          = ""LeftParen""
+	         "")""          = ""RightParen""
+	         ""{""          = ""LeftBrace""
+	         ""}""          = ""RightBrace""
+	         ""[""          = ""LeftBracket""
+	         ""]""          = ""RightBracket""
+	         ""::=""        = ""Assign""
+	         ""=""          = ""Equal""
+
          %EBNF%
-            <Syntax>     ::= <Statement> { <Statement> } .
+	         <Input>      ::= <Tokens> <Grammar> .
 
-            <Statement>  ::= ""IDENTIFIER"" ""::="" <Expression> ""."" .
+	         <Tokens>     ::= ""%TOKENS%"" { <TokenDef> } .
 
-            <Expression> ::= <Term> { ""|"" <Term> } .
+	         <TokenDef>   ::= #AddTokenName# ""STRING"" ""="" #SetTokenDef# ""STRING"" .
 
-            <Term>       ::= <Factor> { <Factor> } .
+	         <Grammar>    ::= ""%EBNF%"" <Syntax> .
 
-            <Factor>     ::= ""IDENTIFIER"" |
-                             ""STRING"" |
-                             ""("" <Expression> "")"" |
-                             ""["" <Expression> ""]"" |
-                             ""{"" <Expression> ""}"" .
+	         <Syntax>     ::= #BeginSyntax# <Statement> { <Statement> } #EndSyntax# .
+
+	         <Statement>  ::= #BeginStatement# ""IDENTIFIER"" ""::="" <Expression> ""."" #EndStatement# .
+
+	         <Expression> ::= #BeginExpression# <Term> { ""|"" <Term> } #EndExpression# .
+
+	         <Term>       ::= #BeginTerm# <Factor> { <Factor> #EndTerm# } .
+
+	         <Factor>     ::= #FoundProduction(token)# ""IDENTIFIER"" |
+					          #FoundTerminal(token)# ""STRING"" |
+					          #BeginParens# ""("" <Expression> "")"" #EndParens# |
+					          #BeginOption# ""["" <Expression> ""]"" #EndOption# |
+					          #BeginKleene# ""{"" <Expression> ""}"" #EndKleene# .
+
+	         <Action>     ::= [ #FoundAction# ""ACTION"" ] .
+
+      ";
+
+      private const string TestCase4A = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= #BeginStatement# ""a"" #EndStatement#.
+      ";
+
+      private const string TestCase5 = @"
+         %TOKENS%
+            ""a"" = ""tkA""
+         %EBNF%
+            <S> ::= #action# ""a"" .
       ";
 
       [Test/*, Ignore("Just for experimenting")*/]
@@ -169,7 +195,7 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase1A));
+         stream.Write(encoding.GetBytes(TestCase4A));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
@@ -179,8 +205,8 @@ namespace EbnfCompiler.Driver
          var (tokens, productions) = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var fc = new IcSharpGenerator(productions, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
-         fc.Run();
+         var gen = new CSharpGenerator(productions, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
+         gen.Run();
 
          foreach (var prod in astBuilder.Productions)
          {

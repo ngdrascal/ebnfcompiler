@@ -24,7 +24,13 @@ namespace EbnfCompiler.AST.Impl
             case AstNodeType.Statement:
                _tracer.BeginTrace("Statement");
 
+               if (astNode.AsStatement().PreActionNode != null)
+                  Traverse(astNode.AsStatement().PreActionNode);
+
                Traverse(astNode.AsStatement().Expression);
+
+               if (astNode.AsStatement().PostActionNode != null)
+                  Traverse(astNode.AsStatement().PostActionNode);
 
                _tracer.EndTrace("Statement");
                break;
@@ -73,7 +79,7 @@ namespace EbnfCompiler.AST.Impl
                break;
 
             case AstNodeType.Action:
-               _tracer.TraceLine("Action - {}");
+               _tracer.TraceLine($"Action - {astNode.AsActionNode().ActionName}");
 
                break;
 

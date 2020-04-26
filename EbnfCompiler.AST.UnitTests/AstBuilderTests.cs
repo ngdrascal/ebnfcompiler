@@ -46,6 +46,17 @@ namespace EbnfCompiler.AST.UnitTests
       {
          var mock = new Mock<IAstNodeFactory>();
 
+         // Syntax
+         mock.Setup(factory =>
+               factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Syntax),
+                  It.IsAny<IToken>()))
+            .Returns((AstNodeType nodeType, IToken token) =>
+            {
+               var node = new SyntaxNode(token, _tracerMock.Object);
+               _allNodes.Add(node);
+               return node;
+            });
+
          // Statement
          mock.Setup(factory =>
                factory.Create(It.Is<AstNodeType>(nodeType => nodeType == AstNodeType.Statement),
@@ -218,18 +229,19 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       [Test]
-      public void BeginSyntax_WhenGivenAToken_DoesNotPush()
+      public void BeginSyntax_WhenGivenAToken_PushesSyntaxNode()
       {
          // Arrange:
+         var token = new Token() { TokenKind = TokenKind.String, Image = "a" };
          var stack = new Stack<IAstNode>();
-
-         var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
+         var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
-         builder.BeginSyntax();
+         builder.BeginSyntax(token);
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(0));
+         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Peek(), Is.InstanceOf<ISyntaxNode>());
       }
 
       [Test]
@@ -237,14 +249,15 @@ namespace EbnfCompiler.AST.UnitTests
       {
          var prodInfo = _prodInfoFactoryMock.Object.Create("<S>");
 
-         var exprToken = new Token() { TokenKind = TokenKind.String, Image = "a" };
-         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
+         var token = new Token() { TokenKind = TokenKind.String, Image = "a" };
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, token);
          prodInfo.RightHandSide = (IExpressionNode)expr;
 
          var prodRefToken = new Token() { TokenKind = TokenKind.String, Image = "<S>" };
          _nodeFactoryMock.Object.Create(AstNodeType.ProdRef, prodRefToken);
 
          var stack = new Stack<IAstNode>();
+         stack.Push(_nodeFactoryMock.Object.Create(AstNodeType.Syntax, token));
 
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object,
                                       stack, _tracerMock.Object);
@@ -267,13 +280,14 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<S>" };
          var stack = new Stack<IAstNode>();
+         stack.Push(_nodeFactoryMock.Object.Create(AstNodeType.Syntax, token));
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
          // Act:
          builder.BeginStatement(token);
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IStatementNode)));
          Assert.That((stack.Peek() as IStatementNode)?.ProdName, Is.EqualTo(token.Image));
       }
@@ -307,13 +321,14 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
          var stack = new Stack<IAstNode>();
+         stack.Push(_nodeFactoryMock.Object.Create(AstNodeType.Syntax, token));
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
          // Act:
          builder.BeginExpression(token);
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
          Assert.That((stack.Peek() as IExpressionNode)?.Image, Is.EqualTo(token.Image));
          Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Null);
@@ -426,13 +441,14 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<T>" };
          var stack = new Stack<IAstNode>();
+         stack.Push(_nodeFactoryMock.Object.Create(AstNodeType.Expression, token));
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
          builder.BeginTerm(token);
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(ITermNode)));
          Assert.That((stack.Peek() as ITermNode)?.Image, Is.EqualTo(token.Image));
          Assert.That((stack.Peek() as ITermNode)?.FirstFactor, Is.Null);
@@ -451,7 +467,6 @@ namespace EbnfCompiler.AST.UnitTests
 
          var termToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
          var term = _nodeFactoryMock.Object.Create(AstNodeType.Term, termToken);
-
          stack.Push(term);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -471,13 +486,15 @@ namespace EbnfCompiler.AST.UnitTests
          // Arrange:
          var token = new Token { TokenKind = TokenKind.String, Image = "<F>" };
          var stack = new Stack<IAstNode>();
+         stack.Push(_nodeFactoryMock.Object.Create(AstNodeType.Term, token));
+
          var builder = new AstBuilder(_nodeFactoryMock.Object, null, stack, _tracerMock.Object);
 
          // Act:
          builder.BeginFactor(token);
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(1));
+         Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IFactorNode)));
          Assert.That((stack.Peek() as IFactorNode)?.Image, Is.EqualTo(token.Image));
          Assert.That((stack.Peek() as IFactorNode)?.NextFactor, Is.Null);
@@ -691,7 +708,6 @@ namespace EbnfCompiler.AST.UnitTests
 
          // Assert:
          Assert.That(_nodeFactoryMock.Object.AllNodes.Count(p=>p.AstNodeType == AstNodeType.Action), Is.EqualTo(1));
-
       }
    }
 }

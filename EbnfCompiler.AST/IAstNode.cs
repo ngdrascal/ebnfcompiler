@@ -4,7 +4,7 @@ namespace EbnfCompiler.AST
 {
    public enum AstNodeType
    {
-      Statement, Expression, Term, Factor, ProdRef, Terminal, Action,
+      Syntax, Statement, Expression, Term, Factor, ProdRef, Terminal, Action,
       Paren, Option, KleeneStar
    };
 
@@ -21,13 +21,24 @@ namespace EbnfCompiler.AST
       string ToString();
    }
 
-   public interface IStatementNode : IAstNode
+   public interface IHaveActions
+   {
+      IActionNode PreActionNode { get; set; }
+      IActionNode PostActionNode { get; set; }
+   }
+
+   public interface ISyntaxNode : IAstNode, IHaveActions
+   {
+      IStatementNode FirstStatement { get; set; }
+   }
+
+   public interface IStatementNode : IAstNode, IHaveActions
    {
       string ProdName { get; }
       IExpressionNode Expression { get; set; }
    }
 
-   public interface IExpressionNode : IAstNode
+   public interface IExpressionNode : IAstNode, IHaveActions
    {
       ITermNode FirstTerm { get; }
 
@@ -36,7 +47,7 @@ namespace EbnfCompiler.AST
       int TermCount { get; }
    }
 
-   public interface ITermNode : IAstNode
+   public interface ITermNode : IAstNode, IHaveActions
    {
       ITermNode NextTerm { get; set; }
 
@@ -45,7 +56,7 @@ namespace EbnfCompiler.AST
       void AppendFactor(IFactorNode newFactor);
    }
 
-   public interface IFactorNode : IAstNode
+   public interface IFactorNode : IAstNode, IHaveActions
    {
       IAstNode FactorExpr { get; set; }
 
@@ -78,7 +89,7 @@ namespace EbnfCompiler.AST
       IExpressionNode Expression { get; set; }
    }
 
-   public interface IActionNode
+   public interface IActionNode: IAstNode
    {
       string ActionName { get; }
    }

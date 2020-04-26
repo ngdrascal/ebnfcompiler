@@ -20,7 +20,7 @@ namespace EbnfCompiler.Parser
       private void Match(TokenKind tokenKind)
       {
          if (_scanner.CurrentToken.TokenKind != tokenKind)
-            throw new SyntaxErrorException($"Expecting: {tokenKind}", _scanner.CurrentToken);
+            throw new SyntaxErrorException(tokenKind, _scanner.CurrentToken);
       }
 
       public (IReadOnlyCollection<ITokenDefinition> TokenDefinitions,
@@ -73,12 +73,21 @@ namespace EbnfCompiler.Parser
       // <Syntax> ::= <statement> { <Statement> } .
       private void ParseSyntax()
       {
-         _astBuilder.BeginSyntax();
+         ParseAction();
+
+         _astBuilder.BeginSyntax(_scanner.CurrentToken);
 
          ParseStatement();
 
-         while (_scanner.CurrentToken.TokenKind == TokenKind.Identifier)
+         var statementStartTokens = new[]
+         {
+            TokenKind.Identifier, TokenKind.Action
+         };
+
+         while (statementStartTokens.Contains(_scanner.CurrentToken.TokenKind))
             ParseStatement();
+
+         ParseAction();
 
          _astBuilder.EndSyntax();
       }
@@ -86,7 +95,11 @@ namespace EbnfCompiler.Parser
       // <Statement> ::= "PRODNAME" "::=" <Expression> ".".
       private void ParseStatement()
       {
+         ParseAction();
+
          _astBuilder.BeginStatement(_scanner.CurrentToken);
+
+         Match(TokenKind.Identifier);
          _scanner.Advance();
 
          Match(TokenKind.Assign);
@@ -97,30 +110,40 @@ namespace EbnfCompiler.Parser
          Match(TokenKind.Period);
          _scanner.Advance();
 
+         ParseAction();
+
          _astBuilder.EndStatement();
       }
 
       // <Expression> ::= <Term> { "|" <Term> }.
       private void ParseExpression()
       {
+         ParseAction();
+         
          _astBuilder.BeginExpression(_scanner.CurrentToken);
+         
          ParseTerm();
+         
          while (_scanner.CurrentToken.TokenKind == TokenKind.Or)
          {
             _scanner.Advance();
             ParseTerm();
          }
 
+         ParseAction();
+
          _astBuilder.EndExpression();
       }
 
-      // <Term> ::= <Action> <Factor> <Action> { <Factor> <Action> }
+      // <Term> ::= <Factor> { <Action> }
       private void ParseTerm()
       {
+         ParseAction();
+
          _astBuilder.BeginTerm(_scanner.CurrentToken);
-         ParseActions();
+         
          ParseFactor();
-         ParseActions();
+
          var factorStartTokens = new[]
          {
             TokenKind.Identifier, TokenKind.String, TokenKind.Action,
@@ -129,8 +152,10 @@ namespace EbnfCompiler.Parser
          while (factorStartTokens.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseFactor();
-            ParseActions();
          }
+
+         ParseAction();
+
          _astBuilder.EndTerm();
       }
 
@@ -141,6 +166,8 @@ namespace EbnfCompiler.Parser
       //              "{" <Expression> "}".
       private void ParseFactor()
       {
+         ParseAction();
+
          _astBuilder.BeginFactor(_scanner.CurrentToken);
 
          switch (_scanner.CurrentToken.TokenKind)
@@ -179,13 +206,16 @@ namespace EbnfCompiler.Parser
                break;
          }
 
+         ParseAction();
+
          _astBuilder.EndFactor();
       }
 
+      // <Action> ::= [ #FoundAction# ""ACTION"" ] .
       // First = [Action, <epsilon>]
-      private void ParseActions()
+      private void ParseAction()
       {
-         while (_scanner.CurrentToken.TokenKind == TokenKind.Action)
+         if (_scanner.CurrentToken.TokenKind == TokenKind.Action)
          {
             _astBuilder.FoundAction(_scanner.CurrentToken);
             Match(TokenKind.Action);

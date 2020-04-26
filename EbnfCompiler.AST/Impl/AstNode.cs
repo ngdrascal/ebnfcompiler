@@ -41,6 +41,29 @@ namespace EbnfCompiler.AST.Impl
       protected abstract void CalcFirstSet();
    }
 
+   public class SyntaxNode : AstNode, ISyntaxNode
+   {
+      public SyntaxNode(IToken token, IDebugTracer tracer) 
+         : base(AstNodeType.Syntax, token, tracer)
+      {
+      }
+
+      protected override void CalcFirstSet()
+      {
+         FirstSetInternal.Union(FirstStatement.FirstSet);
+      }
+
+      public IStatementNode FirstStatement { get; set; }
+
+      public override string ToString()
+      {
+         return $"{FirstStatement} .";
+      }
+
+      public IActionNode PreActionNode { get; set; }
+      public IActionNode PostActionNode { get; set; }
+   }
+
    public class StatementNode : AstNode, IStatementNode
    {
       public StatementNode(IToken token, IDebugTracer tracer)
@@ -61,6 +84,9 @@ namespace EbnfCompiler.AST.Impl
       {
          FirstSetInternal.Union(Expression.FirstSet);
       }
+
+      public IActionNode PreActionNode { get; set; }
+      public IActionNode PostActionNode { get; set; }
    }
 
    public class ExpressionNode : AstNode, IExpressionNode
@@ -117,6 +143,9 @@ namespace EbnfCompiler.AST.Impl
             term = term.NextTerm;
          }
       }
+
+      public IActionNode PreActionNode { get; set; }
+      public IActionNode PostActionNode { get; set; }
    }
 
    public class TermNode : AstNode, ITermNode
@@ -175,6 +204,9 @@ namespace EbnfCompiler.AST.Impl
          if (allIncludeEpsilon)
             FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
+
+      public IActionNode PreActionNode { get; set; }
+      public IActionNode PostActionNode { get; set; }
    }
 
    public class FactorNode : AstNode, IFactorNode
@@ -197,6 +229,9 @@ namespace EbnfCompiler.AST.Impl
       {
          FirstSetInternal.Union(FactorExpr.FirstSet);
       }
+
+      public IActionNode PreActionNode { get; set; }
+      public IActionNode PostActionNode { get; set; }
    }
 
    public class ProdRefNode : AstNode, IProdRefNode
@@ -324,6 +359,8 @@ namespace EbnfCompiler.AST.Impl
 
       protected override void CalcFirstSet()
       {
+         FirstSetInternal.Add("Action");
+         FirstSetInternal.Add(FirstSetInternal.Epsilon);
       }
    }
 }

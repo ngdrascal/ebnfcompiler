@@ -21,6 +21,14 @@ namespace EbnfCompiler.AST.Impl
 
    public static class NodeTypeCaster
    {
+      public static ISyntaxNode AsSyntax(this IAstNode astNode)
+      {
+         if (!(astNode is ISyntaxNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(ISyntaxNode)));
+
+         return result;
+      }
+
       public static IStatementNode AsStatement(this IAstNode astNode)
       {
          if (!(astNode is IStatementNode result))
@@ -28,8 +36,7 @@ namespace EbnfCompiler.AST.Impl
 
          return result;
       }
-
-
+      
       public static IExpressionNode AsExpression(this IAstNode astNode)
       {
          if (!(astNode is IExpressionNode result))

@@ -23,18 +23,7 @@ namespace EbnfCompiler.CodeGenerator
       public bool GenerateSwitch { get; set; }
    }
 
-   // internal class ExpressionContext : ContextBase
-   // {
-   //    public ExpressionContext(bool generateSwitch)
-   //       : base(AstNodeType.Expression)
-   //    {
-   //       GenerateSwitch = generateSwitch;
-   //    }
-   //
-   //    public bool GenerateSwitch { get; }
-   // }
-
-   public class IcSharpGenerator : ICodeGenerator
+   public class CSharpGenerator : ICodeGenerator
    {
       private readonly IReadOnlyCollection<IProductionInfo> _productions;
       private readonly IReadOnlyCollection<ITokenDefinition> _tokens;
@@ -42,9 +31,9 @@ namespace EbnfCompiler.CodeGenerator
       private readonly ILogger _log;
       private readonly Stack<ContextBase> _stack;
       private int _indentLevel;
-      public string Output { get; private set; }
+      private string Output { get; set; }
 
-      public IcSharpGenerator(IReadOnlyCollection<IProductionInfo> productions, IReadOnlyCollection<ITokenDefinition> tokens,
+      public CSharpGenerator(IReadOnlyCollection<IProductionInfo> productions, IReadOnlyCollection<ITokenDefinition> tokens,
                               IAstTraverser traverser, ILogger log)
       {
          _productions = productions;
@@ -79,6 +68,14 @@ namespace EbnfCompiler.CodeGenerator
       {
          switch (node.AstNodeType)
          {
+            case AstNodeType.Syntax:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               break;
+
+            case AstNodeType.Statement:
+               _stack.Push(new ContextBase(node.AstNodeType));
+               break;
+
             case AstNodeType.Expression:
                _stack.Push(new ContextBase(node.AstNodeType));
                _stack.Peek().GenerateSwitch = node.AsExpression().TermCount > 1;
@@ -251,9 +248,18 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintOption(ITerminalSet firstSet)
       {
-         PrintFirstSet(firstSet);
+         if (firstSet.AsEnumerable().Count(p => p != "$EPSILON$") > 1)
+         {
+            PrintFirstSet(firstSet);
 
-         PrintLine($"if (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+            PrintLine("if (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+         }
+         else
+         {
+            var defs = SetAsTokenDefinitions(firstSet);
+            PrintLine($"if (_scanner.CurrentToken.TokenKind == TokenKind.{defs.First()})");
+         }
+
          PrintLine("{");
          Indent();
       }
@@ -290,7 +296,7 @@ namespace EbnfCompiler.CodeGenerator
       private List<string> SetAsTokenDefinitions(ITerminalSet firstSet)
       {
          var tokens = new List<string>();
-         foreach (var token in firstSet.AsEnumerable())
+         foreach (var token in firstSet.AsEnumerable().Where(t => t != "$EPSILON$"))
          {
             var tokenDef = _tokens.FirstOrDefault(p => p.Image.Equals(token))?.Definition;
             if (tokenDef == null)
