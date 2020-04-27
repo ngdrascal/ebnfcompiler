@@ -170,8 +170,8 @@ namespace EbnfCompiler.Driver
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            <S> ::= #BeginStatement# ""a"" #EndStatement#.
-      ";
+            #BeginStmt# <S> ::=  ""a"" . #EndStmt#
+       ";
 
       private const string TestCase5 = @"
          %TOKENS%

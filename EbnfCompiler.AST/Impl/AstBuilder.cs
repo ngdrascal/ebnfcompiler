@@ -73,6 +73,10 @@ namespace EbnfCompiler.AST.Impl
 
          _tracer.TraceLine(new string('-', 40));
 
+
+         var prodInfo = _prodInfoFactory.Create(statement.ProdName);
+         prodInfo.RightHandSide = statement.Expression;
+
          FixupProdRefNodes();
       }
 
@@ -99,9 +103,6 @@ namespace EbnfCompiler.AST.Impl
 
          var statement = _stack.Pop().AsStatement();
          statement.PostActionNode = actionNode;
-
-         var prodInfo = _prodInfoFactory.Create(statement.ProdName);
-         prodInfo.RightHandSide = statement.Expression;
       }
 
       public void BeginExpression(IToken token)
