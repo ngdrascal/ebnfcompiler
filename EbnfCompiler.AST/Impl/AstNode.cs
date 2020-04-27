@@ -43,7 +43,7 @@ namespace EbnfCompiler.AST.Impl
 
    public class SyntaxNode : AstNode, ISyntaxNode
    {
-      public SyntaxNode(IToken token, IDebugTracer tracer) 
+      public SyntaxNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Syntax, token, tracer)
       {
       }
@@ -54,6 +54,18 @@ namespace EbnfCompiler.AST.Impl
       }
 
       public IStatementNode FirstStatement { get; set; }
+      public void AppendStatement(IStatementNode newStatement)
+      {
+         if (FirstStatement == null)
+            FirstStatement = newStatement;
+         else
+         {
+            var s = FirstStatement;
+            while (s.NextStatement != null)
+               s = s.NextStatement;
+            s.NextStatement = newStatement;
+         }
+      }
 
       public override string ToString()
       {
@@ -74,6 +86,8 @@ namespace EbnfCompiler.AST.Impl
       public string ProdName => Image;
 
       public IExpressionNode Expression { get; set; }
+
+      public IStatementNode NextStatement { get; set; }
 
       public override string ToString()
       {

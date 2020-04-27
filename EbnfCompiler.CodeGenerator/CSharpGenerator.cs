@@ -11,9 +11,12 @@ namespace EbnfCompiler.CodeGenerator
       public ContextBase(AstNodeType nodeType)
       {
          NodeType = nodeType;
+         Properties = new Dictionary<string, object>();
       }
 
       public AstNodeType NodeType { get; }
+
+      public Dictionary<string, object> Properties { get; }
 
       public override string ToString()
       {
@@ -25,7 +28,7 @@ namespace EbnfCompiler.CodeGenerator
 
    public class CSharpGenerator : ICodeGenerator
    {
-      private readonly IReadOnlyCollection<IProductionInfo> _productions;
+      private readonly ISyntaxNode _syntaxTree;
       private readonly IReadOnlyCollection<ITokenDefinition> _tokens;
       private readonly IAstTraverser _traverser;
       private readonly ILogger _log;
@@ -33,10 +36,10 @@ namespace EbnfCompiler.CodeGenerator
       private int _indentLevel;
       private string Output { get; set; }
 
-      public CSharpGenerator(IReadOnlyCollection<IProductionInfo> productions, IReadOnlyCollection<ITokenDefinition> tokens,
+      public CSharpGenerator(ISyntaxNode syntaxTree, IReadOnlyCollection<ITokenDefinition> tokens,
                               IAstTraverser traverser, ILogger log)
       {
-         _productions = productions;
+         _syntaxTree = syntaxTree;
          _tokens = tokens;
          _traverser = traverser;
          _log = log;
@@ -48,32 +51,35 @@ namespace EbnfCompiler.CodeGenerator
          _traverser.ProcessNode += ProcessNode;
          _traverser.PostProcessNode += PostProcessNode;
 
-         PrintUsings();
-         PrintNamespaceHeader();
-         PrintMatchMethod();
-
-         foreach (var prod in _productions)
-         {
-            PrintMethodHeader(prod.Name);
-
-            _traverser.Traverse(prod.RightHandSide);
-
-            PrintMethodFooter();
-         }
-
-         PrintNamespaceFooter();
+         _traverser.Traverse(_syntaxTree);
       }
 
       private void ProcessNode(IAstNode node)
       {
+         ContextBase context;
          switch (node.AstNodeType)
          {
             case AstNodeType.Syntax:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               context = new ContextBase(node.AstNodeType);
+               _stack.Push(context);
+
+               PrintUsings();
+               PrintNamespaceHeader();
+               PrintMatchMethod();
+
+               PrintParseGoal(node.AsSyntax().FirstStatement.ProdName,
+                              node.AsSyntax().PreActionNode?.ActionName,
+                              node.AsSyntax().PostActionNode?.ActionName);
                break;
 
             case AstNodeType.Statement:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               context = new ContextBase(node.AstNodeType);
+               _stack.Push(context);
+
+               context.Properties.Add("PreActionName", node.AsStatement().PreActionNode?.ActionName);
+               context.Properties.Add("PostActionName", node.AsStatement().PostActionNode?.ActionName);
+
+               PrintMethodHeader(node.AsStatement().ProdName, context.Properties["PreActionName"]?.ToString());
                break;
 
             case AstNodeType.Expression:
@@ -85,7 +91,7 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Term:
-               var context = new ContextBase(node.AstNodeType);
+               context = new ContextBase(node.AstNodeType);
                context.GenerateSwitch = _stack.Peek().GenerateSwitch;
                _stack.Push(context);
 
@@ -112,7 +118,7 @@ namespace EbnfCompiler.CodeGenerator
 
             case AstNodeType.Action:
                _stack.Push(new ContextBase(node.AstNodeType));
-               PrintActionNode(node.AsActionNode().ActionName);
+               //PrintAction(node.AsActionNode().ActionName);
                break;
 
             case AstNodeType.Paren:
@@ -137,6 +143,14 @@ namespace EbnfCompiler.CodeGenerator
 
          switch (context.NodeType)
          {
+            case AstNodeType.Syntax:
+               PrintNamespaceFooter();
+               break;
+
+            case AstNodeType.Statement:
+               PrintMethodFooter(context.Properties["PostActionName"]?.ToString());
+               break;
+
             case AstNodeType.Expression:
                break;
 
@@ -212,16 +226,38 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine("}");
       }
 
-      private void PrintMethodHeader(string name)
+      private void PrintParseGoal(string prodName, string preActionName, string postActionName)
       {
          PrintLine();
-         PrintLine($"void Parse{name}()");
+         PrintLine($"public void ParseGoal()");
          PrintLine("{");
          Indent();
+
+         if (!string.IsNullOrEmpty(preActionName))
+            PrintAction(preActionName);
+         
+         PrintProdRef(prodName);
+         
+         if (!string.IsNullOrEmpty(postActionName))
+            PrintAction(postActionName);
+
+         PrintMethodFooter(postActionName);
       }
 
-      private void PrintMethodFooter()
+      private void PrintMethodHeader(string name, string preActionName)
       {
+         PrintLine();
+         PrintLine($"private void Parse{name}()");
+         PrintLine("{");
+         Indent();
+         if (!string.IsNullOrEmpty(preActionName))
+            PrintAction(preActionName);
+      }
+
+      private void PrintMethodFooter(string postActionName)
+      {
+         if (!string.IsNullOrEmpty(postActionName))
+            PrintAction(postActionName);
          Outdent();
          PrintLine("}");
       }
@@ -241,9 +277,9 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine("_scanner.Advance()");
       }
 
-      private void PrintActionNode(string name)
+      private void PrintAction(string actionName)
       {
-         PrintLine($"semantics.{name}();");
+         PrintLine($"semantics.{actionName}();");
       }
 
       private void PrintOption(ITerminalSet firstSet)

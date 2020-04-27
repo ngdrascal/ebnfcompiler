@@ -24,13 +24,13 @@ namespace EbnfCompiler.Parser
       }
 
       public (IReadOnlyCollection<ITokenDefinition> TokenDefinitions,
-              IReadOnlyCollection<IProductionInfo> Productions) ParseGoal()
+              ISyntaxNode AbstractSyntaxTree) ParseGoal()
       {
          ParseInput();
          Match(TokenKind.Eof);
          _scanner.Advance();
 
-         return (_astBuilder.TokenDefinitions, _astBuilder.Productions);
+         return (_astBuilder.TokenDefinitions, _astBuilder.SyntaxTree);
       }
 
       // <Input> ::= <Tokens> <Grammar>

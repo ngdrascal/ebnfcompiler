@@ -170,15 +170,8 @@ namespace EbnfCompiler.Driver
          %TOKENS%
             ""a"" = ""tkA""
          %EBNF%
-            #BeginStmt# <S> ::=  ""a"" . #EndStmt#
+            #A1# <S> ::= #A3# ""a"" #A4# . #A5#
        ";
-
-      private const string TestCase5 = @"
-         %TOKENS%
-            ""a"" = ""tkA""
-         %EBNF%
-            <S> ::= #action# ""a"" .
-      ";
 
       [Test/*, Ignore("Just for experimenting")*/]
       public void Test01()
@@ -202,19 +195,19 @@ namespace EbnfCompiler.Driver
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
                                          new ProdInfoFactory(tracer), new Stack<IAstNode>(), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
-         var (tokens, productions) = parser.ParseGoal();
+         var (tokens, ast) = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var gen = new CSharpGenerator(productions, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
+         var gen = new CSharpGenerator(ast, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
          gen.Run();
 
          foreach (var prod in astBuilder.Productions)
          {
             //    tracer.TraceLine($"\nAST for <{prod.Name}>");
-            //    traverser.Traverse(prod.RightHandSide);
+            //    traverser.Traverse(prod.Statement);
             //    
             //    // tracer.TraceLine(new string('-', 40));
-            //    // tracer.TraceLine($"First of <{prod.Name}>: {prod.RightHandSide.FirstSet}");
+            //    // tracer.TraceLine($"First of <{prod.Name}>: {prod.Statement.FirstSet}");
          }
       }
    }

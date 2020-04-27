@@ -12,12 +12,12 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer = tracer;
          Name = name;
-         RightHandSide = null;
+         Statement = null;
       }
 
       public string Name { get; }
 
-      public IExpressionNode RightHandSide { get; set; }
+      public IStatementNode Statement { get; set; }
 
       public ITerminalSet FirstSet
       {
@@ -25,9 +25,9 @@ namespace EbnfCompiler.AST.Impl
          {
             _tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
 
-            _tracer.EndTrace($"First: {GetType().Name} = {RightHandSide.FirstSet} ");
+            _tracer.EndTrace($"First: {GetType().Name} = {Statement.FirstSet} ");
 
-            return RightHandSide.FirstSet;
+            return Statement.FirstSet;
          }
       }
 
@@ -43,7 +43,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"<{Name}> ::= {RightHandSide?.ToString()}.";
+         return $"<{Name}> ::= {Statement?.ToString()}.";
       }
    }
 }

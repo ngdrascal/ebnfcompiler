@@ -250,8 +250,10 @@ namespace EbnfCompiler.AST.UnitTests
          var prodInfo = _prodInfoFactoryMock.Object.Create("<S>");
 
          var token = new Token() { TokenKind = TokenKind.String, Image = "a" };
-         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, token);
-         prodInfo.RightHandSide = (IExpressionNode)expr;
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, token).AsExpression();
+         var stmt = _nodeFactoryMock.Object.Create(AstNodeType.Statement, token).AsStatement();
+         stmt.Expression = expr;
+         prodInfo.Statement = stmt;
 
          var prodRefToken = new Token() { TokenKind = TokenKind.String, Image = "<S>" };
          _nodeFactoryMock.Object.Create(AstNodeType.ProdRef, prodRefToken);
@@ -296,13 +298,18 @@ namespace EbnfCompiler.AST.UnitTests
       public void EndStatement_WhenGivenToken_SetsProductionsRhs()
       {
          // Arrange:
-         var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
-         var statement = (StatementNode)_nodeFactoryMock.Object.Create(AstNodeType.Statement, stmtToken);
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<E>" };
-         statement.Expression = (ExpressionNode)_nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken).AsExpression();
+         var stmtToken = new Token { TokenKind = TokenKind.String, Image = "<S>" };
+         var stmt = _nodeFactoryMock.Object.Create(AstNodeType.Statement, stmtToken).AsStatement();
+         stmt.Expression = expr;
+         var syntaxToken = new Token { TokenKind = TokenKind.String, Image = "" };
+         var syntax = _nodeFactoryMock.Object.Create(AstNodeType.Syntax, syntaxToken).AsSyntax();
+         syntax.AppendStatement(stmt);
 
          var stack = new Stack<IAstNode>();
-         stack.Push(statement);
+         stack.Push(syntax);
+         stack.Push(stmt);
 
          var builder = new AstBuilder(_nodeFactoryMock.Object, _prodInfoFactoryMock.Object, stack, _tracerMock.Object);
 
@@ -310,9 +317,9 @@ namespace EbnfCompiler.AST.UnitTests
          builder.EndStatement();
 
          // Assert:
-         Assert.That(stack.Count, Is.EqualTo(0));
+         Assert.That(stack.Count, Is.EqualTo(1));
          Assert.That(builder.Productions.First().Name, Is.EqualTo(stmtToken.Image));
-         Assert.That(builder.Productions.First().RightHandSide, Is.InstanceOf(typeof(IExpressionNode)));
+         Assert.That(builder.Productions.First().Statement.Expression, Is.InstanceOf(typeof(IExpressionNode)));
       }
 
       [Test]
@@ -370,7 +377,7 @@ namespace EbnfCompiler.AST.UnitTests
          stack.Push(paren);
 
          var exprToken = new Token { TokenKind = TokenKind.String, Image = "<T>" };
-         var expr =  _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
+         var expr = _nodeFactoryMock.Object.Create(AstNodeType.Expression, exprToken);
          stack.Push(expr);
 
          var builder = new AstBuilder(null, null, stack, _tracerMock.Object);
@@ -707,7 +714,7 @@ namespace EbnfCompiler.AST.UnitTests
          builder.FoundAction(actionToken);
 
          // Assert:
-         Assert.That(_nodeFactoryMock.Object.AllNodes.Count(p=>p.AstNodeType == AstNodeType.Action), Is.EqualTo(1));
+         Assert.That(_nodeFactoryMock.Object.AllNodes.Count(p => p.AstNodeType == AstNodeType.Action), Is.EqualTo(1));
       }
    }
 }

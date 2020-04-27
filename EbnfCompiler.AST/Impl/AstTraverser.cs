@@ -21,6 +21,26 @@ namespace EbnfCompiler.AST.Impl
 
          switch (astNode.AstNodeType)
          {
+            case AstNodeType.Syntax:
+               _tracer.BeginTrace(nameof(AstNodeType.Syntax));
+
+               if (astNode.AsSyntax().PreActionNode != null)
+                  Traverse(astNode.AsSyntax().PreActionNode);
+
+               var stmt = astNode.AsSyntax().FirstStatement;
+               while (stmt != null)
+               {
+                  Traverse(stmt);
+
+                  stmt = stmt.NextStatement;
+               }
+
+               if (astNode.AsSyntax().PostActionNode != null)
+                  Traverse(astNode.AsSyntax().PostActionNode);
+
+               _tracer.EndTrace(nameof(AstNodeType.Syntax));
+               break;
+
             case AstNodeType.Statement:
                _tracer.BeginTrace("Statement");
 
@@ -38,6 +58,9 @@ namespace EbnfCompiler.AST.Impl
             case AstNodeType.Expression:
                _tracer.BeginTrace("Expression");
 
+               if (astNode.AsExpression().PreActionNode != null)
+                  Traverse(astNode.AsExpression().PreActionNode);
+
                var term = astNode.AsExpression().FirstTerm;
                while (term != null)
                {
@@ -45,6 +68,9 @@ namespace EbnfCompiler.AST.Impl
 
                   term = term.NextTerm;
                }
+
+               if (astNode.AsExpression().PostActionNode != null)
+                  Traverse(astNode.AsExpression().PreActionNode);
 
                _tracer.EndTrace("Expression");
                break;
@@ -65,7 +91,13 @@ namespace EbnfCompiler.AST.Impl
             case AstNodeType.Factor:
                _tracer.BeginTrace(astNode.AstNodeType.ToString());
 
+               if (astNode.AsFactor().PreActionNode != null)
+                  Traverse(astNode.AsFactor().PreActionNode);
+
                Traverse(astNode.AsFactor().FactorExpr);
+
+               if (astNode.AsFactor().PostActionNode != null)
+                  Traverse(astNode.AsFactor().PostActionNode);
 
                _tracer.EndTrace(astNode.AstNodeType.ToString());
                break;

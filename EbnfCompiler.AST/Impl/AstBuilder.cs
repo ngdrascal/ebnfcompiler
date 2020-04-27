@@ -30,6 +30,7 @@ namespace EbnfCompiler.AST.Impl
 
       public IReadOnlyCollection<ITokenDefinition> TokenDefinitions => _tokenDefinitions.AsReadOnly();
       public IReadOnlyCollection<IProductionInfo> Productions => _prodInfoFactory.AllProductions;
+      public ISyntaxNode SyntaxTree { get; private set; }
 
       public void AddTokenName(IToken token)
       {
@@ -73,11 +74,9 @@ namespace EbnfCompiler.AST.Impl
 
          _tracer.TraceLine(new string('-', 40));
 
-
-         var prodInfo = _prodInfoFactory.Create(statement.ProdName);
-         prodInfo.RightHandSide = statement.Expression;
-
          FixupProdRefNodes();
+
+         SyntaxTree = syntax;
       }
 
       public void BeginStatement(IToken token)
@@ -103,6 +102,11 @@ namespace EbnfCompiler.AST.Impl
 
          var statement = _stack.Pop().AsStatement();
          statement.PostActionNode = actionNode;
+
+         _stack.Peek().AsSyntax().AppendStatement(statement);
+
+         var prodInfo = _prodInfoFactory.Create(statement.ProdName);
+         prodInfo.Statement = statement;
       }
 
       public void BeginExpression(IToken token)
@@ -280,7 +284,7 @@ namespace EbnfCompiler.AST.Impl
          {
             var prodRefNode = (IProdRefNode)node;
             var prodInfo = Productions.First(p => p.Name == prodRefNode.ProdName);
-            prodRefNode.Expression = prodInfo.RightHandSide;
+            prodRefNode.Expression = prodInfo.Statement.Expression;
          }
       }
 

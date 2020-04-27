@@ -29,13 +29,17 @@ namespace EbnfCompiler.AST
 
    public interface ISyntaxNode : IAstNode, IHaveActions
    {
-      IStatementNode FirstStatement { get; set; }
+      IStatementNode FirstStatement { get; }
+
+      void AppendStatement(IStatementNode newNode);
    }
 
    public interface IStatementNode : IAstNode, IHaveActions
    {
       string ProdName { get; }
       IExpressionNode Expression { get; set; }
+
+      IStatementNode NextStatement { get; set; }
    }
 
    public interface IExpressionNode : IAstNode, IHaveActions

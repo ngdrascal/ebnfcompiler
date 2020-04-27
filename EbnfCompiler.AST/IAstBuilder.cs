@@ -8,6 +8,8 @@ namespace EbnfCompiler.AST
       IReadOnlyCollection<ITokenDefinition> TokenDefinitions { get; }
       IReadOnlyCollection<IProductionInfo> Productions { get; }
 
+      ISyntaxNode SyntaxTree { get; }
+
       void AddTokenName(IToken token);
       void SetTokenDef(IToken token);
 
