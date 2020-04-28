@@ -83,9 +83,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginStatement));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var statement = _astNodeFactory.Create(AstNodeType.Statement, token).AsStatement();
          statement.PreActionNode = actionNode;
@@ -96,9 +94,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndStatement));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var statement = _stack.Pop().AsStatement();
          statement.PostActionNode = actionNode;
@@ -113,9 +109,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginExpression));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var expression = _astNodeFactory.Create(AstNodeType.Expression, token).AsExpression();
          expression.PreActionNode = actionNode;
@@ -126,12 +120,10 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndExpression));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var expression = _stack.Pop().AsExpression();
-         expression.PreActionNode = actionNode;
+         expression.PostActionNode = actionNode;
 
          switch (_stack.Peek().AstNodeType)
          {
@@ -157,9 +149,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginTerm));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var term = _astNodeFactory.Create(AstNodeType.Term, token).AsTerm();
          term.PreActionNode = actionNode;
@@ -170,9 +160,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndTerm));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var term = _stack.Pop().AsTerm();
          term.PostActionNode = actionNode;
@@ -183,9 +171,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginFactor));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var factor = _astNodeFactory.Create(AstNodeType.Factor, token).AsFactor();
          factor.PreActionNode = actionNode;
@@ -196,9 +182,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndFactor));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsActionNode();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsActionNode() : null;
 
          var factor = _stack.Pop().AsFactor();
          factor.PostActionNode = actionNode;

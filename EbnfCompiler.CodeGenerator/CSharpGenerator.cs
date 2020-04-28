@@ -86,6 +86,9 @@ namespace EbnfCompiler.CodeGenerator
                _stack.Push(new ContextBase(node.AstNodeType));
                _stack.Peek().GenerateSwitch = node.AsExpression().TermCount > 1;
 
+               if (node.AsExpression().PreActionNode != null)
+                  PrintAction(node.AsExpression().PreActionNode.ActionName);
+
                if (node.AsExpression().TermCount > 1)
                   PrintTermSwitch();
                break;
@@ -104,6 +107,10 @@ namespace EbnfCompiler.CodeGenerator
 
             case AstNodeType.Factor:
                _stack.Push(new ContextBase(node.AstNodeType));
+
+               if (node.AsFactor().PostActionNode != null)
+                  PrintAction(node.AsFactor().PostActionNode.ActionName);
+
                break;
 
             case AstNodeType.ProdRef:

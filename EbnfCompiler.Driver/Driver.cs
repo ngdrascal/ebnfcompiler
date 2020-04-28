@@ -169,8 +169,9 @@ namespace EbnfCompiler.Driver
       private const string TestCase4A = @"
          %TOKENS%
             ""a"" = ""tkA""
+            ""b"" = ""tkB""
          %EBNF%
-            #A1# <S> ::= #A3# ""a"" #A4# . #A5#
+            <S> ::= #A1# ""a"" ""b"" #A4# . #A5#
        ";
 
       [Test/*, Ignore("Just for experimenting")*/]

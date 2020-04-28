@@ -33,14 +33,14 @@ namespace EbnfCompiler.Parser
          return (_astBuilder.TokenDefinitions, _astBuilder.SyntaxTree);
       }
 
-      // <Input> ::= <Tokens> <Grammar>
+      // <Input> ::= <Tokens> <Grammar> .
       private void ParseInput()
       {
          ParseTokens();
          ParseGrammar();
       }
 
-      // <tokens> ::= "%TOKENS%" { <TokenDef> }
+      // <tokens> ::= "%TOKENS%" { <TokenDef> } .
       private void ParseTokens()
       {
          Match(TokenKind.TokensTag);
@@ -49,7 +49,7 @@ namespace EbnfCompiler.Parser
             ParseTokenDef();
       }
 
-      // <TokenDef> ::= "STRING" "=" "STRING"
+      // <TokenDef> ::= "STRING" "=" "STRING" .
       private void ParseTokenDef()
       {
          _astBuilder.AddTokenName(_scanner.CurrentToken);
@@ -62,7 +62,7 @@ namespace EbnfCompiler.Parser
          _scanner.Advance();
       }
 
-      // <Grammar> ::= "%EBNF%" <Syntax>
+      // <Grammar> ::= "%EBNF%" <Syntax> .
       private void ParseGrammar()
       {
          Match(TokenKind.EbnfTag);
@@ -92,7 +92,7 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndSyntax();
       }
 
-      // <Statement> ::= "PRODNAME" "::=" <Expression> ".".
+      // <Statement> ::= "PRODNAME" "::=" <Expression> "." .
       private void ParseStatement()
       {
          ParseAction();
@@ -115,7 +115,7 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndStatement();
       }
 
-      // <Expression> ::= <Term> { "|" <Term> }.
+      // <Expression> ::= <Term> { "|" <Term> } .
       private void ParseExpression()
       {
          ParseAction();
@@ -135,7 +135,7 @@ namespace EbnfCompiler.Parser
          _astBuilder.EndExpression();
       }
 
-      // <Term> ::= <Factor> { <Action> }
+      // <Term> ::= <Factor> { <Action> } .
       private void ParseTerm()
       {
          ParseAction();
@@ -163,7 +163,7 @@ namespace EbnfCompiler.Parser
       //              "STRING" |
       //              "(" <Expression> ")" |
       //              "[" <Expression> "]" |
-      //              "{" <Expression> "}".
+      //              "{" <Expression> "}" .
       private void ParseFactor()
       {
          ParseAction();
