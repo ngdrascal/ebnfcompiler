@@ -106,10 +106,12 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Factor:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               context = new ContextBase(node.AstNodeType);
+               context.Properties.Add("PostActionName", node.AsFactor().PostActionNode?.ActionName);
+               _stack.Push(context);
 
-               if (node.AsFactor().PostActionNode != null)
-                  PrintAction(node.AsFactor().PostActionNode.ActionName);
+               if (node.AsFactor().PreActionNode != null)
+                  PrintAction(node.AsFactor().PreActionNode.ActionName);
 
                break;
 
@@ -171,6 +173,8 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Factor:
+               if (context.Properties["PostActionName"] != null)
+                  PrintAction(context.Properties["PostActionName"].ToString());
                break;
 
             case AstNodeType.ProdRef:

@@ -171,7 +171,7 @@ namespace EbnfCompiler.Driver
             ""a"" = ""tkA""
             ""b"" = ""tkB""
          %EBNF%
-            <S> ::= #A1# ""a"" ""b"" #A4# . #A5#
+            <S> ::= #A2# ""a"" #A3# ""b"" #A4# . #A5#
        ";
 
       [Test/*, Ignore("Just for experimenting")*/]
