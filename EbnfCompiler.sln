@@ -19,14 +19,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.Scanner.UnitTe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{9BE843CC-D162-4805-A5DC-6AAC5BCF5958}"
 	ProjectSection(SolutionItems) = preProject
-		Documents\AST.vsdx = Documents\AST.vsdx
+		Documents\Ebnf.vsdx = Documents\Ebnf.vsdx
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.AST", "EbnfCompiler.AST\EbnfCompiler.AST.csproj", "{E475340B-3548-4AD4-BE08-6BE5F580C959}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EbnfCompiler.AST.UnitTests", "EbnfCompiler.AST.UnitTests\EbnfCompiler.AST.UnitTests.csproj", "{9A240F48-1BED-470C-95CE-C9BCB2BD5B99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.AST.UnitTests", "EbnfCompiler.AST.UnitTests\EbnfCompiler.AST.UnitTests.csproj", "{9A240F48-1BED-470C-95CE-C9BCB2BD5B99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EbnfCompiler.Parser.UnitTests", "EbnfCompiler.Parser.UnitTests\EbnfCompiler.Parser.UnitTests.csproj", "{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.Parser.UnitTests", "EbnfCompiler.Parser.UnitTests\EbnfCompiler.Parser.UnitTests.csproj", "{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
