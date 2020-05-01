@@ -168,7 +168,6 @@ namespace EbnfCompiler.CodeGenerator
                {
                   PrintLine("break;");
                   Outdent();
-                  PrintLine("}");
                }
                break;
 
@@ -286,11 +285,12 @@ namespace EbnfCompiler.CodeGenerator
 
          PrintLine($"Match(TokenKind.{tokenDef});");
          PrintLine("_scanner.Advance()");
+         PrintLine();
       }
 
       private void PrintAction(string actionName)
       {
-         PrintLine($"semantics.{actionName}();");
+         PrintLine($"_astBuilder.{actionName}();");
       }
 
       private void PrintOption(ITerminalSet firstSet)

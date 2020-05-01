@@ -156,11 +156,12 @@ namespace EbnfCompiler.Driver
 
 	         <Term>       ::= #BeginTerm# <Factor> { <Factor> #EndTerm# } .
 
-	         <Factor>     ::= #FoundProduction(token)# ""IDENTIFIER"" |
+	         <Factor>     ::= #BeginFactor# 
+                        (#FoundProduction(token)# ""IDENTIFIER"" |
 					          #FoundTerminal(token)# ""STRING"" |
 					          #BeginParens# ""("" <Expression> "")"" #EndParens# |
 					          #BeginOption# ""["" <Expression> ""]"" #EndOption# |
-					          #BeginKleene# ""{"" <Expression> ""}"" #EndKleene# .
+					          #BeginKleene# ""{"" <Expression> ""}"" #EndKleene#) #EndFactor# .
 
 	         <Action>     ::= [ #FoundAction# ""ACTION"" ] .
 
@@ -171,7 +172,7 @@ namespace EbnfCompiler.Driver
             ""a"" = ""tkA""
             ""b"" = ""tkB""
          %EBNF%
-            <S> ::= #A2# ""a"" #A3# ""b"" #A4# . #A5#
+            <S> ::= #A0# ( #A1# ""a"" #A2# ) | ( #B3# ""b"" #B4#)  .
        ";
 
       [Test/*, Ignore("Just for experimenting")*/]
