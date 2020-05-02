@@ -1,5 +1,5 @@
 %TOKENS%
-"w" = "tkT1"
+"w" = "tkW"
 
 %EBNF%
-<A> ::= ( "w" ) .
+<A> ::= "w" .

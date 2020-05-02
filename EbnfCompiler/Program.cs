@@ -13,13 +13,10 @@ namespace EbnfCompiler
       {
          var loggerFactory = LoggerFactory.Create(builder =>
          {
-            builder
-               .AddFilter("PARSER", LogLevel.Information)
-               .AddFilter("CSGEN", LogLevel.Trace)
-               .AddDebug();
+            builder.ClearProviders();
          });
-         var logger = loggerFactory.CreateLogger("PARSER");
-         var tracer = new DebugTracer(logger);
+         var nullLogger = loggerFactory.CreateLogger("NULL");
+         var tracer = new DebugTracer(nullLogger);
 
          using var stream = new FileStream(args[0], FileMode.Open);
          stream.Seek(0, SeekOrigin.Begin);
@@ -35,8 +32,7 @@ namespace EbnfCompiler
          var (tokens, ast) = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var gen = new CSharpGenerator(ast, tokens, traverser, 
-                                   loggerFactory.CreateLogger("CSGEN"));
+         var gen = new CSharpGenerator(ast, tokens, traverser, nullLogger);
          gen.Run();
       }
    }
