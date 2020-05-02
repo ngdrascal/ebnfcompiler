@@ -1,0 +1,41 @@
+%TOKENS%
+	"IDENTIFIER" = "Identifier"
+	"STRING"     = "String"
+	"ACTION"     = "Action"
+	"%TOKENS%"   = "Tokens"
+	"%EBNF%"     = "Ebnf"
+	"."          = "Period"
+	"|"          = "Or"
+	"("          = "LeftParen"
+	")"          = "RightParen"
+	"{"          = "LeftBrace"
+	"}"          = "RightBrace"
+	"["          = "LeftBracket"
+	"]"          = "RightBracket"
+	"::="        = "Assign"
+	"="          = "Equal"
+
+%EBNF%
+	<Input>      ::= <Tokens> <Grammar> .
+
+	<Tokens>     ::= "%TOKENS%" { <TokenDef> } .
+
+	<TokenDef>   ::= #AddTokenName# "STRING" "=" #SetTokenDef# "STRING" .
+
+	<Grammar>    ::= "%EBNF%" <Syntax> .
+
+	<Syntax>     ::= #BeginSyntax# <Statement> { <Statement> } #EndSyntax# .
+
+	<Statement>  ::= #BeginStatement# "IDENTIFIER" "::=" <Expression> "." #EndStatement# .
+
+	<Expression> ::= #BeginExpression# <Term> { "|" <Term> } #EndExpression# .
+
+	<Term>       ::= #BeginTerm# <Factor> { <Factor> #EndTerm# .
+
+	<Factor>     ::= #FoundProduction(token)# "IDENTIFIER" |
+					 #FoundTerminal(token)# "STRING" |
+					 #BeginParens# "(" <Expression> ")" #EndParens# |
+					 #BeginOption# "[" <Expression> "]" #EndOption# |
+					 #BeginKleene# "{" <Expression> "}" #EndKleene# .
+
+	<Actions>    ::= [ #FoundAction# "ACTION" ] .

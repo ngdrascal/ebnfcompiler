@@ -1,0 +1,31 @@
+*parser, fgvmt
+*tokens
+"$eof$"
+"IDENTIFIER"
+"STRING"
+"."
+"|"
+"{"
+"}"
+"["
+"]"
+"("
+")"
+"::="
+*grammar
+<Goal>             <Syntax>
+<Syntax>           <Syntax1_Kln> "."
+<Syntax1_Kln>      <Statement> <Syntax1_Kln>
+                   / ""
+<Statement>        "IDENTIFIER" "::=" <Expression> "."
+<Expression>       <Term> <Expression1_Kln>
+<Expression1_Kln>  "|" <Term> <Expression1_Kln>
+                   / ""
+<Term>             <Factor> <Term1_Kln>
+<Term1_Kln>        <Factor> <Term1_Kln>
+                   / ""
+<Factor>           "IDENTIFIER"
+                   / "STRING"
+                   / "(" <Expression> ")"
+                   / "[" <Expression> "]"
+                   / "{" <Expression> "}"

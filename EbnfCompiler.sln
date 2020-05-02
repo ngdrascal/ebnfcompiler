@@ -28,6 +28,30 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.AST.UnitTests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EbnfCompiler.Parser.UnitTests", "EbnfCompiler.Parser.UnitTests\EbnfCompiler.Parser.UnitTests.csproj", "{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Data", "Test Data", "{472382CE-522C-4F9F-87F9-D2F4EA1D9B7C}"
+	ProjectSection(SolutionItems) = preProject
+		Test Data\DoubleOpt.bnf = Test Data\DoubleOpt.bnf
+		Test Data\EBNF.bnf = Test Data\EBNF.bnf
+		Test Data\EBNF_With_Actions.bnf = Test Data\EBNF_With_Actions.bnf
+		Test Data\EBNF_Without_Actions.bnf = Test Data\EBNF_Without_Actions.bnf
+		Test Data\simpleBNF.bnf = Test Data\simpleBNF.bnf
+		Test Data\test_0.bnf = Test Data\test_0.bnf
+		Test Data\test_1.bnf = Test Data\test_1.bnf
+		Test Data\test_10.bnf = Test Data\test_10.bnf
+		Test Data\test_11.bnf = Test Data\test_11.bnf
+		Test Data\test_12.bnf = Test Data\test_12.bnf
+		Test Data\test_2.bnf = Test Data\test_2.bnf
+		Test Data\test_3.bnf = Test Data\test_3.bnf
+		Test Data\test_4.bnf = Test Data\test_4.bnf
+		Test Data\test_5.bnf = Test Data\test_5.bnf
+		Test Data\test_6.bnf = Test Data\test_6.bnf
+		Test Data\test_7.bnf = Test Data\test_7.bnf
+		Test Data\test_8.bnf = Test Data\test_8.bnf
+		Test Data\test_9.bnf = Test Data\test_9.bnf
+		Test Data\test_FirstSet.bnf = Test Data\test_FirstSet.bnf
+		Test Data\UndefProd.bnf = Test Data\UndefProd.bnf
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

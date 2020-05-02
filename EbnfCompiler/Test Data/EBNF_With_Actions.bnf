@@ -1,0 +1,41 @@
+%TOKENS%
+	"IDENTIFIER" = "Identifier"
+	"STRING"     = "String"
+	"ACTION"     = "Action"
+	"%TOKENS%"   = "Tokens"
+	"%EBNF%"     = "Ebnf"
+	"."          = "Period"
+	"|"          = "Or"
+	"("          = "LeftParen"
+	")"          = "RightParen"
+	"{"          = "LeftBrace"
+	"}"          = "RightBrace"
+	"["          = "LeftBracket"
+	"]"          = "RightBracket"
+	"::="        = "Assign"
+	"="          = "Equal"
+
+%EBNF%
+	<Input>      ::= <Tokens> <Grammar> .
+
+	<Tokens>     ::= "%TOKENS%" {<TokenDef>} .
+
+	<TokenDef>   ::= "STRING" "=" "STRING" .
+
+	<Grammar>    ::= <Action> "%EBNF%" <Syntax> <Action> .
+
+	<Syntax>     ::= <Action> <Statement> { <Statement> } <Action> .
+
+	<Statement>  ::= <Action> "IDENTIFIER" "::=" <Expression> "." <Action> .
+
+	<Expression> ::= <Action> <Term> {"|" <Term>} <Action> .
+
+	<Term>       ::= <Action> <Factor> { <Factor> } <Action> .
+
+	<Factor>     ::= <Action> ("IDENTIFIER" |
+   							   "STRING" |
+							   "(" <Expression> ")" |
+							   "[" <Expression> "]" |
+							   "{" <Expression> "}" ) <Action> .
+
+	<Action>     ::= [ "ACTION" ] .

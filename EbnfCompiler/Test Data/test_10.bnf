@@ -1,0 +1,19 @@
+<Designator>       ::= <Ident> #NewName# {<DesignatorTail>}.
+
+<DesignatorTail>   ::= "." <Ident> #FieldName#
+                     | "[" #StartIndex# <Expression> #FirstIndex#
+                           {"," <Expression> #NextIndex#} "]" #FinishIndex#
+                     | "^" #Dereference#
+                     | "(" [ #BeginParams# <Expression> #ProcessParam#
+                               {"," <Expression> #ProcessParam#} ] ")" #CheckFunctCall#
+                   .
+
+<IdentList>        ::= <Ident> {"," <Ident>} .
+
+<QualId>           ::= <Ident> [<QualIdTail>] .
+
+<QualIdTail>       ::= "." <Ident> .
+
+<Ident>            ::= "identifier" #ProcessId(prevToken)#.
+
+<Expression>       ::= 

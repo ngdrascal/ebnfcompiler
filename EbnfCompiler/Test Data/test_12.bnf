@@ -1,0 +1,47 @@
+%TOKENS%
+
+"#" = "tkPound"
+"$" = "tkDollar"
+"&" = "tkAmper"
+"'" = "tkTick"
+"(" = "tkLParen"
+")" = "tkRParen"
+"*" = "tkAsterisk"
+"+" = "tkPlus"
+"," = "tkComma"
+"-" = "tkMinus"
+"." = "tkPeriod"
+"/" = "tkSlash"
+":" = "tkColon"
+";" = "tkSemicolon"
+"<" = "tkLT"
+"=" = "tkEQ"
+">" = "tkGT"
+"@" = "tkAtSign"
+"[" = "tkLBracket"
+"]" = "tkRBracket"
+"^" = "tkHat"
+"{" = "tkRBrace"
+"}" = "tkLBrace"
+".." = "tkRange"
+":=" = "tkAssign"
+"<=" = "tkLE"
+">=" = "tkGE"
+"<>" = "tkNE"
+
+"IDENTIFIER"      = "tkIdent"
+"char_literal"    = "tkCharLiteral"
+
+%EBNF%
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////
+// DESIGNAOR
+//////////////////////////////////////////////////////////////////////////////////////////
+
+<Designator>       ::= <Ident> {<DesignatorTail>}.
+
+<DesignatorTail>   ::= "(" [  <ident> {"," <ident> } ] ")" 
+                   .
+<Ident>            ::= "identifier" .
+

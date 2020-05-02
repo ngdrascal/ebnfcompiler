@@ -1,0 +1,12 @@
+<Syntax>     ::= {<Statement>} "." .
+<Statement>  ::= "IDENTIFIER" "::=" <Expression> ".".
+<Expression> ::= <Term> {"|" <Term>}.
+<Term>       ::= <Actions> <Factor> <Actions> {<Factor> <Actions>}.
+<Factor>     ::= "IDENTIFIER" |
+                 "STRING" |
+                 "(" <Expression> ")" |
+                 "[" <Expression> "]" |
+                 "{" <Expression> "}".
+
+<Actions>    ::= {"ACTION"} .
+
