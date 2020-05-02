@@ -10,7 +10,7 @@ namespace EbnfCompiler.AST
 
    public interface IAstNode
    {
-      ISourceLocation Location { get; set; }
+      ISourceLocation Location { get; }
 
       AstNodeType AstNodeType { get; }
 

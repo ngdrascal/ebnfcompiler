@@ -197,10 +197,10 @@ namespace EbnfCompiler.Driver
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
                                          new ProdInfoFactory(tracer), new Stack<IAstNode>(), tracer);
          var parser = new Parser.Parser(scanner, astBuilder);
-         var (tokens, ast) = parser.ParseGoal();
+         var rootNode = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var gen = new CSharpGenerator(ast, tokens, traverser, loggerFactory.CreateLogger("CSGEN"));
+         var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
          gen.Run();
 
          foreach (var prod in astBuilder.Productions)

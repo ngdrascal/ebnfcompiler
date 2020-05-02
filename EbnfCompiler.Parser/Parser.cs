@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using EbnfCompiler.AST;
 using EbnfCompiler.Compiler;
 using EbnfCompiler.Scanner;
@@ -23,14 +22,13 @@ namespace EbnfCompiler.Parser
             throw new SyntaxErrorException(tokenKind, _scanner.CurrentToken);
       }
 
-      public (IReadOnlyCollection<ITokenDefinition> TokenDefinitions,
-              ISyntaxNode AbstractSyntaxTree) ParseGoal()
+      public IRootNode ParseGoal()
       {
          ParseInput();
          Match(TokenKind.Eof);
          _scanner.Advance();
 
-         return (_astBuilder.TokenDefinitions, _astBuilder.SyntaxTree);
+         return new RootNode(_astBuilder.TokenDefinitions, _astBuilder.SyntaxTree);
       }
 
       // <Input> ::= <Tokens> <Grammar> .

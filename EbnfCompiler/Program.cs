@@ -29,10 +29,10 @@ namespace EbnfCompiler
 
          var parser = new Parser.Parser(scanner, astBuilder);
 
-         var (tokens, ast) = parser.ParseGoal();
+         var rootNode = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var gen = new CSharpGenerator(ast, tokens, traverser, nullLogger);
+         var gen = new CSharpGenerator(rootNode, traverser, nullLogger);
          gen.Run();
       }
    }

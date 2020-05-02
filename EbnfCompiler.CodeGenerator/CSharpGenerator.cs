@@ -36,11 +36,10 @@ namespace EbnfCompiler.CodeGenerator
       private int _indentLevel;
       private string Output { get; set; }
 
-      public CSharpGenerator(ISyntaxNode syntaxTree, IReadOnlyCollection<ITokenDefinition> tokens,
-                              IAstTraverser traverser, ILogger log)
+      public CSharpGenerator(IRootNode rootNode, IAstTraverser traverser, ILogger log)
       {
-         _syntaxTree = syntaxTree;
-         _tokens = tokens;
+         _syntaxTree = rootNode.Syntax;
+         _tokens = rootNode.TokenDefs;
          _traverser = traverser;
          _log = log;
          _stack = new Stack<ContextBase>();
