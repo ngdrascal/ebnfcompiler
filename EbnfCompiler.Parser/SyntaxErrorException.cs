@@ -1,18 +1,13 @@
-﻿using System;
-using EbnfCompiler.Compiler;
+﻿using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.Parser
 {
-   public class SyntaxErrorException : Exception
+   public class SyntaxErrorException : CompilerException
    {
-      private readonly IToken _token;
-
       public SyntaxErrorException(TokenKind expecting, IToken token)
-         : base($"Expecting: {expecting}. Found: {token.TokenKind} At: {token.Location.StartLine} {token.Location.StartColumn}")
+         : base($"Expecting: {expecting}. Found: {token.TokenKind} At: {token.Location.StartLine} {token.Location.StartColumn}",
+            token.Location)
       {
-         _token = token;
       }
-
-      public IToken Token => _token;
    }
 }

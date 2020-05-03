@@ -5,6 +5,7 @@ using System.Text;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
 using EbnfCompiler.CodeGenerator;
+using EbnfCompiler.Compiler;
 using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 

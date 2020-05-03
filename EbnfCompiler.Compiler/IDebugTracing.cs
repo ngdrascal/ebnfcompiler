@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace EbnfCompiler.AST
+namespace EbnfCompiler.Compiler
 {
    public interface IDebugTracer
    {

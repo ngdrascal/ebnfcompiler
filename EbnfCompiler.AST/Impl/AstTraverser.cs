@@ -1,4 +1,5 @@
 ﻿using System;
+using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.AST.Impl
 {

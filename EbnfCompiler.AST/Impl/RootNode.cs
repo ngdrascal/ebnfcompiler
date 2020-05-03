@@ -10,7 +10,7 @@ namespace EbnfCompiler.AST.Impl
          Syntax = syntax;
       }
 
-      public IReadOnlyCollection<ITokenDefinition> TokenDefs { get; private set; }
-      public ISyntaxNode Syntax { get; private set; }
+      public IReadOnlyCollection<ITokenDefinition> TokenDefs { get; }
+      public ISyntaxNode Syntax { get; }
    }
 }

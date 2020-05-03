@@ -3,6 +3,7 @@ using System.IO;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
 using EbnfCompiler.CodeGenerator;
+using EbnfCompiler.Compiler;
 using Microsoft.Extensions.Logging;
 
 namespace EbnfCompiler

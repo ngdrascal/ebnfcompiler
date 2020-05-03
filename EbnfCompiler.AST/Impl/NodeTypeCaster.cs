@@ -108,6 +108,7 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
+      // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
       private static string ErrorMessage(AstNodeType fromType, Type toType)
       {
          if (toType == null) 
