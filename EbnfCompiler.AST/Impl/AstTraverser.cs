@@ -56,13 +56,8 @@ namespace EbnfCompiler.AST.Impl
                if (astNode.AsExpression().PreActionNode != null)
                   Traverse(astNode.AsExpression().PreActionNode);
 
-               var term = astNode.AsExpression().FirstTerm;
-               while (term != null)
-               {
+               foreach(var term in astNode.AsExpression().Terms)
                   Traverse(term);
-
-                  term = term.NextTerm;
-               }
 
                if (astNode.AsExpression().PostActionNode != null)
                   Traverse(astNode.AsExpression().PreActionNode);

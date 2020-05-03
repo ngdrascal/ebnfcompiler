@@ -44,7 +44,7 @@ namespace EbnfCompiler.AST
 
    public interface IExpressionNode : IAstNode, IHaveActions
    {
-      ITermNode FirstTerm { get; }
+      IReadOnlyCollection<ITermNode> Terms { get; }
 
       void AppendTerm(ITermNode newTerm);
 
@@ -93,7 +93,7 @@ namespace EbnfCompiler.AST
       IExpressionNode Expression { get; set; }
    }
 
-   public interface IActionNode: IAstNode
+   public interface IActionNode : IAstNode
    {
       string ActionName { get; }
    }

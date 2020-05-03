@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using EbnfCompiler.Compiler;
 
@@ -104,57 +105,42 @@ namespace EbnfCompiler.AST.Impl
 
    public class ExpressionNode : AstNode, IExpressionNode
    {
-      private int _termCount;
+      private readonly List<ITermNode> _terms = new List<ITermNode>();
+
       public ExpressionNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Expression, token, tracer)
       {
       }
 
-      public ITermNode FirstTerm { get; private set; }
+      public IReadOnlyCollection<ITermNode> Terms => _terms.AsReadOnly();
 
       public void AppendTerm(ITermNode newTerm)
       {
-         if (FirstTerm == null)
-            FirstTerm = newTerm;
-         else
-         {
-            var t = FirstTerm;
-            while (t.NextTerm != null)
-               t = t.NextTerm;
-            t.NextTerm = newTerm;
-         }
-
-         _termCount++;
+         _terms.Add(newTerm);
       }
 
-      public int TermCount => _termCount;
+      public int TermCount => _terms.Count;
 
       public override string ToString()
       {
          var result = string.Empty;
 
-         var term = FirstTerm;
-         while (term != null)
+         foreach (var term in _terms.SkipLast(1))
          {
             result += term.ToString();
-            term = term.NextTerm;
-            if (term != null)
-               result += " | ";
+            result += " | ";
          }
+
+         result += _terms.Last().ToString();
 
          return result;
       }
 
       protected override void CalcFirstSet()
       {
-         var term = FirstTerm;
-         while (term != null)
-         {
+         foreach (var term in _terms)
             // ReSharper disable once RedundantArgumentDefaultValue
             FirstSetInternal.Union(term.FirstSet, true);
-
-            term = term.NextTerm;
-         }
       }
 
       public IActionNode PreActionNode { get; set; }

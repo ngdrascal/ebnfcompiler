@@ -338,7 +338,7 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
          Assert.That((stack.Peek() as IExpressionNode)?.Image, Is.EqualTo(token.Image));
-         Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Null);
+         Assert.That((stack.Peek() as IExpressionNode)?.Terms.Count, Is.EqualTo(0));
       }
 
       [Test]
@@ -484,7 +484,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Assert:
          Assert.That(stack.Count, Is.EqualTo(1));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IExpressionNode)));
-         Assert.That((stack.Peek() as IExpressionNode)?.FirstTerm, Is.Not.Null);
+         Assert.That((stack.Peek() as IExpressionNode)?.Terms.Count, Is.Not.EqualTo(0));
       }
 
       [Test]
