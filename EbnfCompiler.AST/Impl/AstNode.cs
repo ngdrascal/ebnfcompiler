@@ -149,38 +149,26 @@ namespace EbnfCompiler.AST.Impl
 
    public class TermNode : AstNode, ITermNode
    {
+      private readonly List<IFactorNode> _factors = new List<IFactorNode>();
+
       public TermNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Term, token, tracer)
       {
       }
 
-      public ITermNode NextTerm { get; set; }
-
-      public IFactorNode FirstFactor { get; private set; }
+      public IReadOnlyCollection<IFactorNode> Factors => _factors.AsReadOnly();
 
       public void AppendFactor(IFactorNode newFactor)
       {
-         if (FirstFactor == null)
-            FirstFactor = newFactor;
-         else
-         {
-            var t = FirstFactor;
-            while (t.NextFactor != null)
-               t = t.NextFactor;
-            t.NextFactor = newFactor;
-         }
+         _factors.Add(newFactor);
       }
 
       public override string ToString()
       {
          var result = string.Empty;
 
-         var factor = FirstFactor;
-         while (factor != null)
-         {
-            result += " " + factor.ToString();
-            factor = factor.NextFactor;
-         }
+         foreach (var fact in _factors)
+            result += " " + fact.ToString();
 
          return result;
       }
@@ -189,15 +177,15 @@ namespace EbnfCompiler.AST.Impl
       {
          var allIncludeEpsilon = true;
 
-         var factor = FirstFactor;
-         while (factor != null)
+        foreach(var factor in _factors)
          {
             FirstSetInternal.Union(factor.FirstSet, false);
             if (!factor.FirstSet.IncludesEpsilon)
                allIncludeEpsilon = false;
 
             // keep going as long as FirstSet includes Epsilon
-            factor = factor.FactorExpr.FirstSet.IncludesEpsilon ? factor.NextFactor : null;
+            if (!factor.FactorExpr.FirstSet.IncludesEpsilon)
+               break;
          }
 
          if (allIncludeEpsilon)
@@ -216,8 +204,6 @@ namespace EbnfCompiler.AST.Impl
       }
 
       public IAstNode FactorExpr { get; set; }
-
-      public IFactorNode NextFactor { get; set; }
 
       public override string ToString()
       {

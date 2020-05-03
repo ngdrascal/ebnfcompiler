@@ -68,12 +68,8 @@ namespace EbnfCompiler.AST.Impl
             case AstNodeType.Term:
                _tracer.BeginTrace("Term");
 
-               var factor = astNode.AsTerm().FirstFactor;
-               while (factor != null)
-               {
+               foreach(var factor in astNode.AsTerm().Factors)
                   Traverse(factor);
-                  factor = factor.NextFactor;
-               }
 
                _tracer.EndTrace("Term");
                break;

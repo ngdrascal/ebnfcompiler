@@ -458,7 +458,7 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(ITermNode)));
          Assert.That((stack.Peek() as ITermNode)?.Image, Is.EqualTo(token.Image));
-         Assert.That((stack.Peek() as ITermNode)?.FirstFactor, Is.Null);
+         Assert.That((stack.Peek() as ITermNode)?.Factors.Count, Is.EqualTo(0));
       }
 
       [Test]
@@ -504,7 +504,6 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(stack.Count, Is.EqualTo(2));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(IFactorNode)));
          Assert.That((stack.Peek() as IFactorNode)?.Image, Is.EqualTo(token.Image));
-         Assert.That((stack.Peek() as IFactorNode)?.NextFactor, Is.Null);
       }
 
       [Test]
@@ -530,7 +529,7 @@ namespace EbnfCompiler.AST.UnitTests
          // Assert:
          Assert.That(stack.Count, Is.EqualTo(1));
          Assert.That(stack.Peek(), Is.InstanceOf(typeof(ITermNode)));
-         Assert.That((stack.Peek() as ITermNode)?.FirstFactor, Is.Not.Null);
+         Assert.That((stack.Peek() as ITermNode)?.Factors.Count, Is.Not.EqualTo(0));
       }
 
       [Test]

@@ -53,9 +53,7 @@ namespace EbnfCompiler.AST
 
    public interface ITermNode : IAstNode, IHaveActions
    {
-      ITermNode NextTerm { get; set; }
-
-      IFactorNode FirstFactor { get; }
+      IReadOnlyCollection<IFactorNode> Factors { get; }
 
       void AppendFactor(IFactorNode newFactor);
    }
@@ -63,8 +61,6 @@ namespace EbnfCompiler.AST
    public interface IFactorNode : IAstNode, IHaveActions
    {
       IAstNode FactorExpr { get; set; }
-
-      IFactorNode NextFactor { get; set; }
    }
 
    public interface IProdRefNode : IAstNode
