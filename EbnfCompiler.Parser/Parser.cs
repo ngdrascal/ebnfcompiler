@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using EbnfCompiler.AST;
+using EbnfCompiler.AST.Impl;
 using EbnfCompiler.Compiler;
 using EbnfCompiler.Scanner;
 

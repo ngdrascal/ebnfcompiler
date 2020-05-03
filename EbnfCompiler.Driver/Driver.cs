@@ -202,15 +202,6 @@ namespace EbnfCompiler.Driver
          var traverser = new AstTraverser(tracer);
          var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
          gen.Run();
-
-         foreach (var prod in astBuilder.Productions)
-         {
-            //    tracer.TraceLine($"\nAST for <{prod.Name}>");
-            //    traverser.Traverse(prod.Statement);
-            //    
-            //    // tracer.TraceLine(new string('-', 40));
-            //    // tracer.TraceLine($"First of <{prod.Name}>: {prod.Statement.FirstSet}");
-         }
       }
    }
 }
