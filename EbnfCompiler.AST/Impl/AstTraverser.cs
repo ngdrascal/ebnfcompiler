@@ -27,13 +27,8 @@ namespace EbnfCompiler.AST.Impl
                if (astNode.AsSyntax().PreActionNode != null)
                   Traverse(astNode.AsSyntax().PreActionNode);
 
-               var stmt = astNode.AsSyntax().FirstStatement;
-               while (stmt != null)
-               {
+               foreach (var stmt in astNode.AsSyntax().Statements)
                   Traverse(stmt);
-
-                  stmt = stmt.NextStatement;
-               }
 
                if (astNode.AsSyntax().PostActionNode != null)
                   Traverse(astNode.AsSyntax().PostActionNode);

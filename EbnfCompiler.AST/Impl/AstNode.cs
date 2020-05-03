@@ -1,13 +1,15 @@
-﻿using EbnfCompiler.Compiler;
+﻿using System.Collections.Generic;
+using System.Text;
+using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.AST.Impl
 {
    public abstract class AstNode : IAstNode
    {
-      protected readonly IDebugTracer Tracer;
+      private readonly IDebugTracer _tracer;
       protected readonly TerminalSet FirstSetInternal = new TerminalSet();
 
-      public ISourceLocation Location { get; set; }
+      public ISourceLocation Location { get; }
 
       public AstNodeType AstNodeType { get; }
 
@@ -20,11 +22,11 @@ namespace EbnfCompiler.AST.Impl
             if (!FirstSetInternal.IsEmpty())
                return FirstSetInternal;
 
-            Tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
+            _tracer.BeginTrace(message: $"First: {GetType().Name}: {this}");
 
             CalcFirstSet();
 
-            Tracer.EndTrace($"First: {GetType().Name} = {FirstSetInternal} ");
+            _tracer.EndTrace($"First: {GetType().Name} = {FirstSetInternal} ");
 
             return FirstSetInternal;
          }
@@ -32,7 +34,7 @@ namespace EbnfCompiler.AST.Impl
 
       protected AstNode(AstNodeType astNodeType, IToken token, IDebugTracer tracer)
       {
-         Tracer = tracer;
+         _tracer = tracer;
          AstNodeType = astNodeType;
          Location = token.Location;
          Image = token.Image;
@@ -43,6 +45,8 @@ namespace EbnfCompiler.AST.Impl
 
    public class SyntaxNode : AstNode, ISyntaxNode
    {
+      private readonly List<IStatementNode> _statements = new List<IStatementNode>();
+
       public SyntaxNode(IToken token, IDebugTracer tracer)
          : base(AstNodeType.Syntax, token, tracer)
       {
@@ -50,26 +54,23 @@ namespace EbnfCompiler.AST.Impl
 
       protected override void CalcFirstSet()
       {
-         FirstSetInternal.Union(FirstStatement.FirstSet);
+         // there isn't a first set for the Syntax node
       }
 
-      public IStatementNode FirstStatement { get; set; }
+      public IReadOnlyCollection<IStatementNode> Statements => _statements.AsReadOnly();
+
       public void AppendStatement(IStatementNode newStatement)
       {
-         if (FirstStatement == null)
-            FirstStatement = newStatement;
-         else
-         {
-            var s = FirstStatement;
-            while (s.NextStatement != null)
-               s = s.NextStatement;
-            s.NextStatement = newStatement;
-         }
+         _statements.Add(newStatement);
       }
 
       public override string ToString()
       {
-         return $"{FirstStatement} .";
+         var sb = new StringBuilder();
+         foreach (var s in _statements)
+            sb.AppendLine(s.ToString());
+
+         return sb.ToString();
       }
 
       public IActionNode PreActionNode { get; set; }
@@ -86,8 +87,6 @@ namespace EbnfCompiler.AST.Impl
       public string ProdName => Image;
 
       public IExpressionNode Expression { get; set; }
-
-      public IStatementNode NextStatement { get; set; }
 
       public override string ToString()
       {

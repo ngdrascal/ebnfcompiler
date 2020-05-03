@@ -66,7 +66,7 @@ namespace EbnfCompiler.CodeGenerator
                PrintNamespaceHeader();
                PrintMatchMethod();
 
-               PrintParseGoal(node.AsSyntax().FirstStatement.ProdName,
+               PrintParseGoal(node.AsSyntax().Statements.First().ProdName,
                               node.AsSyntax().PreActionNode?.ActionName,
                               node.AsSyntax().PostActionNode?.ActionName);
                break;

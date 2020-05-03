@@ -1,4 +1,5 @@
-﻿using EbnfCompiler.Compiler;
+﻿using System.Collections.Generic;
+using EbnfCompiler.Compiler;
 
 namespace EbnfCompiler.AST
 {
@@ -29,7 +30,7 @@ namespace EbnfCompiler.AST
 
    public interface ISyntaxNode : IAstNode, IHaveActions
    {
-      IStatementNode FirstStatement { get; }
+      IReadOnlyCollection<IStatementNode> Statements { get; }
 
       void AppendStatement(IStatementNode newNode);
    }
@@ -37,9 +38,8 @@ namespace EbnfCompiler.AST
    public interface IStatementNode : IAstNode, IHaveActions
    {
       string ProdName { get; }
-      IExpressionNode Expression { get; set; }
 
-      IStatementNode NextStatement { get; set; }
+      IExpressionNode Expression { get; set; }
    }
 
    public interface IExpressionNode : IAstNode, IHaveActions
