@@ -74,17 +74,17 @@ namespace EbnfCompiler.AST
       string TermName { get; }
    }
 
-   public interface IParenNode
+   public interface IParenNode : IAstNode
    {
       IExpressionNode Expression { get; set; }
    }
 
-   public interface IOptionNode
+   public interface IOptionNode : IAstNode
    {
       IExpressionNode Expression { get; set; }
    }
 
-   public interface IKleeneStarNode
+   public interface IKleeneStarNode : IAstNode
    {
       IExpressionNode Expression { get; set; }
    }

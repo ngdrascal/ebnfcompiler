@@ -2,23 +2,6 @@
 
 namespace EbnfCompiler.AST.Impl
 {
-   public class NodeCastException : Exception
-   {
-      public NodeCastException()
-      {
-      }
-
-      public NodeCastException(string message)
-      : base(message)
-      {
-      }
-
-      public NodeCastException(string message, Exception innerException)
-         : base(message, innerException)
-      {
-      }
-   }
-
    public static class NodeTypeCaster
    {
       public static ISyntaxNode AsSyntax(this IAstNode astNode)
@@ -77,14 +60,14 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      public static IParenNode AsLParen(this IAstNode astNode)
+      public static IParenNode AsParen(this IAstNode astNode)
       {
          if (!(astNode is IParenNode result))
             throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IParenNode)));
          return result;
       }
 
-      public static IOptionNode AsLOption(this IAstNode astNode)
+      public static IOptionNode AsOption(this IAstNode astNode)
       {
          if (!(astNode is IOptionNode result))
             throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IOptionNode)));
@@ -92,7 +75,7 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      public static IKleeneStarNode AsLKleeneStarNode(this IAstNode astNode)
+      public static IKleeneStarNode AsKleene(this IAstNode astNode)
       {
          if (!(astNode is IKleeneStarNode result))
             throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IKleeneStarNode)));
@@ -100,7 +83,7 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      public static IActionNode AsActionNode(this IAstNode astNode)
+      public static IActionNode AsAction(this IAstNode astNode)
       {
          if (!(astNode is IActionNode result))
             throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IActionNode)));
@@ -108,13 +91,9 @@ namespace EbnfCompiler.AST.Impl
          return result;
       }
 
-      // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
       private static string ErrorMessage(AstNodeType fromType, Type toType)
       {
-         if (toType == null) 
-            throw new ArgumentNullException(nameof(toType));
-
-         return $"Internal error casting {fromType} to {nameof(toType)}.";
+         return $"Internal error casting {fromType} to {toType.Name}.";
       }
    }
 }
