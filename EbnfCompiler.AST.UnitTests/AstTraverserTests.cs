@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using EbnfCompiler.AST.Impl;
 using EbnfCompiler.Compiler;
 using Moq;
@@ -6,7 +7,7 @@ using NUnit.Framework;
 
 namespace EbnfCompiler.AST.UnitTests
 {
-   [TestFixture]
+   [TestFixture, ExcludeFromCodeCoverage]
    public class AstTraverserTests
    {
       [Test]

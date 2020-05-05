@@ -23,8 +23,8 @@ namespace EbnfCompiler.AST.UnitTests
          AsSomething_WhenIsSomething_ReturnsSomething<ProdRefNode, IProdRefNode>(s => s.AsProdRef());
          AsSomething_WhenIsSomething_ReturnsSomething<TerminalNode, ITerminalNode>(s => s.AsTerminal());
          AsSomething_WhenIsSomething_ReturnsSomething<ParenNode, IParenNode>(s => s.AsParen());
-         // AsSomething_WhenIsSomething_ReturnsSomething<OptionNode, IOptionNode>(s => s.AsOption());
-         // AsSomething_WhenIsSomething_ReturnsSomething<KleeneNode, IKleeneStarNode>(s => s.AsKleene());
+         AsSomething_WhenIsSomething_ReturnsSomething<OptionNode, IOptionNode>(s => s.AsOption());
+         AsSomething_WhenIsSomething_ReturnsSomething<KleeneNode, IKleeneStarNode>(s => s.AsKleene());
          AsSomething_WhenIsSomething_ReturnsSomething<ActionNode, IActionNode>(s => s.AsAction());
       }
 
