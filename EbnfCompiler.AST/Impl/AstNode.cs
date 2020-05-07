@@ -91,7 +91,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"{Expression} .";
+         return ProdName + " ::= " + Expression.ToString() + " .";
       }
 
       protected override void CalcFirstSet()
@@ -165,9 +165,9 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         var result = string.Empty;
-
-         foreach (var fact in _factors)
+         var result = _factors.Count > 0 ? _factors.First().ToString() : string.Empty;
+         
+         foreach (var fact in _factors.TakeLast(_factors.Count - 1))
             result += " " + fact.ToString();
 
          return result;
@@ -177,7 +177,7 @@ namespace EbnfCompiler.AST.Impl
       {
          var allIncludeEpsilon = true;
 
-        foreach(var factor in _factors)
+         foreach (var factor in _factors)
          {
             FirstSetInternal.Union(factor.FirstSet, false);
             if (!factor.FirstSet.IncludesEpsilon)
@@ -276,7 +276,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"( {Expression} )";
+         return "( " + Expression.ToString() + " )";
       }
 
       protected override void CalcFirstSet()
@@ -296,7 +296,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"[ {Expression} ]";
+         return "[ " + Expression.ToString() + " ]";
       }
 
       protected override void CalcFirstSet()
