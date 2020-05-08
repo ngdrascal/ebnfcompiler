@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using EbnfCompiler.AST.Impl;
 using EbnfCompiler.Compiler;
@@ -10,14 +11,25 @@ namespace EbnfCompiler.AST.UnitTests
    [TestFixture, ExcludeFromCodeCoverage]
    public class AstTraverserTests
    {
-      [Test]
-      public void AstTraverser_WhenSyntaxNode_CallsDelegates()
+      [TestCase(typeof(SyntaxNode))]
+      [TestCase(typeof(StatementNode))]
+      [TestCase(typeof(ExpressionNode))]
+      [TestCase(typeof(TermNode))]
+      [TestCase(typeof(FactorNode))]
+      [TestCase(typeof(ProdRefNode))]
+      [TestCase(typeof(TerminalNode))]
+      [TestCase(typeof(ActionNode))]
+      [TestCase(typeof(ParenNode))]
+      [TestCase(typeof(OptionNode))]
+      [TestCase(typeof(KleeneNode))]
+      public void AstTraverser_GivenANodeType_CallsDelegates(Type nodeType)
       {
          // Arrange:
          IAstNode actualNode = null;
          var postProcessWasCalled = false;
          var tracer = new Mock<IDebugTracer>().Object;
-         var expectedNode = new SyntaxNode(new Token(TokenKind.Identifier, "<T>"), tracer);
+         var expectedNode = (IAstNode)Activator.CreateInstance(nodeType, new Token(), tracer);
+
          var traverser = new AstTraverser(tracer);
          traverser.ProcessNode += (node) => { actualNode = node; };
          traverser.PostProcessNode += () => { postProcessWasCalled = true; };
@@ -60,6 +72,23 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(tally[AstNodeType.Syntax], Is.EqualTo(1));
          Assert.That(tally[AstNodeType.Statement], Is.EqualTo(1));
          Assert.That(tally[AstNodeType.Expression], Is.EqualTo(1));
+      }
+
+      [Test]
+      public void Test()
+      {
+         using var sb = new SyntaxBuilder();
+         sb.Syntax(
+            sb.Statement("<S>",
+               sb.Expression(
+                  sb.Term(
+                     sb.Factor(sb.Terminal("a")),
+                     sb.Factor(sb.Terminal("b")),
+                     sb.Factor(sb.ProdRef("<T>"))),
+                  sb.Term(
+                     sb.Factor(sb.Terminal("c"))))));
+
+         var output = sb.Build();
       }
    }
 }

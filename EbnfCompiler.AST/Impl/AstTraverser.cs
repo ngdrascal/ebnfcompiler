@@ -40,6 +40,7 @@ namespace EbnfCompiler.AST.Impl
                if (astNode.AsStatement().PreActionNode != null)
                   Traverse(astNode.AsStatement().PreActionNode);
 
+               CheckForValue(astNode, "Expression", astNode.AsStatement().Expression);
                Traverse(astNode.AsStatement().Expression);
 
                if (astNode.AsStatement().PostActionNode != null)
@@ -51,7 +52,7 @@ namespace EbnfCompiler.AST.Impl
                if (astNode.AsExpression().PreActionNode != null)
                   Traverse(astNode.AsExpression().PreActionNode);
 
-               foreach(var term in astNode.AsExpression().Terms)
+               foreach (var term in astNode.AsExpression().Terms)
                   Traverse(term);
 
                if (astNode.AsExpression().PostActionNode != null)
@@ -60,7 +61,7 @@ namespace EbnfCompiler.AST.Impl
                break;
 
             case AstNodeType.Term:
-               foreach(var factor in astNode.AsTerm().Factors)
+               foreach (var factor in astNode.AsTerm().Factors)
                   Traverse(factor);
 
                break;
@@ -69,6 +70,7 @@ namespace EbnfCompiler.AST.Impl
                if (astNode.AsFactor().PreActionNode != null)
                   Traverse(astNode.AsFactor().PreActionNode);
 
+               CheckForValue(astNode, "FactorExpr", astNode.AsFactor().FactorExpr);
                Traverse(astNode.AsFactor().FactorExpr);
 
                if (astNode.AsFactor().PostActionNode != null)
@@ -78,12 +80,12 @@ namespace EbnfCompiler.AST.Impl
 
             case AstNodeType.ProdRef:
                _tracer.TraceLine($"{astNode.AsProdRef().ProdName}");
-               
+
                break;
 
             case AstNodeType.Terminal:
                _tracer.TraceLine($"{astNode.AsTerminal().TermName}");
-              
+
                break;
 
             case AstNodeType.Action:
@@ -92,16 +94,20 @@ namespace EbnfCompiler.AST.Impl
                break;
 
             case AstNodeType.Paren:
+               CheckForValue(astNode, "Expression", astNode.AsParen().Expression);
+
                Traverse(astNode.AsParen().Expression);
 
                break;
 
             case AstNodeType.Option:
+               CheckForValue(astNode, "Expression", astNode.AsOption().Expression);
                Traverse(astNode.AsOption().Expression);
 
                break;
 
             case AstNodeType.KleeneStar:
+               CheckForValue(astNode, "Expression", astNode.AsKleene().Expression);
                Traverse(astNode.AsKleene().Expression);
 
                break;
@@ -110,6 +116,12 @@ namespace EbnfCompiler.AST.Impl
          _tracer.EndTrace(astNode.AstNodeType.ToString());
 
          PostProcessNode?.Invoke();
+      }
+
+      private void CheckForValue(IAstNode parentNode, string propertyName, IAstNode propertyValue)
+      {
+         if (propertyValue == null)
+            throw new AstErrorException(message: $"Invalid AST node: {parentNode.AstNodeType.ToString()}. Missing value for property {propertyName}.");
       }
    }
 }

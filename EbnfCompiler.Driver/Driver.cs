@@ -182,9 +182,9 @@ namespace EbnfCompiler.Driver
          var loggerFactory = LoggerFactory.Create(builder =>
          {
             builder
-               .AddFilter("ASTBuilder", LogLevel.Trace)
-               .AddFilter("ASTTraverser", LogLevel.Trace)
-               .AddFilter("CSGEN", LogLevel.Information)
+               .AddFilter("ASTBuilder", LogLevel.Warning)
+               .AddFilter("ASTTraverser", LogLevel.Warning)
+               .AddFilter("CSGEN", LogLevel.Trace)
                .AddDebug();
          });
          var builderLogger = loggerFactory.CreateLogger("ASTBuilder");
@@ -192,7 +192,7 @@ namespace EbnfCompiler.Driver
 
          var encoding = new UTF8Encoding();
          using var stream = new MemoryStream();
-         stream.Write(encoding.GetBytes(TestCase1C));
+         stream.Write(encoding.GetBytes(TestCase1B));
          stream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner.Scanner(stream);
@@ -205,7 +205,9 @@ namespace EbnfCompiler.Driver
          var traverserTracer = new DebugTracer(traverserLogger);
          var traverser = new AstTraverser(traverserTracer);
 
-         var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
+         //var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
+         var gen = new TestTreeGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
+
          gen.Run();
       }
    }
