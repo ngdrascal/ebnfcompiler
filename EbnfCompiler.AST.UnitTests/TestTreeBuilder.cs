@@ -105,6 +105,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Syntax
    {
       private readonly IDebugTracer _tracer;
@@ -147,6 +148,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Statement
    {
       private readonly IDebugTracer _tracer;
@@ -184,6 +186,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Expression
    {
       private readonly IDebugTracer _tracer;
@@ -228,6 +231,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Term
    {
       private readonly IDebugTracer _tracer;
@@ -271,6 +275,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Factor
    {
       private readonly IDebugTracer _tracer;
@@ -341,6 +346,7 @@ namespace EbnfCompiler.AST.UnitTests
       IAstNode BuildTree();
    }
 
+   [ExcludeFromCodeCoverage]
    public class Terminal : IFactExpr
    {
       private readonly IDebugTracer _tracer;
@@ -367,6 +373,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class ProdRef : IFactExpr
    {
       private readonly IDebugTracer _tracer;
@@ -393,6 +400,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Paren : IFactExpr
    {
       private readonly IDebugTracer _tracer;
@@ -428,6 +436,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Option : IFactExpr
    {
       private readonly IDebugTracer _tracer;
@@ -463,6 +472,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Kleene : IFactExpr
    {
       private readonly IDebugTracer _tracer;
@@ -498,6 +508,7 @@ namespace EbnfCompiler.AST.UnitTests
       }
    }
 
+   [ExcludeFromCodeCoverage]
    public class Action
    {
       private readonly string _name;
