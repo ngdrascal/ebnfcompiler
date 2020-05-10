@@ -111,7 +111,7 @@ namespace EbnfCompiler.Scanner
                         break;
                      case '<':
                         CurrentToken.TokenKind = TokenKind.Identifier;
-                        CurrentToken.Image = string.Empty;
+                        CurrentToken.Image = "<";
                         _state = State.Ident;
                         break;
                      case '"':
@@ -121,11 +121,11 @@ namespace EbnfCompiler.Scanner
                         break;
                      case '#':
                         CurrentToken.TokenKind = TokenKind.Action;
-                        CurrentToken.Image = string.Empty;
+                        CurrentToken.Image = "#";
                         _state = State.Action;
                         break;
                      case '%':
-                        CurrentToken.Image = string.Empty;
+                        CurrentToken.Image = "%";
                         _state = State.Tag;
                         break;
                      case ChEof:
@@ -155,6 +155,7 @@ namespace EbnfCompiler.Scanner
                   }
                   else if (_currentCh == '>')
                   {
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                      _state = State.Done;
                   }
@@ -192,6 +193,7 @@ namespace EbnfCompiler.Scanner
                   }
                   else if (_currentCh == '#')
                   {
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                      _state = State.Done;
                   }
@@ -212,10 +214,10 @@ namespace EbnfCompiler.Scanner
                   {
                      switch (CurrentToken.Image)
                      {
-                        case "TOKENS":
+                        case "%TOKENS":
                            CurrentToken.TokenKind = TokenKind.TokensTag;
                            break;
-                        case "EBNF":
+                        case "%EBNF":
                            CurrentToken.TokenKind = TokenKind.EbnfTag;
                            break;
                         default:
@@ -223,6 +225,7 @@ namespace EbnfCompiler.Scanner
                            break;
                      }
 
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
                      _state = State.Done;
                   }
@@ -302,7 +305,7 @@ namespace EbnfCompiler.Scanner
 
       private void SkipWhiteSpace()
       {
-         while (_currentCh == ChSpace || _currentCh == ChTab || _currentCh == ChCr || 
+         while (_currentCh == ChSpace || _currentCh == ChTab || _currentCh == ChCr ||
                 _currentCh == ChLf || _currentCh == ChZero)
             _currentCh = NextChar();
       }

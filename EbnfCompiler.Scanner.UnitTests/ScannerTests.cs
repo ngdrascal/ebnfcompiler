@@ -8,11 +8,11 @@ namespace EbnfCompiler.Scanner.UnitTests
    [TestFixture, ExcludeFromCodeCoverage]
    public class ScannerTests
    {
-      [TestCase("%TOKENS%", TokenKind.TokensTag, "TOKENS")]
-      [TestCase("%EBNF%", TokenKind.EbnfTag, "EBNF")]
-      [TestCase("<SomeIdentifier>", TokenKind.Identifier, "SomeIdentifier")]
+      [TestCase("%TOKENS%", TokenKind.TokensTag, "%TOKENS%")]
+      [TestCase("%EBNF%", TokenKind.EbnfTag, "%EBNF%")]
+      [TestCase("<SomeIdentifier>", TokenKind.Identifier, "<SomeIdentifier>")]
       [TestCase("\"SomeString\"", TokenKind.String, "SomeString")]
-      [TestCase("#SomeAction#", TokenKind.Action, "SomeAction")]
+      [TestCase("#SomeAction#", TokenKind.Action, "#SomeAction#")]
 
       [TestCase("(", TokenKind.LeftParen, "(")]
       [TestCase(")", TokenKind.RightParen, ")")]
@@ -47,12 +47,12 @@ namespace EbnfCompiler.Scanner.UnitTests
          Assert.AreEqual(input.Length, scanner.CurrentToken.Location.StopColumn);
       }
 
-      [TestCase("%T\tOKENS>", "T")]
-      [TestCase("%EB\tNF>", "EB")]
-      [TestCase("%ERROR%>", "ERROR")]
-      [TestCase("<Some\tidentifier>", "Some")]
+      [TestCase("%T\tOKENS>", "%T")]
+      [TestCase("%EB\tNF>", "%EB")]
+      [TestCase("%ERROR%>", "%ERROR%")]
+      [TestCase("<Some\tidentifier>", "<Some")]
       [TestCase("\"Some\tstring\"", "Some")]
-      [TestCase("#Some\taction#", "Some")]
+      [TestCase("#Some\taction#", "#Some")]
       [TestCase(":=", ":")]
       [TestCase("::", "::")]
       [TestCase("/", "")]
