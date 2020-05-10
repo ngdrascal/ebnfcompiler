@@ -176,7 +176,7 @@ namespace EbnfCompiler.Driver
             <S> ::= #A0# ( #A1# ""a"" #A2# ) | ( #B3# ""b"" #B4#)  .
        ";
 
-      [Test/*, Ignore("Just for experimenting")*/]
+      [Test, Ignore("Just for experimenting")]
       public void Test01()
       {
          var loggerFactory = LoggerFactory.Create(builder =>
@@ -205,8 +205,7 @@ namespace EbnfCompiler.Driver
          var traverserTracer = new DebugTracer(traverserLogger);
          var traverser = new AstTraverser(traverserTracer);
 
-         //var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
-         var gen = new TestTreeGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
+         var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
 
          gen.Run();
       }
