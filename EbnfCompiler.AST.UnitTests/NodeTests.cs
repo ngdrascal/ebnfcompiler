@@ -145,7 +145,7 @@ namespace EbnfCompiler.AST.UnitTests
       public void ProdRefNode_WithIdentifier_ReturnsCorrectString()
       {
          // Arranged:
-         var node = new ProdRefNode(new Token(TokenKind.Identifier, "T"), _tracer);
+         var node = new ProdRefNode(new Token(TokenKind.Identifier, "<T>"), _tracer);
 
          // Act:
          var actual = node.ToString();
@@ -223,7 +223,7 @@ namespace EbnfCompiler.AST.UnitTests
       public void ActionNode__ReturnsCorrectString()
       {
          // Arranged:
-         var node = new ActionNode(new Token(TokenKind.Action, "Action"), _tracer);
+         var node = new ActionNode(new Token(TokenKind.Action, "#Action#"), _tracer);
 
          // Act:
          var actual = node.ToString();

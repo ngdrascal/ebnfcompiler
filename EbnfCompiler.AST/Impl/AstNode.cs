@@ -233,7 +233,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"<{ProdName}>";
+         return $"{ProdName}";
       }
 
       protected override void CalcFirstSet()
@@ -339,7 +339,7 @@ namespace EbnfCompiler.AST.Impl
 
       public override string ToString()
       {
-         return $"#{ActionName}#";
+         return $"{ActionName}";
       }
 
       protected override void CalcFirstSet()
