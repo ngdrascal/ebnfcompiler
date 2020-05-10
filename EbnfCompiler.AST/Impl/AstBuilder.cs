@@ -52,9 +52,8 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.BeginTrace(nameof(BeginSyntax));
 
-         IActionNode actionNode = null;
-         if (_stack.Count > 0 && _stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsAction();
+         var actionNode = (_stack.Count > 0 && _stack.Peek() is IActionNode)
+            ? _stack.Pop().AsAction() : null;
 
          var syntax = _astNodeFactory.Create(AstNodeType.Syntax, token).AsSyntax();
          syntax.PreActionNode = actionNode;
@@ -65,9 +64,7 @@ namespace EbnfCompiler.AST.Impl
       {
          _tracer.EndTrace(nameof(EndSyntax));
 
-         IActionNode actionNode = null;
-         if (_stack.Peek() is IActionNode)
-            actionNode = _stack.Pop().AsAction();
+         var actionNode = _stack.Peek() is IActionNode ? _stack.Pop().AsAction() : null;
 
          var syntax = _stack.Pop().AsSyntax();
          syntax.PostActionNode = actionNode;
@@ -271,170 +268,5 @@ namespace EbnfCompiler.AST.Impl
             prodRefNode.Expression = prodInfo.Statement.Expression;
          }
       }
-
-      /*
-            private void Traverse(string prodName, INode node, ITerminalSet firstSet, bool rollup = true)
-            {
-               while (node != null)
-               {
-                  switch (node.NodeType)
-                  {
-                     case NodeType.Expression:
-                        TraceLine("AltHead");
-
-                        // figure the first set for each alternative and add them to first set of
-                        // the head
-                        var term = node.AsExpression().FirstTerm;
-                        while (term != null)
-                        {
-                           Traverse(prodName, term.Next, term.FirstSet);
-                           TraceLine("First(alt) = " + term.FirstSet);
-
-                           try
-                           {
-                              ((ExpressionNode)node).FirstSet.Add(term.FirstSet);
-                           }
-                           catch (Exception)
-                           {
-                              Error("Duplicate terminal in first set of <" + prodName + "> " + '\n' +
-                                    "First(<" + prodName + ">)=[" +
-                                    ((ExpressionNode)node).FirstSet.DelimitedText() + ']',
-                                 node);
-                           }
-
-                           if (term.FirstSet.IncludesEpsilon)
-                              ((ExpressionNode)node).FirstSet.IncludesEpsilon = true;
-
-                           TraceLine("First(head) = " + ((ExpressionNode)node).FirstSet);
-
-                           term = term.NextTerm;
-                        }
-
-                        if (rollup)
-                        {
-                           // add the first set of the head to the first set of <firstSet>
-                           try
-                           {
-                              firstSet.Add(((ExpressionNode)node).FirstSet);
-                           }
-                           catch (Exception)
-                           {
-                              Error("Duplicate terminal in first set of <" + prodName + "> " +
-                                    '\n' +
-                                    "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]",
-                                 node);
-                           }
-
-                           if (((ExpressionNode)node).FirstSet.IncludesEpsilon)
-                              firstSet.IncludesEpsilon = true;
-
-                           TraceLine("First(firstSet) = " + firstSet);
-                        }
-
-                        break;
-
-                     case NodeType.ProdRef:
-                        TraceLine("ProdRef - " + ((ProdRefNode)node).ProdName);
-                        ComputeFirst(((ProdRefNode)node).ProdName);
-                        var prodInfo = Productions.First(p => p.Key == ((ProdRefNode)node).ProdName).Value;
-                        try
-                        {
-                           firstSet.Add(prodInfo.Expression.FirstSet);
-                        }
-                        catch (Exception)
-                        {
-                           Error("Duplicate terminal in first set of <" + prodName + "> " +
-                                 "found in <" + ((ProdRefNode)node).ProdName + ">" + '\n' +
-                                 "First(<" + prodName + ">)=[" + firstSet.DelimitedText() + "]" + '\n' +
-                                 "First(<" + ((ProdRefNode)node).ProdName + ">)=[" +
-                                 prodInfo.Expression.FirstSet.DelimitedText() + "]", node);
-                        }
-
-                        firstSet.IncludesEpsilon = prodInfo.Expression.FirstSet.IncludesEpsilon;
-                        if (!prodInfo.Expression.FirstSet.IncludesEpsilon)
-                           rollup = false;
-                        break;
-
-                     case NodeType.Terminal:
-                        TraceLine("TermName - " + ((TerminalNode)node).TermName);
-
-                        if (!firstSet.Includes(((TerminalNode)node).TermName))
-                        {
-                           firstSet.Add(((TerminalNode)node).TermName);
-                           firstSet.IncludesEpsilon = false;
-                           rollup = false;
-                        }
-                        else
-                           Error("Duplicate in first set of <" + prodName + ">: " +
-                                 ((TerminalNode)node).TermName, node);
-
-                        break;
-
-                     case NodeType.Term:
-                        TraceLine("Alternative");
-                        // should never get here
-                        break;
-
-                     case NodeType.ActName:
-                        TraceLine("ActName");
-                        // do nothing
-                        break;
-
-                     case NodeType.LParen:
-                        TraceLine("ntLParens");
-                        // do nothing
-                        break;
-
-                     case NodeType.BeginOption:
-                        TraceLine("BeginOption");
-                        // do nothing
-                        break;
-
-                     case NodeType.BeginKleeneStar:
-                        TraceLine("BeginKleene");
-                        // do nothing
-                        break;
-
-                     case NodeType.RParen:
-                        TraceLine("ntRParens");
-                        if (!firstSet.IncludesEpsilon)
-                           rollup = false;
-                        break;
-
-                     case NodeType.EndOption:
-                     case NodeType.EndKleeneStar:
-                        TraceLine(node.NodeType == NodeType.EndOption ? "EndOption" : "EndKleene");
-
-                        if (node.Next == null)
-                           firstSet.IncludesEpsilon = true;
-                        break;
-                  }
-
-                  node = node.Next;
-                  if (rollup)
-                     continue;
-
-                  // skip until no more nodes or a AltHead node
-                  while ((node != null) && (node.NodeType != NodeType.Expression))
-                     node = node.Next;
-               }
-            }
-
-            private void ComputeFirst(string prodName)
-            {
-               if (!Productions.TryGetValue(prodName, out var prodInfo))
-                  Error("Production not defined:" + prodName);
-
-               if (prodInfo == null || !prodInfo.Expression.FirstSet.IsEmpty())
-                  return;
-
-               TraceLine("BEGIN PRODUCTION - " + prodName);
-               Traverse(prodName, prodInfo.Expression, prodInfo.Expression.FirstSet);
-               TraceLine("END PRODUCTION - " + prodName);
-            }
-
-*/
-
-
    }
 }

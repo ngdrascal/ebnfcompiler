@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EbnfCompiler
 {
+   [ExcludeFromCodeCoverage]
    internal class Program
    {
       static void Main(string[] args)
