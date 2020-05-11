@@ -22,7 +22,7 @@ namespace EbnfCompiler.AST.UnitTests
          traverser.ProcessNode += node => tally[node.AstNodeType]++;
          var tree = BuildTree(tracer);
 
-            // Act:
+         // Act:
          traverser.Traverse(tree);
 
          // Assert:
@@ -36,7 +36,7 @@ namespace EbnfCompiler.AST.UnitTests
          Assert.That(tally[AstNodeType.Paren], Is.EqualTo(1));
          Assert.That(tally[AstNodeType.Option], Is.EqualTo(1));
          Assert.That(tally[AstNodeType.KleeneStar], Is.EqualTo(1));
-         Assert.That(tally[AstNodeType.Action], Is.EqualTo(2));
+         Assert.That(tally[AstNodeType.Action], Is.EqualTo(10));
       }
 
       private Dictionary<AstNodeType, int> InitTally()
@@ -61,14 +61,14 @@ namespace EbnfCompiler.AST.UnitTests
       private ISyntaxNode BuildTree(IDebugTracer tracer)
       {
          using var sb = new SyntaxBuilder(tracer);
-         sb.Syntax(
-            sb.Statement("<S>",
-               sb.Expression(
+         sb.Syntax("BeforeSyntax", "AfterSyntax",
+            sb.Statement("BeforeStmt", "AfterStmt", "<S>",
+               sb.Expression("BeforeExpr", "AfterExpr",
                   sb.Term(
                      sb.Factor(sb.Terminal("a")),
                      sb.Factor(sb.ProdRef("<T>"))
                   ),
-                  sb.Term(
+                  sb.Term("BeforeTerm", "AfterTerm",
                      sb.Factor("BeforeFactor", "AfterFactor",
                         sb.Paren(
                            sb.Expression(

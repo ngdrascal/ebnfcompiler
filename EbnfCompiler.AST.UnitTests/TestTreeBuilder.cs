@@ -23,9 +23,27 @@ namespace EbnfCompiler.AST.UnitTests
          _root = new Syntax(_tracer, statements);
       }
 
+      public void Syntax(string processName, string postProcessName, params Statement[] statements)
+      {
+         _root = new Syntax(_tracer, statements)
+         {
+            PreActionName = processName,
+            PostActionName = postProcessName
+         };
+      }
+
       public Statement Statement(string prodName, Expression expression)
       {
          return new Statement(_tracer, prodName, expression);
+      }
+
+      public Statement Statement(string processName, string postProcessName, string prodName, Expression expression)
+      {
+         return new Statement(_tracer, prodName, expression)
+         {
+            PreActionName = processName,
+            PostActionName = postProcessName
+         };
       }
 
       public Expression Expression(params Term[] terms)
@@ -33,9 +51,27 @@ namespace EbnfCompiler.AST.UnitTests
          return new Expression(_tracer, terms);
       }
 
+      public Expression Expression(string processName, string postProcessName, params Term[] terms)
+      {
+         return new Expression(_tracer, terms)
+         {
+            PreActionName = processName,
+            PostActionName = postProcessName
+         };
+      }
+
       public Term Term(params Factor[] factors)
       {
          return new Term(_tracer, factors);
+      }
+
+      public Term Term(string processName, string postProcessName, params Factor[] factors)
+      {
+         return new Term(_tracer, factors)
+         {
+            PreActionName = processName,
+            PostActionName = postProcessName
+         };
       }
 
       public Factor Factor(IFactExpr factExpr)
@@ -120,6 +156,8 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       public string NodeName { get; }
+      public string PreActionName { get; set; }
+      public string PostActionName { get; set; }
 
       public string BuildCode()
       {
@@ -137,7 +175,16 @@ namespace EbnfCompiler.AST.UnitTests
 
       public ISyntaxNode BuildTree()
       {
-         var syntaxNode = new SyntaxNode(new Token(), _tracer);
+         var syntaxNode = new SyntaxNode(new Token(), _tracer)
+         {
+            PreActionNode = string.IsNullOrEmpty(PreActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PreActionName), _tracer),
+            PostActionNode = string.IsNullOrEmpty(PostActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PostActionName), _tracer)
+         };
+
          foreach (var stmt in _statements)
          {
             var stmtNode = stmt.BuildTree();
@@ -165,6 +212,8 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       public string NodeName { get; }
+      public string PreActionName { get; set; }
+      public string PostActionName { get; set; }
 
       public string BuildCode()
       {
@@ -178,7 +227,16 @@ namespace EbnfCompiler.AST.UnitTests
 
       public IStatementNode BuildTree()
       {
-         var stmtNode = new StatementNode(new Token(TokenKind.Identifier, _prodName), _tracer);
+         var stmtNode = new StatementNode(new Token(TokenKind.Identifier, _prodName), _tracer)
+         {
+            PreActionNode = string.IsNullOrEmpty(PreActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PreActionName), _tracer),
+            PostActionNode = string.IsNullOrEmpty(PostActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PostActionName), _tracer)
+         };
+
          var exprNode = _expression.BuildTree();
          stmtNode.Expression = exprNode;
 
@@ -201,6 +259,8 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       public string NodeName { get; }
+      public string PreActionName { get; set; }
+      public string PostActionName { get; set; }
 
       public string BuildCode()
       {
@@ -219,7 +279,15 @@ namespace EbnfCompiler.AST.UnitTests
 
       public IExpressionNode BuildTree()
       {
-         var exprNode = new ExpressionNode(new Token(), _tracer);
+         var exprNode = new ExpressionNode(new Token(), _tracer)
+         {
+            PreActionNode = string.IsNullOrEmpty(PreActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PreActionName), _tracer),
+            PostActionNode = string.IsNullOrEmpty(PostActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PostActionName), _tracer)
+         };
 
          foreach (var term in _terms)
          {
@@ -246,6 +314,8 @@ namespace EbnfCompiler.AST.UnitTests
       }
 
       public string NodeName { get; }
+      public string PreActionName { get; set; }
+      public string PostActionName { get; set; }
 
       public string BuildCode()
       {
@@ -264,7 +334,16 @@ namespace EbnfCompiler.AST.UnitTests
 
       public ITermNode BuildTree()
       {
-         var termNode = new TermNode(new Token(), _tracer);
+         var termNode = new TermNode(new Token(), _tracer)
+         {
+            PreActionNode = string.IsNullOrEmpty(PreActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PreActionName), _tracer),
+            PostActionNode = string.IsNullOrEmpty(PostActionName)
+               ? null
+               : new ActionNode(new Token(TokenKind.Action, PostActionName), _tracer)
+         };
+
          foreach (var fact in _factors)
          {
             var factorNode = fact.BuildTree();

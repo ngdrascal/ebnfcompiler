@@ -61,8 +61,14 @@ namespace EbnfCompiler.AST.Impl
                break;
 
             case AstNodeType.Term:
+               if (astNode.AsTerm().PreActionNode != null)
+                  Traverse(astNode.AsTerm().PreActionNode);
+
                foreach (var factor in astNode.AsTerm().Factors)
                   Traverse(factor);
+
+               if (astNode.AsTerm().PostActionNode != null)
+                  Traverse(astNode.AsTerm().PreActionNode);
 
                break;
 
