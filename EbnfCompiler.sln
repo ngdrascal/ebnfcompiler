@@ -35,6 +35,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Data", "Test Data", "{
 		Test Data\EBNF_With_Actions.bnf = Test Data\EBNF_With_Actions.bnf
 		Test Data\EBNF_Without_Actions.bnf = Test Data\EBNF_Without_Actions.bnf
 		Test Data\simpleBNF.bnf = Test Data\simpleBNF.bnf
+		SimpleLang.bnf = SimpleLang.bnf
 		Test Data\test_0.bnf = Test Data\test_0.bnf
 		Test Data\test_1.bnf = Test Data\test_1.bnf
 		Test Data\test_10.bnf = Test Data\test_10.bnf

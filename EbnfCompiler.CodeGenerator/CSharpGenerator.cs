@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using EbnfCompiler.AST;
 using EbnfCompiler.AST.Impl;
-using Microsoft.Extensions.Logging;
 
 namespace EbnfCompiler.CodeGenerator
 {
@@ -28,29 +28,27 @@ namespace EbnfCompiler.CodeGenerator
 
    public class CSharpGenerator : ICodeGenerator
    {
-      private readonly ISyntaxNode _syntaxTree;
-      private readonly IReadOnlyCollection<ITokenDefinition> _tokens;
       private readonly IAstTraverser _traverser;
-      private readonly ILogger _log;
+      private readonly StreamWriter _streamWriter;
+
+      private IReadOnlyCollection<ITokenDefinition> _tokens;
       private readonly Stack<ContextBase> _stack;
       private int _indentLevel;
-      private string Output { get; set; }
 
-      public CSharpGenerator(IRootNode rootNode, IAstTraverser traverser, ILogger log)
+      public CSharpGenerator(IAstTraverser traverser, StreamWriter streamWriter)
       {
-         _syntaxTree = rootNode.Syntax;
-         _tokens = rootNode.TokenDefs;
          _traverser = traverser;
-         _log = log;
-         _stack = new Stack<ContextBase>();
-      }
-
-      public void Run()
-      {
+         _streamWriter = streamWriter;
          _traverser.ProcessNode += ProcessNode;
          _traverser.PostProcessNode += PostProcessNode;
 
-         _traverser.Traverse(_syntaxTree);
+         _stack = new Stack<ContextBase>();
+      }
+
+      public void Run(IRootNode rootNode)
+      {
+         _tokens = rootNode.TokenDefs;
+         _traverser.Traverse(rootNode.Syntax);
       }
 
       private void ProcessNode(IAstNode node)
@@ -238,7 +236,7 @@ namespace EbnfCompiler.CodeGenerator
       private void PrintParseGoal(string prodName, string preActionName, string postActionName)
       {
          PrintLine();
-         PrintLine($"public void ParseGoal()");
+         PrintLine("public void ParseGoal()");
          PrintLine("{");
          Indent();
 
@@ -380,21 +378,15 @@ namespace EbnfCompiler.CodeGenerator
          _indentLevel -= 3;
       }
 
-      private void Append(string s)
+      private void PrintLine()
       {
-         Output += s;
+         _streamWriter.WriteLine();
       }
 
-      private void PrintLine(string s = "")
+      private void PrintLine(string s)
       {
          var indent = new string(' ', _indentLevel);
-         Append($"{indent}{s}");
-
-         if (Output.Equals(string.Empty))
-            Output = " ";
-
-         _log.LogDebug(Output);
-         Output = string.Empty;
+         _streamWriter.WriteLine($"{indent}{s}");
       }
    }
 }

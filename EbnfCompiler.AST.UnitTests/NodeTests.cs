@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using EbnfCompiler.AST.Impl;
 using EbnfCompiler.Compiler;
 using Moq;
@@ -49,6 +50,72 @@ namespace EbnfCompiler.AST.UnitTests
 
          // Assert:
          Assert.That(actual, Is.EqualTo("<S> ::= \"a\" ."));
+      }
+
+      [Test]
+      public void StatementNode_WhenValidTree_CalculatesCorrectFirstSet()
+      {
+         // Arrange:
+         var tracer = new Mock<IDebugTracer>().Object;
+         var tree = BuildTree(tracer);
+
+         // Act:
+         var firstSetS = tree.Statements.First(p => p.ProdName == "<S>").FirstSet;
+         var firstSetT = tree.Statements.First(p => p.ProdName == "<T>").FirstSet;
+         var firstSetU = tree.Statements.First(p => p.ProdName == "<U>").FirstSet;
+
+         // Assert:
+         Assert.That(firstSetS.ToString(), Is.EqualTo("[ a ]"));
+         Assert.That(firstSetT.ToString(), Is.EqualTo("[ b,$EPSILON$ ]"));
+         Assert.That(firstSetU.ToString(), Is.EqualTo("[ c ]"));
+      }
+
+      private ISyntaxNode BuildTree(IDebugTracer tracer)
+      {
+         using var sb = new SyntaxBuilder(tracer);
+         sb.Syntax(
+            sb.Statement("<S>",
+               sb.Expression(
+                  sb.Term(
+                     sb.Factor(sb.Terminal("a")),
+                     sb.Factor(sb.ProdRef("<T>")),
+                     sb.Factor(sb.ProdRef("<U>"))
+                  )
+               )
+            ),
+            sb.Statement("<T>",
+               sb.Expression(
+                  sb.Term(
+                     sb.Factor(
+                        sb.Option(
+                           sb.Expression(
+                              sb.Term(
+                                 sb.Factor(sb.Terminal("b"))
+                              )
+                           )
+                        )
+                     )
+                  )
+               )
+            ),
+            sb.Statement("<U>",
+               sb.Expression(
+                  sb.Term(
+                     sb.Factor(
+                        sb.Kleene(
+                           sb.Expression(
+                              sb.Term(
+                                 sb.Factor(sb.Terminal("c"))
+                              )
+                           )
+                        )
+                     )
+                  )
+               )
+            )
+         );
+
+         return sb.BuildTree();
       }
 
       [Test]

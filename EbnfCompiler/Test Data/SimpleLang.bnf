@@ -1,0 +1,45 @@
+%TOKENS%
+   "var"             = "Var"
+   "designator"      = "Designator"
+   "number"          = "Number"
+   "string"          = "String"
+   "print"           = "Print"
+   "printLine"       = "PrintLine"
+   "number-literal"  = "Number"
+   "string-literal"  = "String"
+   ";"               = "Semi"
+   ":"               = "Colon"
+   "="               = "Assign"
+   "("               = "LParen"
+   ")"               = "RParen"
+   "+"               = "Plus"
+   "-"               = "Minus"
+   "*"               = "Asterisk"
+   "/"               = "FowardSlash"
+
+%EBNF%
+   <statement-list> ::= <statement> ";" { <statement> ";" } .
+
+   <statement> ::= <var-declaration> | <print-stmt> | <printline-stmt> .
+
+   <var-declaration> ::= "var" "designator" ":" <type> "=" <expression> .
+
+   <type> ::= "number" | "string" .
+
+   <expression> ::= [ <sign> ] <term> { <term-operator> <term> } .
+
+   <term> ::= <factor> { <factor-operator> <factor> } .
+
+   <factor> ::= "(" <expression> ")" | "designator" | <constant-literal> .
+
+   <sign> ::= "+" | "-" .
+
+   <term-operator> ::= "+" | "-" .
+
+   <factor-operator> ::= "*" | "/" .
+
+   <constant-literal> ::= "number-literal" | "string-literal" .
+
+   <print-stmt> ::= "print" "(" <expression> ")" .
+
+   <printline-stmt> ::= "printLine" "(" [ <expression> ] ")" .

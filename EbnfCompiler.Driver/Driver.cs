@@ -205,9 +205,11 @@ namespace EbnfCompiler.Driver
          var traverserTracer = new DebugTracer(traverserLogger);
          var traverser = new AstTraverser(traverserTracer);
 
-         var gen = new CSharpGenerator(rootNode, traverser, loggerFactory.CreateLogger("CSGEN"));
+         var output = new MemoryStream();
+         var streamWriter = new StreamWriter(stream);
+         var gen = new CSharpGenerator(traverser, streamWriter);
 
-         gen.Run();
+         gen.Run(rootNode);
       }
    }
 }

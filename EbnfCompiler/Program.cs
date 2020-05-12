@@ -21,10 +21,10 @@ namespace EbnfCompiler
          var nullLogger = loggerFactory.CreateLogger("NULL");
          var tracer = new DebugTracer(nullLogger);
 
-         using var stream = new FileStream(args[0], FileMode.Open);
-         stream.Seek(0, SeekOrigin.Begin);
+         using var inStream = new FileStream(args[0], FileMode.Open);
+         inStream.Seek(0, SeekOrigin.Begin);
 
-         var scanner = new Scanner.Scanner(stream);
+         var scanner = new Scanner.Scanner(inStream);
 
          var astBuilder = new AstBuilder(new AstNodeFactory(tracer), 
                                          new ProdInfoFactory(tracer), 
@@ -35,8 +35,13 @@ namespace EbnfCompiler
          var rootNode = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var gen = new CSharpGenerator(rootNode, traverser, nullLogger);
-         gen.Run();
+         var outFileName = "Parser.cs";
+         using var outStream = new FileStream(outFileName, FileMode.Create);
+         using var streamWriter = new StreamWriter(outStream);
+
+         var gen = new CSharpGenerator(traverser, streamWriter);
+         gen.Run(rootNode);
+
       }
    }
 }

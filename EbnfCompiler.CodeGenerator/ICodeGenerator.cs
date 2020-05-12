@@ -1,7 +1,9 @@
-﻿namespace EbnfCompiler.CodeGenerator
+﻿using EbnfCompiler.AST;
+
+namespace EbnfCompiler.CodeGenerator
 {
    public interface ICodeGenerator
    {
-      void Run();
+      void Run(IRootNode rootNode);
    }
 }
