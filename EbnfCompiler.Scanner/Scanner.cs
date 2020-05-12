@@ -148,7 +148,7 @@ namespace EbnfCompiler.Scanner
                   break;
 
                case State.Ident:
-                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_%]$"))
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_%\-]$"))
                   {
                      CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();

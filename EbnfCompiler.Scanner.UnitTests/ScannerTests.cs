@@ -10,7 +10,7 @@ namespace EbnfCompiler.Scanner.UnitTests
    {
       [TestCase("%TOKENS%", TokenKind.TokensTag, "%TOKENS%")]
       [TestCase("%EBNF%", TokenKind.EbnfTag, "%EBNF%")]
-      [TestCase("<SomeIdentifier>", TokenKind.Identifier, "<SomeIdentifier>")]
+      [TestCase("<Some-Identifier>", TokenKind.Identifier, "<Some-Identifier>")]
       [TestCase("\"SomeString\"", TokenKind.String, "SomeString")]
       [TestCase("#SomeAction#", TokenKind.Action, "#SomeAction#")]
 
