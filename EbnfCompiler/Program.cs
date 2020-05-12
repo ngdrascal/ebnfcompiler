@@ -26,8 +26,8 @@ namespace EbnfCompiler
 
          var scanner = new Scanner.Scanner(inStream);
 
-         var astBuilder = new AstBuilder(new AstNodeFactory(tracer), 
-                                         new ProdInfoFactory(tracer), 
+         var astBuilder = new AstBuilder(new AstNodeFactory(tracer),
+                                         new ProdInfoFactory(tracer),
                                          new Stack<IAstNode>(), tracer);
 
          var parser = new Parser.Parser(scanner, astBuilder);
@@ -35,7 +35,7 @@ namespace EbnfCompiler
          var rootNode = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var outFileName = "Parser.cs";
+         var outFileName = Path.GetFullPath(args[0]) + "Parser.cs";
          using var outStream = new FileStream(outFileName, FileMode.Create);
          using var streamWriter = new StreamWriter(outStream);
 

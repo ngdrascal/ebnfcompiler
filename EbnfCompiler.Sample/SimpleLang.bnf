@@ -5,8 +5,8 @@
    "string"          = "String"
    "print"           = "Print"
    "printLine"       = "PrintLine"
-   "number-literal"  = "Number"
-   "string-literal"  = "String"
+   "number-literal"  = "NumberLiteral"
+   "string-literal"  = "StringLiteral"
    ";"               = "Semi"
    ":"               = "Colon"
    "="               = "Assign"
@@ -15,7 +15,7 @@
    "+"               = "Plus"
    "-"               = "Minus"
    "*"               = "Asterisk"
-   "/"               = "FowardSlash"
+   "/"               = "ForwardSlash"
 
 %EBNF%
    <statement-list> ::= <statement> ";" { <statement> ";" } .

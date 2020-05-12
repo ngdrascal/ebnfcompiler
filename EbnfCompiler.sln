@@ -35,7 +35,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Data", "Test Data", "{
 		Test Data\EBNF_With_Actions.bnf = Test Data\EBNF_With_Actions.bnf
 		Test Data\EBNF_Without_Actions.bnf = Test Data\EBNF_Without_Actions.bnf
 		Test Data\simpleBNF.bnf = Test Data\simpleBNF.bnf
-		SimpleLang.bnf = SimpleLang.bnf
 		Test Data\test_0.bnf = Test Data\test_0.bnf
 		Test Data\test_1.bnf = Test Data\test_1.bnf
 		Test Data\test_10.bnf = Test Data\test_10.bnf
@@ -52,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test Data", "Test Data", "{
 		Test Data\test_FirstSet.bnf = Test Data\test_FirstSet.bnf
 		Test Data\UndefProd.bnf = Test Data\UndefProd.bnf
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EbnfCompiler.Sample", "EbnfCompiler.Sample\EbnfCompiler.Sample.csproj", "{6EC5E1DD-7413-41E2-8A3E-3B463A72B1A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +100,10 @@ Global
 		{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E46FE6E-A74E-4DA0-946D-E0E42C2952E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EC5E1DD-7413-41E2-8A3E-3B463A72B1A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EC5E1DD-7413-41E2-8A3E-3B463A72B1A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EC5E1DD-7413-41E2-8A3E-3B463A72B1A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EC5E1DD-7413-41E2-8A3E-3B463A72B1A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

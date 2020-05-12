@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EbnfCompiler.AST;
@@ -62,6 +63,9 @@ namespace EbnfCompiler.CodeGenerator
 
                PrintUsings();
                PrintNamespaceHeader();
+               PrintClassHeader();
+               PrintClassProperties();
+               PrintConstructor();
                PrintMatchMethod();
 
                PrintParseGoal(node.AsSyntax().Statements.First().ProdName,
@@ -109,7 +113,6 @@ namespace EbnfCompiler.CodeGenerator
 
                if (node.AsFactor().PreActionNode != null)
                   PrintAction(node.AsFactor().PreActionNode.ActionName);
-
                break;
 
             case AstNodeType.ProdRef:
@@ -150,6 +153,7 @@ namespace EbnfCompiler.CodeGenerator
          switch (context.NodeType)
          {
             case AstNodeType.Syntax:
+               PrintClassFooter();
                PrintNamespaceFooter();
                break;
 
@@ -158,6 +162,11 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Expression:
+               if (context.GenerateSwitch)
+               {
+                  Outdent();
+                  PrintLine("}");
+               }
                break;
 
             case AstNodeType.Term:
@@ -199,17 +208,16 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintUsings()
       {
-         PrintLine("using System.Collections.Generic;");
          PrintLine("using System.Linq;");
-         PrintLine("using EbnfCompiler.AST;");
-         PrintLine("using EbnfCompiler.Compiler;");
-         PrintLine("using EbnfCompiler.Scanner;");
-         PrintLine();
+         // PrintLine("using EbnfCompiler.AST;");
+         // PrintLine("using EbnfCompiler.Compiler;");
+         // PrintLine("using EbnfCompiler.Scanner;");
+         // PrintLine();
       }
 
       private void PrintNamespaceHeader()
       {
-         PrintLine("namespace EbnfCompiler.Parser");
+         PrintLine("namespace EbnfCompiler.Sample");
          PrintLine("{");
          Indent();
       }
@@ -220,14 +228,46 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine("}");
       }
 
+      private void PrintClassHeader()
+      {
+         PrintLine("public class Parser");
+         PrintLine("{");
+         Indent();
+      }
+
+      private void PrintClassProperties()
+      {
+         PrintLine("private readonly IScanner _scanner;");
+         PrintLine("private readonly IAstBuilder _astBuilder;");
+      }
+
+      private void PrintClassFooter()
+      {
+         Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintConstructor()
+      {
+         PrintLine();
+         PrintLine("public Parser(IScanner scanner, IAstBuilder astBuilder)");
+         PrintLine("{");
+         Indent();
+         PrintLine("_scanner = scanner;");
+         PrintLine("_astBuilder = astBuilder;");
+         Outdent();
+         PrintLine("}");
+      }
+
       private void PrintMatchMethod()
       {
+         PrintLine();
          PrintLine("private void Match(TokenKind tokenKind)");
          PrintLine("{");
          Indent();
          PrintLine("if (_scanner.CurrentToken.TokenKind != tokenKind)");
          Indent();
-         PrintLine("throw new SyntaxErrorException(\"Expecting: {tokenKind}\", _scanner.CurrentToken);");
+         PrintLine("throw new SyntaxErrorException(tokenKind, _scanner.CurrentToken);");
          Outdent();
          Outdent();
          PrintLine("}");
@@ -242,9 +282,9 @@ namespace EbnfCompiler.CodeGenerator
 
          if (!string.IsNullOrEmpty(preActionName))
             PrintAction(preActionName);
-         
+
          PrintProdRef(prodName);
-         
+
          if (!string.IsNullOrEmpty(postActionName))
             PrintAction(postActionName);
 
@@ -254,12 +294,33 @@ namespace EbnfCompiler.CodeGenerator
       private void PrintMethodHeader(string name, string preActionName)
       {
          PrintLine();
-         PrintLine($"private void Parse{name}()");
+         PrintLine($"private void Parse{CamelCaseMethodName(name)}()");
          PrintLine("{");
          Indent();
          if (!string.IsNullOrEmpty(preActionName))
             PrintAction(preActionName);
       }
+
+      private string CamelCaseMethodName(string name)
+      {
+         var result = String.Empty;
+         var toUpperNexChar = true;
+
+         foreach (var ch in name.Substring(1, name.Length - 2))
+         {
+            if (ch == '-')
+            {
+               toUpperNexChar = true;
+               continue;
+            }
+            var chStr = ch.ToString();
+            result += toUpperNexChar ? chStr.ToUpper() : chStr;
+            toUpperNexChar = false;
+         }
+
+         return result;
+      }
+
 
       private void PrintMethodFooter(string postActionName)
       {
@@ -271,7 +332,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintProdRef(string name)
       {
-         PrintLine($"Parse{name}();");
+         PrintLine($"Parse{CamelCaseMethodName(name)}();");
       }
 
       private void PrintMatchTerminal(string name)
@@ -281,7 +342,7 @@ namespace EbnfCompiler.CodeGenerator
             throw new SemanticErrorException($"Token definition for \"{name}\" not found.");
 
          PrintLine($"Match(TokenKind.{tokenDef});");
-         PrintLine("_scanner.Advance()");
+         PrintLine("_scanner.Advance();");
          PrintLine();
       }
 
@@ -295,7 +356,6 @@ namespace EbnfCompiler.CodeGenerator
          if (firstSet.AsEnumerable().Count(p => p != "$EPSILON$") > 1)
          {
             PrintFirstSet(firstSet);
-
             PrintLine("if (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
          }
          else
