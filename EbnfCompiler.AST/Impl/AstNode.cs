@@ -9,6 +9,22 @@ namespace EbnfCompiler.AST.Impl
    {
       private readonly IDebugTracer _tracer;
       protected readonly TerminalSet FirstSetInternal = new TerminalSet();
+      private static readonly Dictionary<AstNodeType, int> NodeIdSuffix = new Dictionary<AstNodeType, int>()
+      {
+         {AstNodeType.Syntax, 0},
+         {AstNodeType.Statement, 0},
+         {AstNodeType.Expression, 0},
+         {AstNodeType.Term, 0},
+         {AstNodeType.Factor, 0},
+         {AstNodeType.ProdRef, 0},
+         {AstNodeType.Terminal, 0},
+         {AstNodeType.Paren, 0},
+         {AstNodeType.Option, 0},
+         {AstNodeType.KleeneStar, 0},
+         {AstNodeType.Action, 0}
+      };
+
+      public string NodeId { get; }
 
       public ISourceLocation Location { get; }
 
@@ -35,9 +51,10 @@ namespace EbnfCompiler.AST.Impl
 
       protected AstNode(AstNodeType astNodeType, IToken token, IDebugTracer tracer)
       {
-         _tracer = tracer;
          AstNodeType = astNodeType;
+         _tracer = tracer;
          Location = token.Location;
+         NodeId = $"{AstNodeType}{++NodeIdSuffix[AstNodeType]}";
          Image = token.Image;
       }
 
@@ -166,7 +183,7 @@ namespace EbnfCompiler.AST.Impl
       public override string ToString()
       {
          var result = _factors.Count > 0 ? _factors.First().ToString() : string.Empty;
-         
+
          foreach (var fact in _factors.TakeLast(_factors.Count - 1))
             result += " " + fact.ToString();
 

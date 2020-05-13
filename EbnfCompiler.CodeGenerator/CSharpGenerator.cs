@@ -7,9 +7,9 @@ using EbnfCompiler.AST.Impl;
 
 namespace EbnfCompiler.CodeGenerator
 {
-   internal class ContextBase
+   internal class Context
    {
-      public ContextBase(AstNodeType nodeType)
+      public Context(AstNodeType nodeType)
       {
          NodeType = nodeType;
          Properties = new Dictionary<string, object>();
@@ -33,7 +33,7 @@ namespace EbnfCompiler.CodeGenerator
       private readonly StreamWriter _streamWriter;
 
       private IReadOnlyCollection<ITokenDefinition> _tokens;
-      private readonly Stack<ContextBase> _stack;
+      private readonly Stack<Context> _stack;
       private int _indentLevel;
 
       public CSharpGenerator(IAstTraverser traverser, StreamWriter streamWriter)
@@ -43,7 +43,7 @@ namespace EbnfCompiler.CodeGenerator
          _traverser.ProcessNode += ProcessNode;
          _traverser.PostProcessNode += PostProcessNode;
 
-         _stack = new Stack<ContextBase>();
+         _stack = new Stack<Context>();
       }
 
       public void Run(IRootNode rootNode)
@@ -54,11 +54,11 @@ namespace EbnfCompiler.CodeGenerator
 
       private void ProcessNode(IAstNode node)
       {
-         ContextBase context;
+         Context context;
          switch (node.AstNodeType)
          {
             case AstNodeType.Syntax:
-               context = new ContextBase(node.AstNodeType);
+               context = new Context(node.AstNodeType);
                _stack.Push(context);
 
                PrintUsings();
@@ -74,7 +74,7 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Statement:
-               context = new ContextBase(node.AstNodeType);
+               context = new Context(node.AstNodeType);
                _stack.Push(context);
 
                context.Properties.Add("PreActionName", node.AsStatement().PreActionNode?.ActionName);
@@ -84,7 +84,7 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Expression:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               _stack.Push(new Context(node.AstNodeType));
                _stack.Peek().GenerateSwitch = node.AsExpression().TermCount > 1;
 
                if (node.AsExpression().PreActionNode != null)
@@ -95,7 +95,7 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Term:
-               context = new ContextBase(node.AstNodeType);
+               context = new Context(node.AstNodeType);
                context.GenerateSwitch = _stack.Peek().GenerateSwitch;
                _stack.Push(context);
 
@@ -107,7 +107,7 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.Factor:
-               context = new ContextBase(node.AstNodeType);
+               context = new Context(node.AstNodeType);
                context.Properties.Add("PostActionName", node.AsFactor().PostActionNode?.ActionName);
                _stack.Push(context);
 
@@ -116,32 +116,31 @@ namespace EbnfCompiler.CodeGenerator
                break;
 
             case AstNodeType.ProdRef:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               _stack.Push(new Context(node.AstNodeType));
                PrintProdRef(node.AsProdRef().ProdName);
                break;
 
             case AstNodeType.Terminal:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               _stack.Push(new Context(node.AstNodeType));
                PrintMatchTerminal(node.AsTerminal().TermName);
                break;
 
             case AstNodeType.Action:
-               _stack.Push(new ContextBase(node.AstNodeType));
-               //PrintAction(node.AsActionNode().ActionName);
+               _stack.Push(new Context(node.AstNodeType));
                break;
 
             case AstNodeType.Paren:
-               _stack.Push(new ContextBase(node.AstNodeType));
+               _stack.Push(new Context(node.AstNodeType));
                break;
 
             case AstNodeType.Option:
-               _stack.Push(new ContextBase(node.AstNodeType));
-               PrintOption(node.FirstSet);
+               _stack.Push(new Context(node.AstNodeType));
+               PrintOption(node.FirstSet, node.NodeId);
                break;
 
             case AstNodeType.KleeneStar:
-               _stack.Push(new ContextBase(node.AstNodeType));
-               PrintKleene(node.FirstSet);
+               _stack.Push(new Context(node.AstNodeType));
+               PrintKleene(node.FirstSet, node.NodeId);
                break;
          }
       }
@@ -320,8 +319,7 @@ namespace EbnfCompiler.CodeGenerator
 
          return result;
       }
-
-
+      
       private void PrintMethodFooter(string postActionName)
       {
          if (!string.IsNullOrEmpty(postActionName))
@@ -351,12 +349,12 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine($"_astBuilder.{actionName}();");
       }
 
-      private void PrintOption(ITerminalSet firstSet)
+      private void PrintOption(ITerminalSet firstSet, string nodeId)
       {
          if (firstSet.AsEnumerable().Count(p => p != "$EPSILON$") > 1)
          {
-            PrintFirstSet(firstSet);
-            PrintLine("if (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+            PrintFirstSet(firstSet, nodeId);
+            PrintLine($"if (firstSetOf{nodeId}.Contains(_scanner.CurrentToken.TokenKind))");
          }
          else
          {
@@ -368,12 +366,12 @@ namespace EbnfCompiler.CodeGenerator
          Indent();
       }
 
-      private void PrintKleene(ITerminalSet firstSet)
+      private void PrintKleene(ITerminalSet firstSet, string nodeId)
       {
          if (firstSet.AsEnumerable().Count() > 1)
          {
-            PrintFirstSet(firstSet);
-            PrintLine("while (startTokens.Contains(_scanner.CurrentToken.TokenKind))");
+            PrintFirstSet(firstSet, nodeId);
+            PrintLine($"while (firstSetOf{nodeId}.Contains(_scanner.CurrentToken.TokenKind))");
          }
          else
          {
@@ -385,11 +383,11 @@ namespace EbnfCompiler.CodeGenerator
          Indent();
       }
 
-      private void PrintFirstSet(ITerminalSet firstSet)
+      private void PrintFirstSet(ITerminalSet firstSet, string nodeId)
       {
          var tokens = SetAsTokenDefinitions(firstSet);
 
-         PrintLine("var startTokens = new[]");
+         PrintLine($"var firstSetOf{nodeId} = new[]");
          PrintLine("{");
          Indent();
          PrintLine(string.Join(", ", tokens.Select(s => "TokenKind." + s)));

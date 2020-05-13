@@ -11,6 +11,8 @@ namespace EbnfCompiler.AST
 
    public interface IAstNode
    {
+      string NodeId { get; }
+
       ISourceLocation Location { get; }
 
       AstNodeType AstNodeType { get; }

@@ -29,11 +29,11 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.Semi);
          _scanner.Advance();
 
-         var startTokens = new[]
+         var firstSetOfKleeneStar1 = new[]
          {
             TokenKind.Var, TokenKind.Print, TokenKind.PrintLine
          };
-         while (startTokens.Contains(_scanner.CurrentToken.TokenKind))
+         while (firstSetOfKleeneStar1.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseStatement();
             Match(TokenKind.Semi);
@@ -95,20 +95,20 @@ namespace EbnfCompiler.Sample
 
       private void ParseExpression()
       {
-         var startTokens = new[]
+         var firstSetOfOption1 = new[]
          {
             TokenKind.Plus, TokenKind.Minus
          };
-         if (startTokens.Contains(_scanner.CurrentToken.TokenKind))
+         if (firstSetOfOption1.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseSign();
          }
          ParseTerm();
-         var startTokens = new[]
+         var firstSetOfKleeneStar2 = new[]
          {
             TokenKind.Plus, TokenKind.Minus
          };
-         while (startTokens.Contains(_scanner.CurrentToken.TokenKind))
+         while (firstSetOfKleeneStar2.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseTermOperator();
             ParseTerm();
@@ -118,11 +118,11 @@ namespace EbnfCompiler.Sample
       private void ParseTerm()
       {
          ParseFactor();
-         var startTokens = new[]
+         var firstSetOfKleeneStar3 = new[]
          {
             TokenKind.Asterisk, TokenKind.ForwardSlash
          };
-         while (startTokens.Contains(_scanner.CurrentToken.TokenKind))
+         while (firstSetOfKleeneStar3.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseFactorOperator();
             ParseFactor();
@@ -244,11 +244,11 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.LParen);
          _scanner.Advance();
 
-         var startTokens = new[]
+         var firstSetOfOption2 = new[]
          {
             TokenKind.Plus, TokenKind.Minus, TokenKind.LParen, TokenKind.Designator, TokenKind.NumberLiteral, TokenKind.StringLiteral
          };
-         if (startTokens.Contains(_scanner.CurrentToken.TokenKind))
+         if (firstSetOfOption2.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseExpression();
          }
