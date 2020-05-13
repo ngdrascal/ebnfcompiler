@@ -3,7 +3,7 @@
    public enum TokenKind
    {
       Var, Designator, Number, String, Print, PrintLine, NumberLiteral, StringLiteral,
-      Semi, Colon, Assign, LParen, RParen, Plus, Minus, Asterisk, ForwardSlash,
+      Semi, Colon, Assign, LeftParen, RightParen, Plus, Minus, Asterisk, ForwardSlash,
       Eof, Error
    };
 }

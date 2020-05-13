@@ -133,12 +133,12 @@ namespace EbnfCompiler.Sample
       {
          switch (_scanner.CurrentToken.TokenKind)
          {
-            case TokenKind.LParen:
-               Match(TokenKind.LParen);
+            case TokenKind.LeftParen:
+               Match(TokenKind.LeftParen);
                _scanner.Advance();
 
                ParseExpression();
-               Match(TokenKind.RParen);
+               Match(TokenKind.RightParen);
                _scanner.Advance();
 
                break;
@@ -227,11 +227,11 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.Print);
          _scanner.Advance();
 
-         Match(TokenKind.LParen);
+         Match(TokenKind.LeftParen);
          _scanner.Advance();
 
          ParseExpression();
-         Match(TokenKind.RParen);
+         Match(TokenKind.RightParen);
          _scanner.Advance();
 
       }
@@ -241,18 +241,18 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.PrintLine);
          _scanner.Advance();
 
-         Match(TokenKind.LParen);
+         Match(TokenKind.LeftParen);
          _scanner.Advance();
 
          var firstSetOfOption2 = new[]
          {
-            TokenKind.Plus, TokenKind.Minus, TokenKind.LParen, TokenKind.Designator, TokenKind.NumberLiteral, TokenKind.StringLiteral
+            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Designator, TokenKind.NumberLiteral, TokenKind.StringLiteral
          };
          if (firstSetOfOption2.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseExpression();
          }
-         Match(TokenKind.RParen);
+         Match(TokenKind.RightParen);
          _scanner.Advance();
 
       }
