@@ -11,6 +11,7 @@ namespace EbnfCompiler.Sample
          Done,
          v,
          va,
+         var,
          Ident,
          String,
          Assign,
@@ -105,8 +106,59 @@ namespace EbnfCompiler.Sample
                   _currentCh = NextChar();
                   break;
 
+               case State.v:
+                  if (_currentCh == 'a')
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                     _state = State.va;
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[b-zA-Z0-9_]$"))
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                     _state = State.Ident;
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x1A\x20]$"))
+                  {
+                     CurrentToken.TokenKind = TokenKind.Designator;
+                     _currentCh = NextChar();
+                     _state = State.Done;
+                  }
+                  break;
+
+               case State.va:
+                  if (_currentCh == 'r')
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                     _state = State.var;
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-qs-zA-Z0-9_]$"))
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                     _state = State.Ident;
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x20]$"))
+                  {
+                     CurrentToken.TokenKind = TokenKind.Designator;
+                     _currentCh = NextChar();
+                     _state = State.Done;
+                  }
+                  break;
+
+               case State.var:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x1A\x20]$"))
+                  {
+                     CurrentToken.TokenKind = TokenKind.Var;
+                     _currentCh = NextChar();
+                     _state = State.Done;
+                  }
+                  break;
+
                case State.Ident:
-                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_%\-]$"))
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
                   {
                      CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
