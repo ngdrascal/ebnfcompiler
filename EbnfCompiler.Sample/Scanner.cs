@@ -9,11 +9,13 @@ namespace EbnfCompiler.Sample
       {
          Start,
          Done,
-         v,
-         va,
-         var,
+         N, Nu, Num, Numb, Numbe, Number,
+         P, Pr, Pri, Prin, Print, PrintL, PrintLi, PrintLin, PrintLine,
+         S, St, Str, Stri, Strin, String,
+         V, Va, Var,
          Ident,
-         String,
+         StringLiteral,
+         NumberLiteral1, NumberLiteral2,
          Assign,
          Comment
       };
@@ -58,126 +60,577 @@ namespace EbnfCompiler.Sample
                case State.Start:
                   switch (_currentCh)
                   {
+                     case 'n':
+                        _state = State.N;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case 'P':
+                        _state = State.P;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case 's':
+                        _state = State.S;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
                      case 'v':
-                        _state = State.v;
+                        _state = State.V;
                         CurrentToken.Image = "v";
                         break;
                      case '(':
+                        _state = State.Done;
                         CurrentToken.TokenKind = TokenKind.LeftParen;
                         CurrentToken.Image = "(";
-                        _state = State.Done;
                         break;
                      case ')':
+                        _state = State.Done;
                         CurrentToken.TokenKind = TokenKind.RightParen;
                         CurrentToken.Image = ")";
-                        _state = State.Done;
                         break;
                      case ':':
-                        CurrentToken.TokenKind = TokenKind.Assign;
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Colon;
                         CurrentToken.Image = _currentCh.ToString();
-                        _state = State.Assign;
+                        break;
+                     case ';':
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.SemiColon;
+                        CurrentToken.Image = _currentCh.ToString();
                         break;
                      case '=':
+                        _state = State.Done;
                         CurrentToken.TokenKind = TokenKind.Assign;
                         CurrentToken.Image = _currentCh.ToString();
-                        _state = State.Done;
                         break;
-                     case '"':
-                        CurrentToken.TokenKind = TokenKind.String;
-                        CurrentToken.Image = string.Empty;
-                        _state = State.String;
-                        break;
-                     case ChEof:
-                        CurrentToken.TokenKind = TokenKind.Eof;
-                        CurrentToken.Image = "<eof>";
+                     case '+':
                         _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Plus;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case '-':
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Minus;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case '*':
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Asterisk;
+                        CurrentToken.Image = _currentCh.ToString();
                         break;
                      case '/':
-                        CurrentToken.Image = string.Empty;
                         _state = State.Comment;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case '"':
+                        _state = State.StringLiteral;
+                        CurrentToken.TokenKind = TokenKind.String;
+                        CurrentToken.Image = string.Empty;
+                        break;
+                     case '0':
+                     case '1':
+                     case '2':
+                     case '3':
+                     case '4':
+                     case '5':
+                     case '6':
+                     case '7':
+                     case '8':
+                     case '9':
+                        _state = State.NumberLiteral1;
+                        CurrentToken.Image = _currentCh.ToString();
+                        break;
+                     case ChEof:
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Eof;
+                        CurrentToken.Image = "<eof>";
                         break;
 
                      default:
-                        CurrentToken.TokenKind = TokenKind.Error;
-                        _state = State.Done;
+                        if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z]$"))
+                        {
+                           _state = State.Ident;
+                           CurrentToken.Image = _currentCh.ToString();
+                        }
+                        else
+                        {
+                           _state = State.Done;
+                           CurrentToken.TokenKind = TokenKind.Error;
+                        }
                         break;
                   }
                   SetStartPosition(CurrentToken);
                   _currentCh = NextChar();
                   break;
 
-               case State.v:
-                  if (_currentCh == 'a')
+               case State.N:
+                  if (_currentCh == 'u')
                   {
+                     _state = State.Nu;
                      CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
-                     _state = State.va;
                   }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[b-zA-Z0-9_]$"))
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-tv-zA-Z0-9_]$"))
                   {
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
                      _state = State.Ident;
-                  }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x1A\x20]$"))
-                  {
-                     CurrentToken.TokenKind = TokenKind.Designator;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
+                  }
+                  else
+                  {
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
                   }
                   break;
 
-               case State.va:
-                  if (_currentCh == 'r')
+               case State.Nu:
+                  if (_currentCh == 'm')
                   {
+                     _state = State.Num;
                      CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
-                     _state = State.var;
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-ln-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Num:
+                  if (_currentCh == 'b')
+                  {
+                     _state = State.Numb;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[ac-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Numb:
+                  if (_currentCh == 'e')
+                  {
+                     _state = State.Numbe;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-df-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Numbe:
+                  if (_currentCh == 'r')
+                  {
+                     _state = State.Number;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
                   }
                   else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-qs-zA-Z0-9_]$"))
                   {
+                     _state = State.Ident;
                      CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
-                     _state = State.Ident;
                   }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x20]$"))
+                  else
                   {
-                     CurrentToken.TokenKind = TokenKind.Designator;
-                     _currentCh = NextChar();
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
                   }
                   break;
 
-               case State.var:
-                  if (Regex.IsMatch(_currentCh.ToString(), @"^[\x10\x13\x1A\x20]$"))
+               case State.Number:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
                   {
-                     CurrentToken.TokenKind = TokenKind.Var;
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
+                  }
+                  else
+                  {
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Number;
+                  }
+                  break;
+
+               case State.P:
+                  if (_currentCh == 'r')
+                  {
+                     _state = State.Pr;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-qs-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Pr:
+                  if (_currentCh == 'i')
+                  {
+                     _state = State.Pri;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-hj-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Pri:
+                  if (_currentCh == 'n')
+                  {
+                     _state = State.Prin;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-mo-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Prin:
+                  if (_currentCh == 't')
+                  {
+                     _state = State.Print;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-su-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Print:
+                  if (_currentCh == 'L')
+                  {
+                     _state = State.PrintL;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-KM-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Print;
+                  }
+                  break;
+
+               case State.PrintL:
+                  if (_currentCh == 'i')
+                  {
+                     _state = State.PrintLi;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-hj-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Print;
+                  }
+                  break;
+
+               case State.PrintLi:
+                  if (_currentCh == 'n')
+                  {
+                     _state = State.PrintLin;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-mo-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.PrintLin:
+                  if (_currentCh == 'e')
+                  {
+                     _state = State.PrintLine;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-df-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.PrintLine:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.PrintLine;
+                  }
+                  break;
+
+               case State.S:
+                  if (_currentCh == 't')
+                  {
+                     _state = State.St;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-su-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.St:
+                  if (_currentCh == 'r')
+                  {
+                     _state = State.Str;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-qs-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Str:
+                  if (_currentCh == 'i')
+                  {
+                     _state = State.Stri;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-hj-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Stri:
+                  if (_currentCh == 'n')
+                  {
+                     _state = State.Strin;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-mo-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Strin:
+                  if (_currentCh == 'g')
+                  {
+                     _state = State.String;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-fh-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.String:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.String;
+                  }
+                  break;
+
+               case State.V:
+                  if (_currentCh == 'a')
+                  {
+                     _state = State.Va;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[b-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Va:
+                  if (_currentCh == 'r')
+                  {
+                     _state = State.Var;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-qs-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
+                  }
+                  break;
+
+               case State.Var:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
+                  {
+                     _state = State.Ident;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Var;
                   }
                   break;
 
                case State.Ident:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
                   {
-                     CurrentToken.Image += _currentCh;
                      _currentCh = NextChar();
-                  }
-                  else if (_currentCh == '>')
-                  {
                      CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                     _state = State.Done;
                   }
                   else
                   {
-                     CurrentToken.TokenKind = TokenKind.Error;
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
                   }
                   break;
 
-               case State.String:
-
+               case State.StringLiteral:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[\x20-!#-~]$"))
                   {
                      CurrentToken.Image += _currentCh;
@@ -185,13 +638,46 @@ namespace EbnfCompiler.Sample
                   }
                   else if (_currentCh == '"')
                   {
-                     _currentCh = NextChar();
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.StringLiteral;
+                     _currentCh = NextChar();
                   }
                   else
                   {
-                     CurrentToken.TokenKind = TokenKind.Error;
                      _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.Error;
+                  }
+                  break;
+
+               case State.NumberLiteral1:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[0-9]$"))
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else if (_currentCh == '.')
+                  {
+                     _state = State.NumberLiteral2;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.NumberLiteral;
+                  }
+                  break;
+
+               case State.NumberLiteral2:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[0-9]$"))
+                  {
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                  {
+                     _state = State.Done;
+                     CurrentToken.TokenKind = TokenKind.NumberLiteral;
                   }
                   break;
 
@@ -199,10 +685,11 @@ namespace EbnfCompiler.Sample
                   switch (_currentCh)
                   {
                      case '=':
+                        _state = State.Done;
                         CurrentToken.Image += _currentCh;
                         _currentCh = NextChar();
-                        _state = State.Done;
                         break;
+
                      default:
                         CurrentToken.TokenKind = TokenKind.Error;
                         _state = State.Done;
@@ -211,20 +698,19 @@ namespace EbnfCompiler.Sample
                   break;
 
                case State.Comment:
-                  switch (_currentCh)
+                  if (_currentCh == '/')
                   {
-                     case '/':
+                     _state = State.Start;
+                     _currentCh = NextChar();
+                     while (_currentCh != ChCr && _currentCh != ChEof)
                         _currentCh = NextChar();
-                        while (_currentCh != ChCr && _currentCh != ChEof)
-                           _currentCh = NextChar();
 
-                        SkipWhiteSpace();
-                        _state = State.Start;
-                        break;
-                     default:
-                        CurrentToken.TokenKind = TokenKind.Error;
-                        _state = State.Done;
-                        break;
+                     SkipWhiteSpace();
+                  }
+                  else
+                  {
+                     CurrentToken.TokenKind = TokenKind.ForwardSlash;
+                     _state = State.Done;
                   }
                   break;
             }

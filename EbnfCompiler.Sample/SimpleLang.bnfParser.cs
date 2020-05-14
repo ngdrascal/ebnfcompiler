@@ -26,7 +26,7 @@ namespace EbnfCompiler.Sample
       private void ParseStatementList()
       {
          ParseStatement();
-         Match(TokenKind.Semi);
+         Match(TokenKind.SemiColon);
          _scanner.Advance();
 
          var firstSetOfKleeneStar1 = new[]
@@ -36,7 +36,7 @@ namespace EbnfCompiler.Sample
          while (firstSetOfKleeneStar1.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseStatement();
-            Match(TokenKind.Semi);
+            Match(TokenKind.SemiColon);
             _scanner.Advance();
 
          }
@@ -63,7 +63,7 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.Var);
          _scanner.Advance();
 
-         Match(TokenKind.Designator);
+         Match(TokenKind.Identifier);
          _scanner.Advance();
 
          Match(TokenKind.Colon);
@@ -142,8 +142,8 @@ namespace EbnfCompiler.Sample
                _scanner.Advance();
 
                break;
-            case TokenKind.Designator:
-               Match(TokenKind.Designator);
+            case TokenKind.Identifier:
+               Match(TokenKind.Identifier);
                _scanner.Advance();
 
                break;
@@ -246,7 +246,7 @@ namespace EbnfCompiler.Sample
 
          var firstSetOfOption2 = new[]
          {
-            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Designator, TokenKind.NumberLiteral, TokenKind.StringLiteral
+            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
          };
          if (firstSetOfOption2.Contains(_scanner.CurrentToken.TokenKind))
          {
