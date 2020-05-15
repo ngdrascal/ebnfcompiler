@@ -229,7 +229,7 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintClassHeader()
       {
-         PrintLine("public class Parser");
+         PrintLine("public partial class Parser");
          PrintLine("{");
          Indent();
       }
@@ -275,7 +275,7 @@ namespace EbnfCompiler.CodeGenerator
       private void PrintParseGoal(string prodName, string preActionName, string postActionName)
       {
          PrintLine();
-         PrintLine("public void ParseGoal()");
+         PrintLine("public IRootNode ParseGoal()");
          PrintLine("{");
          Indent();
 
@@ -284,8 +284,12 @@ namespace EbnfCompiler.CodeGenerator
 
          PrintProdRef(prodName);
 
+         PrintLine("Match(TokenKind.Eof);");
+
          if (!string.IsNullOrEmpty(postActionName))
             PrintAction(postActionName);
+
+         PrintLine("return BuildRootNode();");
 
          PrintMethodFooter(postActionName);
       }
@@ -346,7 +350,8 @@ namespace EbnfCompiler.CodeGenerator
 
       private void PrintAction(string actionName)
       {
-         PrintLine($"_astBuilder.{actionName}();");
+         var action = CamelCaseMethodName(actionName);
+         PrintLine($"_astBuilder.{action}(_scanner.CurrentToken);");
       }
 
       private void PrintOption(ITerminalSet firstSet, string nodeId)
