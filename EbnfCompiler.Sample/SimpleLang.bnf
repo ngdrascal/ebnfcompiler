@@ -1,17 +1,17 @@
 %TOKENS%
    "var"             = "Var"
-   "designator"      = "Designator"
+   "identifier"      = "Identifier"
    "number"          = "Number"
    "string"          = "String"
    "print"           = "Print"
    "printLine"       = "PrintLine"
    "number-literal"  = "NumberLiteral"
    "string-literal"  = "StringLiteral"
-   ";"               = "Semi"
+   ";"               = "SemiColon"
    ":"               = "Colon"
    "="               = "Assign"
-   "("               = "LParen"
-   ")"               = "RParen"
+   "("               = "LeftParen"
+   ")"               = "RightParen"
    "+"               = "Plus"
    "-"               = "Minus"
    "*"               = "Asterisk"
@@ -22,15 +22,15 @@
 
    <statement> ::= <var-declaration> | <print-stmt> | <printline-stmt> .
 
-   <var-declaration> ::= "var" "designator" ":" <type> "=" <expression> .
+   <var-declaration> ::= #VarStmtStart# "var" #VarStmtIdent# "identifier" ":" #VarStmtType# <type> "=" <expression> #VarStmtEnd# .
 
    <type> ::= "number" | "string" .
 
-   <expression> ::= [ <sign> ] <term> { <term-operator> <term> } .
+   <expression> ::= #ExprStart# [ <sign> ] <term> { #BinaryOp# <term-operator> <term> } #ExprEnd#.
 
-   <term> ::= <factor> { <factor-operator> <factor> } .
+   <term> ::= #TermStart# <factor> { #BinaryOp# <factor-operator> <factor> } #TermEnd#.
 
-   <factor> ::= "(" <expression> ")" | "designator" | <constant-literal> .
+   <factor> ::= "(" <expression> ")" | "identifier" | <constant-literal> .
 
    <sign> ::= "+" | "-" .
 
@@ -38,8 +38,8 @@
 
    <factor-operator> ::= "*" | "/" .
 
-   <constant-literal> ::= "number-literal" | "string-literal" .
+   <constant-literal> ::= ( #NumLiteral# "number-literal" ) | "string-literal" .
 
-   <print-stmt> ::= "print" "(" <expression> ")" .
+   <print-stmt> ::= "print" "(" <expression> ")".
 
    <printline-stmt> ::= "printLine" "(" [ <expression> ] ")" .
