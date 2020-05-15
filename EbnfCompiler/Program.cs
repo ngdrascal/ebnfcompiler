@@ -35,7 +35,7 @@ namespace EbnfCompiler
          var rootNode = parser.ParseGoal();
 
          var traverser = new AstTraverser(tracer);
-         var outFileName = Path.GetFullPath(args[0]) + "Parser.cs";
+         var outFileName = Path.GetDirectoryName(args[0]) + "\\Parser.cs";
          using var outStream = new FileStream(outFileName, FileMode.Create);
          using var streamWriter = new StreamWriter(outStream);
 
