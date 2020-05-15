@@ -9,6 +9,7 @@ namespace EbnfCompiler.Sample
       {
          Start,
          Done,
+         // ReSharper disable twice IdentifierTypo
          N, Nu, Num, Numb, Numbe, Number,
          P, Pr, Pri, Prin, Print, PrintL, PrintLi, PrintLin, PrintLine,
          S, St, Str, Stri, Strin, String,
@@ -16,7 +17,6 @@ namespace EbnfCompiler.Sample
          Ident,
          StringLiteral,
          NumberLiteral1, NumberLiteral2,
-         Assign,
          Comment
       };
 
@@ -391,7 +391,7 @@ namespace EbnfCompiler.Sample
                   else
                   {
                      _state = State.Done;
-                     CurrentToken.TokenKind = TokenKind.Print;
+                     CurrentToken.TokenKind = TokenKind.Identifier;
                   }
                   break;
 
@@ -620,8 +620,8 @@ namespace EbnfCompiler.Sample
                case State.Ident:
                   if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
                   {
-                     _currentCh = NextChar();
                      CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
                   }
                   else
                   {
@@ -678,22 +678,6 @@ namespace EbnfCompiler.Sample
                   {
                      _state = State.Done;
                      CurrentToken.TokenKind = TokenKind.NumberLiteral;
-                  }
-                  break;
-
-               case State.Assign:
-                  switch (_currentCh)
-                  {
-                     case '=':
-                        _state = State.Done;
-                        CurrentToken.Image += _currentCh;
-                        _currentCh = NextChar();
-                        break;
-
-                     default:
-                        CurrentToken.TokenKind = TokenKind.Error;
-                        _state = State.Done;
-                        break;
                   }
                   break;
 
