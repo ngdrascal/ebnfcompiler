@@ -28,6 +28,7 @@ namespace EbnfCompiler.Sample
       private void ParseStatementList()
       {
          ParseStatement();
+         _astBuilder.StmtEnd(_scanner.CurrentToken);
          Match(TokenKind.SemiColon);
          _scanner.Advance();
 
@@ -38,6 +39,7 @@ namespace EbnfCompiler.Sample
          while (firstSetOfKleeneStar1.Contains(_scanner.CurrentToken.TokenKind))
          {
             ParseStatement();
+            _astBuilder.StmtEnd(_scanner.CurrentToken);
             Match(TokenKind.SemiColon);
             _scanner.Advance();
 
@@ -101,7 +103,6 @@ namespace EbnfCompiler.Sample
 
       private void ParseExpression()
       {
-         _astBuilder.ExprStart(_scanner.CurrentToken);
          var firstSetOfOption1 = new[]
          {
             TokenKind.Plus, TokenKind.Minus
@@ -111,6 +112,7 @@ namespace EbnfCompiler.Sample
             ParseSign();
          }
          ParseTerm();
+         _astBuilder.UnaryOpEnd(_scanner.CurrentToken);
          var firstSetOfKleeneStar2 = new[]
          {
             TokenKind.Plus, TokenKind.Minus
@@ -120,13 +122,12 @@ namespace EbnfCompiler.Sample
             _astBuilder.BinaryOp(_scanner.CurrentToken);
             ParseTermOperator();
             ParseTerm();
+            _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
          }
-         _astBuilder.ExprEnd(_scanner.CurrentToken);
       }
 
       private void ParseTerm()
       {
-         _astBuilder.TermStart(_scanner.CurrentToken);
          ParseFactor();
          var firstSetOfKleeneStar3 = new[]
          {
@@ -137,8 +138,8 @@ namespace EbnfCompiler.Sample
             _astBuilder.BinaryOp(_scanner.CurrentToken);
             ParseFactorOperator();
             ParseFactor();
+            _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
          }
-         _astBuilder.TermEnd(_scanner.CurrentToken);
       }
 
       private void ParseFactor()
@@ -155,6 +156,7 @@ namespace EbnfCompiler.Sample
 
                break;
             case TokenKind.Identifier:
+               _astBuilder.FactIdent(_scanner.CurrentToken);
                Match(TokenKind.Identifier);
                _scanner.Advance();
 
@@ -168,6 +170,7 @@ namespace EbnfCompiler.Sample
 
       private void ParseSign()
       {
+         _astBuilder.UnaryOp(_scanner.CurrentToken);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.Plus:

@@ -26,25 +26,20 @@
       IAstNode Expression { get; set; }
    }
 
-   public interface IExpressionNode : IAstNode
-   {
-
-   }
-
    public interface IUnaryOperatorNode : IAstNode
    {
       public UnaryOperators Operator { get; }
 
-      public IAstNode Operand { get; }
+      public IAstNode Operand { get; set; }
    }
 
    public interface IBinaryOperatorNode : IAstNode
    {
       public BinaryOperators Operator { get; }
 
-      public IAstNode LeftOperand { get; }
+      public IAstNode LeftOperand { get; set; }
 
-      public IAstNode RightOperand { get; }
+      public IAstNode RightOperand { get; set; }
    }
 
    public interface INumberLiteralNode : IAstNode

@@ -1,8 +1,11 @@
-﻿namespace EbnfCompiler.Sample
+﻿using System;
+using System.Globalization;
+
+namespace EbnfCompiler.Sample
 {
    public class AstNodeBase : IAstNode
    {
-      public AstNodeBase(AstNodeTypes nodeType, IToken token)
+      protected AstNodeBase(AstNodeTypes nodeType, IToken token)
       {
          AstNodeTypes = nodeType;
          Location = token.Location;
@@ -10,7 +13,7 @@
 
       public AstNodeTypes AstNodeTypes { get; }
 
-      public ISourceLocation Location { get; set; }
+      public ISourceLocation Location { get; }
    }
 
    public class VarStatementNode : AstNodeBase, IVarStatementNode
@@ -24,24 +27,65 @@
       public ITypeNode Type { get; set; }
 
       public IAstNode Expression { get; set; }
+
+      public override string ToString()
+      {
+         return $"var {Variable?.ToString()} : {Type?.ToString()} = {Expression?.ToString()}";
+      }
    }
 
    public class UnaryOperatorNode : AstNodeBase, IUnaryOperatorNode
    {
-      public UnaryOperatorNode(IToken token, UnaryOperators op) : base(AstNodeTypes.UnaryOperator, token)
+      public UnaryOperatorNode(IToken token) : base(AstNodeTypes.UnaryOperator, token)
       {
+         var op = token.Image switch
+         {
+            "+" => UnaryOperators.Plus,
+            "-" => UnaryOperators.Minus,
+            _ => throw new ArgumentOutOfRangeException()
+         };
+
          Operator = op;
       }
 
       public UnaryOperators Operator { get; }
 
       public IAstNode Operand { get; set; }
+
+      public override string ToString()
+      {
+         var op = Operator switch
+         {
+            UnaryOperators.Plus => "+",
+            UnaryOperators.Minus => "-",
+            _ => throw new ArgumentOutOfRangeException()
+         };
+
+         return $"{op}{Operand.ToString()}";
+      }
    }
 
    public class BinaryOperatorNode : AstNodeBase, IBinaryOperatorNode
    {
-      public BinaryOperatorNode(IToken token, BinaryOperators op) : base(AstNodeTypes.BinaryOperator, token)
+      public BinaryOperatorNode(IToken token) : base(AstNodeTypes.BinaryOperator, token)
       {
+         var op = BinaryOperators.Add;
+         switch (token.Image)
+         {
+            case "+":
+               op = BinaryOperators.Add;
+               break;
+            case "-":
+               op = BinaryOperators.Subtract;
+               break;
+            case "*":
+               op = BinaryOperators.Multiply;
+               break;
+            case "/":
+               op = BinaryOperators.Divide;
+               break;
+         }
+
          Operator = op;
       }
 
@@ -50,19 +94,40 @@
       public IAstNode LeftOperand { get; set; }
 
       public IAstNode RightOperand { get; set; }
+
+      public override string ToString()
+      {
+         var left = LeftOperand.ToString();
+         var op = Operator switch
+         {
+            BinaryOperators.Add => "+",
+            BinaryOperators.Subtract => "-",
+            BinaryOperators.Multiply => "*",
+            BinaryOperators.Divide => "/",
+            _ => throw new ArgumentOutOfRangeException()
+         };
+         var right = RightOperand.ToString();
+
+         return $"{left} {op} {right}";
+      }
    }
 
    public class NumberLiteralNode : AstNodeBase, INumberLiteralNode
    {
-      public NumberLiteralNode(IToken token): base(AstNodeTypes.NumberLiteral, token)
+      public NumberLiteralNode(IToken token) : base(AstNodeTypes.NumberLiteral, token)
       {
          float.TryParse(token.Image, out var value);
          Value = value;
       }
 
       public float Value { get; }
+
+      public override string ToString()
+      {
+         return Value.ToString(CultureInfo.InvariantCulture);
+      }
    }
-   
+
    public class StringLiteralNode : AstNodeBase, IStringLiteralNode
    {
       public StringLiteralNode(IToken token, string value) : base(AstNodeTypes.StringLiteral, token)
@@ -71,6 +136,11 @@
       }
 
       public string Value { get; }
+
+      public override string ToString()
+      {
+         return Value;
+      }
    }
 
    public class VariableNode : AstNodeBase, IVariableNode
@@ -81,6 +151,11 @@
       }
 
       public string Name { get; }
+
+      public override string ToString()
+      {
+         return Name;
+      }
    }
 
    public class TypeNode : AstNodeBase, ITypeNode
@@ -91,5 +166,10 @@
       }
 
       public string Name { get; }
+
+      public override string ToString()
+      {
+         return Name;
+      }
    }
 }

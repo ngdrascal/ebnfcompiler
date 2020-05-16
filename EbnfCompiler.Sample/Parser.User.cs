@@ -4,7 +4,7 @@
    {
       IRootNode BuildRootNode()
       {
-         return null;
+         return _astBuilder.RootNode;
       }
    }
 }

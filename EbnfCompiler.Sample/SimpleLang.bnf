@@ -18,7 +18,7 @@
    "/"               = "ForwardSlash"
 
 %EBNF%
-   <statement-list> ::= <statement> ";" { <statement> ";" } .
+   <statement-list> ::= <statement> #StmtEnd# ";" { <statement> #StmtEnd# ";" } .
 
    <statement> ::= <var-declaration> | <print-stmt> | <printline-stmt> .
 
@@ -26,13 +26,13 @@
 
    <type> ::= "number" | "string" .
 
-   <expression> ::= #ExprStart# [ <sign> ] <term> { #BinaryOp# <term-operator> <term> } #ExprEnd#.
+   <expression> ::= [ <sign> ] <term> #UnaryOpEnd# { #BinaryOp# <term-operator> <term> #BinaryOpEnd# } .
 
-   <term> ::= #TermStart# <factor> { #BinaryOp# <factor-operator> <factor> } #TermEnd#.
+   <term> ::= <factor> { #BinaryOp# <factor-operator> <factor> #BinaryOpEnd# } .
 
-   <factor> ::= "(" <expression> ")" | "identifier" | <constant-literal> .
+   <factor> ::= "(" <expression> ")" | ( #FactIdent# "identifier" ) | <constant-literal> .
 
-   <sign> ::= "+" | "-" .
+   <sign> ::= #UnaryOp# "+" | "-" .
 
    <term-operator> ::= "+" | "-" .
 

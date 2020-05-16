@@ -9,7 +9,7 @@ namespace EbnfCompiler.Sample.UnitTests
    public class ParserTests
    {
       private const string TestCase1 = @"
-         var i : number = 1;
+         var i : number = -1 - 2;
       ";
 
       [Test]
