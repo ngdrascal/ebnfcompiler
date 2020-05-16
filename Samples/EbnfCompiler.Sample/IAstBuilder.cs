@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// ReSharper disable UnusedParameter.Global
+
+using System.Collections.Generic;
 
 namespace EbnfCompiler.Sample
 {

@@ -2,7 +2,7 @@
 {
    public class Token : IToken
    {
-      public ISourceLocation Location { get; private set; }
+      public ISourceLocation Location { get; }
       public string Image { get; set; }
       public TokenKind TokenKind { get; set; }
 
