@@ -17,8 +17,7 @@
    </ItemGroup>
 
    <ItemGroup>
-      <ProjectReference Include="..\EbnfCompiler.Parser\EbnfCompiler.Parser.csproj" />
-      <ProjectReference Include="..\EbnfCompiler.Scanner\EbnfCompiler.Scanner.csproj" />
+     <ProjectReference Include="..\..\EbnfCompiler.Parser\EbnfCompiler.Parser.csproj" />
    </ItemGroup>
 
 </Project>
