@@ -2,7 +2,7 @@
   "profiles": {
     "EbnfCompiler": {
       "commandName": "Project",
-      "commandLineArgs": "\"../../../../EbnfCompiler.Sample/SimpleLang.bnf\"  "
+      "commandLineArgs": "\"../../../../Samples/EbnfCompiler.Sample/SimpleLang.bnf\"  "
     }
   }
 }

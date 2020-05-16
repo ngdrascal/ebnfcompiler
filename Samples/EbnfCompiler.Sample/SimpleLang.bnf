@@ -38,7 +38,7 @@
 
    <factor-operator> ::= "*" | "/" .
 
-   <constant-literal> ::= ( #NumLiteral# "number-literal" ) | "string-literal" .
+   <constant-literal> ::= ( #NumLiteral# "number-literal" ) | ( #StrLiteral# "string-literal" ) .
 
    <print-stmt> ::= "print" "(" <expression> ")".
 

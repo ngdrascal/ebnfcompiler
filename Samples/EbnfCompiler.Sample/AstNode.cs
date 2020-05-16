@@ -130,16 +130,16 @@ namespace EbnfCompiler.Sample
 
    public class StringLiteralNode : AstNodeBase, IStringLiteralNode
    {
-      public StringLiteralNode(IToken token, string value) : base(AstNodeTypes.StringLiteral, token)
+      public StringLiteralNode(IToken token) : base(AstNodeTypes.StringLiteral, token)
       {
-         Value = value;
+         Value = token.Image;
       }
 
       public string Value { get; }
 
       public override string ToString()
       {
-         return Value;
+         return $"\"{Value}\"";
       }
    }
 

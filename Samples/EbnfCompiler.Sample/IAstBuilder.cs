@@ -20,6 +20,7 @@ namespace EbnfCompiler.Sample
       void BinaryOpEnd(IToken token);
 
       void NumLiteral(IToken token);
+      void StrLiteral(IToken token);
 
       void FactIdent(IToken token);
    }
@@ -92,6 +93,12 @@ namespace EbnfCompiler.Sample
       {
          var numLitNode = new NumberLiteralNode(token);
          _stack.Push(numLitNode);
+      }
+
+      public void StrLiteral(IToken token)
+      {
+        var strLitNode = new StringLiteralNode(token);
+        _stack.Push(strLitNode);
       }
 
       public void FactIdent(IToken token)

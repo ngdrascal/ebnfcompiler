@@ -231,6 +231,7 @@ namespace EbnfCompiler.Sample
 
                break;
             case TokenKind.StringLiteral:
+               _astBuilder.StrLiteral(_scanner.CurrentToken);
                Match(TokenKind.StringLiteral);
                _scanner.Advance();
 
