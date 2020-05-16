@@ -30,7 +30,7 @@ namespace EbnfCompiler.Sample
 
       public override string ToString()
       {
-         return $"var {Variable?.ToString()} : {Type?.ToString()} = {Expression?.ToString()}";
+         return $"var {Variable?.ToString()} : {Type?.ToString()} = {Expression?.ToString()};";
       }
    }
 
@@ -108,7 +108,7 @@ namespace EbnfCompiler.Sample
          };
          var right = RightOperand.ToString();
 
-         return $"{left} {op} {right}";
+         return $"({left} {op} {right})";
       }
    }
 

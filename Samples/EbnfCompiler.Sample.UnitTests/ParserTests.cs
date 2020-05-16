@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Text;
 using NUnit.Framework;
 
@@ -8,16 +9,20 @@ namespace EbnfCompiler.Sample.UnitTests
    [TestFixture, ExcludeFromCodeCoverage]
    public class ParserTests
    {
-      private const string TestCase1 = @"
-         var i : number = -1 - 2;
-      ";
+      [TestCase("var i : number = 1;",           "var i : number = 1;")]
+      [TestCase("var i : number = 1 + 2;",       "var i : number = (1 + 2);")]
+      [TestCase("var i : number = 1 + 2 * 3;",   "var i : number = (1 + (2 * 3));")]
+      [TestCase("var i : number = (1 + 2) * 3;", "var i : number = ((1 + 2) * 3);")]
+      [TestCase("var i : number = -1;",          "var i : number = -1;")]
+      [TestCase("var i : number = -1 - -2;",     "var i : number = (-1 - -2);")]
 
-      [Test]
-      public void Test()
+      [TestCase("var i : number = j + 1;", "var i : number = (j + 1);")]
+      public void Test(string input, string expectedImage)
       {
+         // Arrange:
          var encoding = new UTF8Encoding();
          using var inStream = new MemoryStream();
-         inStream.Write(encoding.GetBytes(TestCase1));
+         inStream.Write(encoding.GetBytes(input));
          inStream.Seek(0, SeekOrigin.Begin);
 
          var scanner = new Scanner(inStream);
@@ -26,7 +31,11 @@ namespace EbnfCompiler.Sample.UnitTests
 
          var parser = new Parser(scanner, astBuilder);
 
+         // Act:
          var rootNode = parser.ParseGoal();
+
+         // Assert:
+         Assert.That(rootNode.Statements.First().ToString(), Is.EqualTo(expectedImage));
       }
    }
 }
