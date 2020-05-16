@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace EbnfCompiler.Sample
 {
@@ -31,6 +33,28 @@ namespace EbnfCompiler.Sample
       public override string ToString()
       {
          return $"var {Variable?.ToString()} : {Type?.ToString()} = {Expression?.ToString()};";
+      }
+   }
+
+   public class PrintStatementNode : AstNodeBase, IPrintStatementNode
+   {
+      private readonly List<IAstNode> _expressions = new List<IAstNode>();
+
+      public PrintStatementNode(IToken token) : base(AstNodeTypes.PrintStatement, token)
+      {
+      }
+
+      public IReadOnlyCollection<IAstNode> Expressions => _expressions.AsReadOnly();
+
+      public void AppendExpression(IAstNode expression)
+      {
+         _expressions.Add(expression);
+      }
+
+      public override string ToString()
+      {
+         var expressions = string.Join(", ", _expressions.Select(node => node.ToString()));
+         return $"print({expressions});";
       }
    }
 

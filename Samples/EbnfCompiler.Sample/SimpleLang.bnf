@@ -40,6 +40,6 @@
 
    <constant-literal> ::= ( #NumLiteral# "number-literal" ) | ( #StrLiteral# "string-literal" ) .
 
-   <print-stmt> ::= "print" "(" <expression> ")".
+   <print-stmt> ::= #PrintStart# "print" "(" <expression> ")" #PrintEnd# .
 
    <printline-stmt> ::= "printLine" "(" [ <expression> ] ")" .

@@ -65,7 +65,7 @@ namespace EbnfCompiler.Sample
                         _state = State.N;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
-                     case 'P':
+                     case 'p':
                         _state = State.P;
                         CurrentToken.Image = _currentCh.ToString();
                         break;

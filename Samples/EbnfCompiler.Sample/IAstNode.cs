@@ -1,4 +1,6 @@
-﻿namespace EbnfCompiler.Sample
+﻿using System.Collections.Generic;
+
+namespace EbnfCompiler.Sample
 {
    public enum UnaryOperators { Plus, Minus };
 
@@ -24,6 +26,12 @@
       IVariableNode Variable { get; set; }
       ITypeNode Type { get; set; }
       IAstNode Expression { get; set; }
+   }
+
+   public interface IPrintStatementNode : IAstNode
+   {
+      IReadOnlyCollection<IAstNode> Expressions { get; }
+      void AppendExpression(IAstNode expression);
    }
 
    public interface IUnaryOperatorNode : IAstNode

@@ -12,6 +12,14 @@ namespace EbnfCompiler.Sample
          return result;
       }
 
+      public static IPrintStatementNode AsPrintStatement(this IAstNode astNode)
+      {
+         if (!(astNode is IPrintStatementNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeTypes, typeof(IPrintStatementNode)));
+
+         return result;
+      }
+
       public static IUnaryOperatorNode AsUnaryOp(this IAstNode astNode)
       {
          if (!(astNode is IUnaryOperatorNode result))

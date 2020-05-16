@@ -241,6 +241,7 @@ namespace EbnfCompiler.Sample
 
       private void ParsePrintStmt()
       {
+         _astBuilder.PrintStart(_scanner.CurrentToken);
          Match(TokenKind.Print);
          _scanner.Advance();
 
@@ -251,6 +252,7 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.RightParen);
          _scanner.Advance();
 
+         _astBuilder.PrintEnd(_scanner.CurrentToken);
       }
 
       private void ParsePrintlineStmt()
