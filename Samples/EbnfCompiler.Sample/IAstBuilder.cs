@@ -14,7 +14,7 @@ namespace EbnfCompiler.Sample
       void VarStmtEnd(IToken token);
 
       void PrintStart(IToken token);
-      void PrintEnd(IToken token);
+      void PrintExprEnd(IToken token);
 
       void UnaryOp(IToken token);
       void UnaryOpEnd(IToken token);
@@ -70,7 +70,7 @@ namespace EbnfCompiler.Sample
          _stack.Push(printNode);
       }
 
-      public void PrintEnd(IToken token)
+      public void PrintExprEnd(IToken token)
       {
          var expr = _stack.Pop();
          _stack.Peek().AsPrintStatement().AppendExpression(expr);

@@ -65,7 +65,7 @@ namespace EbnfCompiler.Sample
                         _state = State.N;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
-                     case 'p':
+                     case 'P':
                         _state = State.P;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
@@ -86,6 +86,11 @@ namespace EbnfCompiler.Sample
                         _state = State.Done;
                         CurrentToken.TokenKind = TokenKind.RightParen;
                         CurrentToken.Image = ")";
+                        break;
+                     case ',':
+                        _state = State.Done;
+                        CurrentToken.TokenKind = TokenKind.Comma;
+                        CurrentToken.Image = _currentCh.ToString();
                         break;
                      case ':':
                         _state = State.Done;

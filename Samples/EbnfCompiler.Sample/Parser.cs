@@ -248,11 +248,24 @@ namespace EbnfCompiler.Sample
          Match(TokenKind.LeftParen);
          _scanner.Advance();
 
-         ParseExpression();
+         ParseExprList();
          Match(TokenKind.RightParen);
          _scanner.Advance();
 
-         _astBuilder.PrintEnd(_scanner.CurrentToken);
+      }
+
+      private void ParseExprList()
+      {
+         ParseExpression();
+         _astBuilder.PrintExprEnd(_scanner.CurrentToken);
+         while (_scanner.CurrentToken.TokenKind == TokenKind.Comma)
+         {
+            Match(TokenKind.Comma);
+            _scanner.Advance();
+
+            ParseExpression();
+            _astBuilder.PrintExprEnd(_scanner.CurrentToken);
+         }
       }
 
       private void ParsePrintlineStmt()

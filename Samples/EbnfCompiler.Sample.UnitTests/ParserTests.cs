@@ -20,8 +20,10 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("var s : string = \"Hello\";", "var s : string = \"Hello\";")]
       [TestCase("var s : string = \"Hello,\" + \"world!\";", "var s : string = (\"Hello,\" + \"world!\");")]
 
-      [TestCase("print(1);", "print(1);")]
-      [TestCase("print(\"Hello, world!\");", "print(\"Hello, world!\");")]
+      [TestCase("Print(1);", "Print(1);")]
+      [TestCase("Print(\"Hello, world!\");", "Print(\"Hello, world!\");")]
+
+      [TestCase("Print(\"i = \", i);", "Print(\"i = \", i);")]
 
       public void Test(string input, string expectedImage)
       {

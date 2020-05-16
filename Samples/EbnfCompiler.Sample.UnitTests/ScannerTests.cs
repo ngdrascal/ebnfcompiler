@@ -67,6 +67,7 @@ namespace EbnfCompiler.Sample.UnitTests
 
       [TestCase("(", TokenKind.LeftParen, "(")]
       [TestCase(")", TokenKind.RightParen, ")")]
+      [TestCase(",", TokenKind.Comma, ",")]
       [TestCase(":", TokenKind.Colon, ":")]
       [TestCase(";", TokenKind.SemiColon, ";")]
       [TestCase("+", TokenKind.Plus, "+")]

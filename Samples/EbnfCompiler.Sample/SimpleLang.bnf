@@ -9,6 +9,7 @@
    "string-literal"  = "StringLiteral"
    ";"               = "SemiColon"
    ":"               = "Colon"
+   ","               = "Comma"
    "="               = "Assign"
    "("               = "LeftParen"
    ")"               = "RightParen"
@@ -40,6 +41,8 @@
 
    <constant-literal> ::= ( #NumLiteral# "number-literal" ) | ( #StrLiteral# "string-literal" ) .
 
-   <print-stmt> ::= #PrintStart# "print" "(" <expression> ")" #PrintEnd# .
+   <print-stmt> ::= #PrintStart# "print" "(" <expr-list> ")" .
+
+   <expr-list> ::= <expression> #PrintExprEnd# { "," <expression> #PrintExprEnd# } .
 
    <printline-stmt> ::= "printLine" "(" [ <expression> ] ")" .

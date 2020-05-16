@@ -54,7 +54,7 @@ namespace EbnfCompiler.Sample
       public override string ToString()
       {
          var expressions = string.Join(", ", _expressions.Select(node => node.ToString()));
-         return $"print({expressions});";
+         return $"Print({expressions});";
       }
    }
 
