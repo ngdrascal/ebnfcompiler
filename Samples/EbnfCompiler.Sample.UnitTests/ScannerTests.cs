@@ -11,6 +11,7 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("nu", TokenKind.Identifier, "nu")]
       [TestCase("num", TokenKind.Identifier, "num")]
       [TestCase("numb", TokenKind.Identifier, "numb")]
+      // ReSharper disable twice StringLiteralTypo
       [TestCase("numbe", TokenKind.Identifier, "numbe")]
       [TestCase("number", TokenKind.Number, "number")]
 
@@ -32,16 +33,6 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("Priz", TokenKind.Identifier, "Priz")]
       [TestCase("Prinz", TokenKind.Identifier, "Prinz")]
       [TestCase("Printz", TokenKind.Identifier, "Printz")]
-
-      [TestCase("PrintL", TokenKind.Identifier, "PrintL")]
-      [TestCase("PrintLi", TokenKind.Identifier, "PrintLi")]
-      [TestCase("PrintLin", TokenKind.Identifier, "PrintLin")]
-      [TestCase("PrintLine", TokenKind.PrintLine, "PrintLine")]
-
-      [TestCase("PrintLz", TokenKind.Identifier, "PrintLz")]
-      [TestCase("PrintLiz", TokenKind.Identifier, "PrintLiz")]
-      [TestCase("PrintLinz", TokenKind.Identifier, "PrintLinz")]
-      [TestCase("PrintLinez", TokenKind.Identifier, "PrintLinez")]
 
       [TestCase("s", TokenKind.Identifier, "s")]
       [TestCase("st", TokenKind.Identifier, "st")]

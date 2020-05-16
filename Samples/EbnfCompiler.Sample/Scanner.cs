@@ -11,7 +11,7 @@ namespace EbnfCompiler.Sample
          Done,
          // ReSharper disable twice IdentifierTypo
          N, Nu, Num, Numb, Numbe, Number,
-         P, Pr, Pri, Prin, Print, PrintL, PrintLi, PrintLin, PrintLine,
+         P, Pr, Pri, Prin, Print,
          S, St, Str, Stri, Strin, String,
          V, Va, Var,
          Ident,
@@ -364,13 +364,7 @@ namespace EbnfCompiler.Sample
                   break;
 
                case State.Print:
-                  if (_currentCh == 'L')
-                  {
-                     _state = State.PrintL;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-KM-Z0-9_]$"))
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-KM-Z0-9_]$"))
                   {
                      _state = State.Ident;
                      CurrentToken.Image += _currentCh;
@@ -380,80 +374,6 @@ namespace EbnfCompiler.Sample
                   {
                      _state = State.Done;
                      CurrentToken.TokenKind = TokenKind.Print;
-                  }
-                  break;
-
-               case State.PrintL:
-                  if (_currentCh == 'i')
-                  {
-                     _state = State.PrintLi;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-hj-zA-Z0-9_]$"))
-                  {
-                     _state = State.Ident;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else
-                  {
-                     _state = State.Done;
-                     CurrentToken.TokenKind = TokenKind.Identifier;
-                  }
-                  break;
-
-               case State.PrintLi:
-                  if (_currentCh == 'n')
-                  {
-                     _state = State.PrintLin;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-mo-zA-Z0-9_]$"))
-                  {
-                     _state = State.Ident;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else
-                  {
-                     _state = State.Done;
-                     CurrentToken.TokenKind = TokenKind.Identifier;
-                  }
-                  break;
-
-               case State.PrintLin:
-                  if (_currentCh == 'e')
-                  {
-                     _state = State.PrintLine;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else if (Regex.IsMatch(_currentCh.ToString(), @"^[a-df-zA-Z0-9_]$"))
-                  {
-                     _state = State.Ident;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else
-                  {
-                     _state = State.Done;
-                     CurrentToken.TokenKind = TokenKind.Identifier;
-                  }
-                  break;
-
-               case State.PrintLine:
-                  if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
-                  {
-                     _state = State.Ident;
-                     CurrentToken.Image += _currentCh;
-                     _currentCh = NextChar();
-                  }
-                  else
-                  {
-                     _state = State.Done;
-                     CurrentToken.TokenKind = TokenKind.PrintLine;
                   }
                   break;
 

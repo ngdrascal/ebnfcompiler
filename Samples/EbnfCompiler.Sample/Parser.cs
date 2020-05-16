@@ -34,7 +34,7 @@ namespace EbnfCompiler.Sample
 
          var firstSetOfKleeneStar1 = new[]
          {
-            TokenKind.Var, TokenKind.Print, TokenKind.PrintLine
+            TokenKind.Var, TokenKind.Print
          };
          while (firstSetOfKleeneStar1.Contains(_scanner.CurrentToken.TokenKind))
          {
@@ -55,9 +55,6 @@ namespace EbnfCompiler.Sample
                break;
             case TokenKind.Print:
                ParsePrintStmt();
-               break;
-            case TokenKind.PrintLine:
-               ParsePrintlineStmt();
                break;
          }
       }
@@ -266,27 +263,6 @@ namespace EbnfCompiler.Sample
             ParseExpression();
             _astBuilder.PrintExprEnd(_scanner.CurrentToken);
          }
-      }
-
-      private void ParsePrintlineStmt()
-      {
-         Match(TokenKind.PrintLine);
-         _scanner.Advance();
-
-         Match(TokenKind.LeftParen);
-         _scanner.Advance();
-
-         var firstSetOfOption2 = new[]
-         {
-            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
-         };
-         if (firstSetOfOption2.Contains(_scanner.CurrentToken.TokenKind))
-         {
-            ParseExpression();
-         }
-         Match(TokenKind.RightParen);
-         _scanner.Advance();
-
       }
    }
 }

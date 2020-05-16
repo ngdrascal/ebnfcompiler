@@ -21,7 +21,7 @@
 %EBNF%
    <statement-list> ::= <statement> #StmtEnd# ";" { <statement> #StmtEnd# ";" } .
 
-   <statement> ::= <var-declaration> | <print-stmt> | <printline-stmt> .
+   <statement> ::= <var-declaration> | <print-stmt> .
 
    <var-declaration> ::= #VarStmtStart# "var" #VarStmtIdent# "identifier" ":" #VarStmtType# <type> "=" <expression> #VarStmtEnd# .
 
@@ -44,5 +44,3 @@
    <print-stmt> ::= #PrintStart# "print" "(" <expr-list> ")" .
 
    <expr-list> ::= <expression> #PrintExprEnd# { "," <expression> #PrintExprEnd# } .
-
-   <printline-stmt> ::= "printLine" "(" [ <expression> ] ")" .
