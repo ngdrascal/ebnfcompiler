@@ -81,9 +81,16 @@ namespace EbnfCompiler.Sample.UnitTests
 
       [TestCase("12", TokenKind.NumberLiteral, "12")]
       [TestCase("12.34", TokenKind.NumberLiteral, "12.34")]
-      [TestCase("id", TokenKind.Identifier, "id")]
+      [TestCase("+12", TokenKind.NumberLiteral, "+12")]
+      [TestCase("-12", TokenKind.NumberLiteral, "-12")]
+      [TestCase("+12.34", TokenKind.NumberLiteral, "+12.34")]
+      [TestCase("-12.34", TokenKind.NumberLiteral, "-12.34")]
 
-      // [TestCase("", TokenKind.Eof, "<eof>")]
+      [TestCase("id", TokenKind.Identifier, "id")]
+      [TestCase("+id", TokenKind.Plus, "+")]
+      [TestCase("-id", TokenKind.Minus, "-")]
+
+      //[TestCase("", TokenKind.Eof, "<eof>")]
       public void Scanner_GivenValidInput_ReturnsCorrectToken(string input, TokenKind expectedTokenKind, string expectedTokenImage)
       {
          // Arrange:
@@ -103,7 +110,6 @@ namespace EbnfCompiler.Sample.UnitTests
          Assert.AreEqual(1, scanner.CurrentToken.Location.StartLine);
          Assert.AreEqual(1, scanner.CurrentToken.Location.StartColumn);
          Assert.AreEqual(1, scanner.CurrentToken.Location.StopLine);
-         Assert.AreEqual(input.Length, scanner.CurrentToken.Location.StopColumn);
       }
 
       [TestCase("!", "")]
@@ -120,12 +126,11 @@ namespace EbnfCompiler.Sample.UnitTests
          var scanner = new Scanner(stream); // scanner advances on creation
 
          // Assert:
-         Assert.That(scanner.CurrentToken.Image, Is.EqualTo(expectedTokenImage));
          Assert.That(scanner.CurrentToken.TokenKind, Is.EqualTo(TokenKind.Error));
+         Assert.That(scanner.CurrentToken.Image, Is.EqualTo(expectedTokenImage));
          Assert.That(scanner.CurrentToken.Location.StartLine, Is.EqualTo(1));
          Assert.That(scanner.CurrentToken.Location.StartColumn, Is.EqualTo(1));
          Assert.That(scanner.CurrentToken.Location.StopLine, Is.EqualTo(1));
-         //Assert.That(scanner.CurrentToken.Location.StopColumn, Is.EqualTo(expectedTokenImage.Length));
       }
 
       [TestCase("\rvar")]
@@ -163,8 +168,8 @@ namespace EbnfCompiler.Sample.UnitTests
          var scanner = new Scanner(stream); // scanner advances on creation
 
          // Assert:
-         Assert.That(scanner.CurrentToken.Image, Is.EqualTo("<eof>"));
          Assert.That(scanner.CurrentToken.TokenKind, Is.EqualTo(TokenKind.Eof));
+         Assert.That(scanner.CurrentToken.Image, Is.EqualTo("<eof>"));
          Assert.That(scanner.CurrentToken.Location.StartLine, Is.EqualTo(1));
          Assert.That(scanner.CurrentToken.Location.StartColumn, Is.EqualTo(input.Length));
          Assert.That(scanner.CurrentToken.Location.StopLine, Is.EqualTo(1));

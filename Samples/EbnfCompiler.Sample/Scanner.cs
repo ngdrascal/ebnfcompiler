@@ -16,6 +16,7 @@ namespace EbnfCompiler.Sample
          V, Va, Var,
          Ident,
          StringLiteral,
+         Sign,
          NumberLiteral1, NumberLiteral2,
          Comment
       };
@@ -102,12 +103,14 @@ namespace EbnfCompiler.Sample
                         CurrentToken.Image = _currentCh.ToString();
                         break;
                      case '+':
-                        _state = State.Done;
+                        //_state = State.Done;
+                        _state = State.Sign;
                         CurrentToken.TokenKind = TokenKind.Plus;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
                      case '-':
-                        _state = State.Done;
+                        //_state = State.Done;
+                        _state = State.Sign;
                         CurrentToken.TokenKind = TokenKind.Minus;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
@@ -647,6 +650,17 @@ namespace EbnfCompiler.Sample
                      _state = State.Done;
                      CurrentToken.TokenKind = TokenKind.Error;
                   }
+                  break;
+
+               case State.Sign:
+                  if (Regex.IsMatch(_currentCh.ToString(), @"^[0-9]$"))
+                  {
+                     _state = State.NumberLiteral1;
+                     CurrentToken.Image += _currentCh;
+                     _currentCh = NextChar();
+                  }
+                  else
+                     _state = State.Done;
                   break;
 
                case State.NumberLiteral1:
