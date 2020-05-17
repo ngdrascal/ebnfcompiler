@@ -5,7 +5,7 @@ namespace EbnfCompiler.Sample
    public class CompilerException : Exception
    {
       protected CompilerException(string message, ISourceLocation location)
-         : base(message)
+         : base($"({location.StartLine},{location.StartColumn}):{message}")
       {
          Location = location;
       }

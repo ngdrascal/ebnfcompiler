@@ -8,13 +8,18 @@ namespace EbnfCompiler.Sample
 
    public enum AstNodeTypes
    {
-      VarStatement, PrintStatement, PrintLineStatement,
-      UnaryOperator, BinaryOperator, NumberLiteral, StringLiteral, Variable, Type
+      VarStatement, PrintStatement,
+      UnaryOperator, BinaryOperator, NumberLiteral, StringLiteral, Variable, //Type
    };
+
+   public interface IHaveNodeType
+   {
+      string TypeName { get; set; }
+   }
 
    public interface IAstNode
    {
-      AstNodeTypes AstNodeTypes { get; }
+      AstNodeTypes AstNodeType { get; }
 
       ISourceLocation Location { get; }
 
@@ -24,7 +29,7 @@ namespace EbnfCompiler.Sample
    public interface IVarStatementNode : IAstNode
    {
       IVariableNode Variable { get; set; }
-      ITypeNode Type { get; set; }
+
       IAstNode Expression { get; set; }
    }
 
@@ -34,14 +39,14 @@ namespace EbnfCompiler.Sample
       void AppendExpression(IAstNode expression);
    }
 
-   public interface IUnaryOperatorNode : IAstNode
+   public interface IUnaryOperatorNode : IAstNode, IHaveNodeType
    {
       public UnaryOperators Operator { get; }
 
       public IAstNode Operand { get; set; }
    }
 
-   public interface IBinaryOperatorNode : IAstNode
+   public interface IBinaryOperatorNode : IAstNode, IHaveNodeType
    {
       public BinaryOperators Operator { get; }
 
@@ -50,22 +55,17 @@ namespace EbnfCompiler.Sample
       public IAstNode RightOperand { get; set; }
    }
 
-   public interface INumberLiteralNode : IAstNode
+   public interface INumberLiteralNode : IAstNode, IHaveNodeType
    {
       float Value { get; }
    }
 
-   public interface IStringLiteralNode : IAstNode
+   public interface IStringLiteralNode : IAstNode, IHaveNodeType
    {
       string Value { get; }
    }
 
-   public interface IVariableNode : IAstNode
-   {
-      string Name { get; }
-   }
-
-   public interface ITypeNode : IAstNode
+   public interface IVariableNode : IAstNode, IHaveNodeType
    {
       string Name { get; }
    }

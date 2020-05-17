@@ -7,7 +7,7 @@ namespace EbnfCompiler.Sample
       public static IVarStatementNode AsVarStatement(this IAstNode astNode)
       {
          if (!(astNode is IVarStatementNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeTypes, typeof(IVarStatementNode)));
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IVarStatementNode)));
 
          return result;
       }
@@ -15,7 +15,7 @@ namespace EbnfCompiler.Sample
       public static IPrintStatementNode AsPrintStatement(this IAstNode astNode)
       {
          if (!(astNode is IPrintStatementNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeTypes, typeof(IPrintStatementNode)));
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IPrintStatementNode)));
 
          return result;
       }
@@ -23,7 +23,7 @@ namespace EbnfCompiler.Sample
       public static IUnaryOperatorNode AsUnaryOp(this IAstNode astNode)
       {
          if (!(astNode is IUnaryOperatorNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeTypes, typeof(IUnaryOperatorNode)));
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IUnaryOperatorNode)));
 
          return result;
       }
@@ -31,7 +31,15 @@ namespace EbnfCompiler.Sample
       public static IBinaryOperatorNode AsBinaryOp(this IAstNode astNode)
       {
          if (!(astNode is IBinaryOperatorNode result))
-            throw new NodeCastException(ErrorMessage(astNode.AstNodeTypes, typeof(IBinaryOperatorNode)));
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IBinaryOperatorNode)));
+
+         return result;
+      }
+
+      public static IHaveNodeType AsNodeWithType(this IAstNode astNode)
+      {
+         if (!(astNode is IHaveNodeType result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IHaveNodeType)));
 
          return result;
       }

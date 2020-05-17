@@ -56,8 +56,7 @@ namespace EbnfCompiler.Sample
 
       public void VarStmtType(IToken token)
       {
-         var typeNode = new TypeNode(token);
-         _stack.Peek().AsVarStatement().Type = typeNode;
+         _stack.Peek().AsVarStatement().Variable.TypeName = token.Image;
       }
 
       public void VarStmtEnd(IToken token)
@@ -87,7 +86,7 @@ namespace EbnfCompiler.Sample
       public void UnaryOpEnd(IToken token)
       {
          var operand = _stack.Pop();
-         if (_stack.Peek().AstNodeTypes == AstNodeTypes.UnaryOperator)
+         if (_stack.Peek().AstNodeType == AstNodeTypes.UnaryOperator)
             _stack.Peek().AsUnaryOp().Operand = operand;
          else
             _stack.Push(operand);

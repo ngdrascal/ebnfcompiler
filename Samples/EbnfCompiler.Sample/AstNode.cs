@@ -9,11 +9,11 @@ namespace EbnfCompiler.Sample
    {
       protected AstNodeBase(AstNodeTypes nodeType, IToken token)
       {
-         AstNodeTypes = nodeType;
+         AstNodeType = nodeType;
          Location = token.Location;
       }
 
-      public AstNodeTypes AstNodeTypes { get; }
+      public AstNodeTypes AstNodeType { get; }
 
       public ISourceLocation Location { get; }
    }
@@ -26,13 +26,11 @@ namespace EbnfCompiler.Sample
 
       public IVariableNode Variable { get; set; }
 
-      public ITypeNode Type { get; set; }
-
       public IAstNode Expression { get; set; }
 
       public override string ToString()
       {
-         return $"var {Variable?.ToString()} : {Type?.ToString()} = {Expression?.ToString()};";
+         return $"var {Variable?.ToString()} : {Variable?.TypeName} = {Expression?.ToString()};";
       }
    }
 
@@ -70,11 +68,14 @@ namespace EbnfCompiler.Sample
          };
 
          Operator = op;
+         TypeName = "unknown";
       }
 
       public UnaryOperators Operator { get; }
 
       public IAstNode Operand { get; set; }
+
+      public string TypeName { get; set; }
 
       public override string ToString()
       {
@@ -82,7 +83,7 @@ namespace EbnfCompiler.Sample
          {
             UnaryOperators.Plus => "+",
             UnaryOperators.Minus => "-",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => null
          };
 
          return $"{op}{Operand.ToString()}";
@@ -111,6 +112,7 @@ namespace EbnfCompiler.Sample
          }
 
          Operator = op;
+         TypeName = "unknown";
       }
 
       public BinaryOperators Operator { get; }
@@ -118,6 +120,8 @@ namespace EbnfCompiler.Sample
       public IAstNode LeftOperand { get; set; }
 
       public IAstNode RightOperand { get; set; }
+
+      public string TypeName { get; set; }
 
       public override string ToString()
       {
@@ -146,6 +150,8 @@ namespace EbnfCompiler.Sample
 
       public float Value { get; }
 
+      public string TypeName { get => "number"; set { } }
+
       public override string ToString()
       {
          return Value.ToString(CultureInfo.InvariantCulture);
@@ -161,6 +167,8 @@ namespace EbnfCompiler.Sample
 
       public string Value { get; }
 
+      public string TypeName { get => "string"; set { } }
+
       public override string ToString()
       {
          return $"\"{Value}\"";
@@ -172,24 +180,12 @@ namespace EbnfCompiler.Sample
       public VariableNode(IToken token) : base(AstNodeTypes.Variable, token)
       {
          Name = token.Image;
+         TypeName = "unknown";
       }
 
       public string Name { get; }
 
-      public override string ToString()
-      {
-         return Name;
-      }
-   }
-
-   public class TypeNode : AstNodeBase, ITypeNode
-   {
-      public TypeNode(IToken token) : base(AstNodeTypes.Type, token)
-      {
-         Name = token.Image;
-      }
-
-      public string Name { get; }
+      public string TypeName { get; set; }
 
       public override string ToString()
       {
