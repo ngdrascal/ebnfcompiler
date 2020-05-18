@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace EbnfCompiler.Sample
+namespace EbnfCompiler.Sample.Impl
 {
    public class AstNodeBase : IAstNode
    {

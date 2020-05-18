@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using EbnfCompiler.Sample.Impl;
 using NUnit.Framework;
 
 namespace EbnfCompiler.Sample.UnitTests
@@ -56,7 +57,7 @@ namespace EbnfCompiler.Sample.UnitTests
 
          IScanner scanner = new Scanner(inStream);
          IAstBuilder astBuilder = new AstBuilder();
-         return new Parser(scanner, astBuilder).ParseGoal();
+         return new Impl.Parser(scanner, astBuilder).ParseGoal();
       }
    }
 }

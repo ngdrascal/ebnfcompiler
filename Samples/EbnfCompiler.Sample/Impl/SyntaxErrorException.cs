@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace EbnfCompiler.Sample
+namespace EbnfCompiler.Sample.Impl
 {
    public class SyntaxErrorException : CompilerException
    {

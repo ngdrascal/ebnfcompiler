@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using EbnfCompiler.Sample.Impl;
 
 namespace EbnfCompiler.Sample
 {
@@ -13,7 +14,7 @@ namespace EbnfCompiler.Sample
 
          IAstBuilder astBuilder = new AstBuilder();
 
-         var parser = new Parser(scanner, astBuilder);
+         var parser = new Impl.Parser(scanner, astBuilder);
 
          parser.ParseGoal();
       }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EbnfCompiler.Sample
+namespace EbnfCompiler.Sample.Impl
 {
    public static class NodeTypeCaster
    {

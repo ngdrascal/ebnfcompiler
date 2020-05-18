@@ -1,4 +1,4 @@
-﻿namespace EbnfCompiler.Sample
+﻿namespace EbnfCompiler.Sample.Impl
 {
    public class SourceLocation : ISourceLocation
    {

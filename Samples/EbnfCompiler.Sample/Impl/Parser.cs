@@ -1,5 +1,6 @@
 using System.Linq;
-namespace EbnfCompiler.Sample
+
+namespace EbnfCompiler.Sample.Impl
 {
    public partial class Parser
    {

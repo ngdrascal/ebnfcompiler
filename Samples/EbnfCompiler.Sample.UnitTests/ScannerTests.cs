@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using EbnfCompiler.Sample.Impl;
 using NUnit.Framework;
 
 namespace EbnfCompiler.Sample.UnitTests
