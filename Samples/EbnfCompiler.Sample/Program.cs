@@ -10,11 +10,11 @@ namespace EbnfCompiler.Sample
          using var inStream = new FileStream(args[0], FileMode.Open);
          inStream.Seek(0, SeekOrigin.Begin);
 
-         var scanner = new Scanner(inStream);
+         IScanner scanner = new Scanner(inStream);
 
          IAstBuilder astBuilder = new AstBuilder();
 
-         var parser = new Impl.Parser(scanner, astBuilder);
+         var parser = new Parser(scanner, astBuilder);
 
          parser.ParseGoal();
       }

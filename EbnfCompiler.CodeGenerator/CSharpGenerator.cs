@@ -222,12 +222,12 @@ namespace EbnfCompiler.CodeGenerator
          // PrintLine("using EbnfCompiler.AST;");
          // PrintLine("using EbnfCompiler.Compiler;");
          // PrintLine("using EbnfCompiler.Scanner;");
-         // PrintLine();
+         PrintLine();
       }
 
       private void PrintNamespaceHeader()
       {
-         PrintLine("namespace EbnfCompiler.Sample");
+         PrintLine("namespace EbnfCompiler.Sample.Impl");
          PrintLine("{");
          Indent();
       }
