@@ -4,15 +4,25 @@ namespace EbnfCompiler.Sample
 {
    public interface ISemanticChecks
    {
-      void Check(IVarStatementNode varStmtNode);
-      void Check(IPrintStatementNode printStmtNode);
+      void Check(IRootNode rootNode);
    }
 
    public class SemanticChecks : ISemanticChecks
    {
       private readonly List<string> _symbolTable = new List<string>();
 
-      public void Check(IVarStatementNode varStmtNode)
+      public void Check(IRootNode rootNode)
+      {
+         foreach (var stmtNode in rootNode.Statements)
+         {
+            if (stmtNode.AstNodeType == AstNodeTypes.VarStatement)
+               Check(stmtNode.AsVarStatement());
+            else if(stmtNode.AstNodeType == AstNodeTypes.PrintStatement)
+               Check(stmtNode.AsPrintStatement());
+         }
+      }
+
+      private void Check(IVarStatementNode varStmtNode)
       {
          // verify the identifier doesn't already exist
          var varName = varStmtNode.Variable.Name;
@@ -32,9 +42,13 @@ namespace EbnfCompiler.Sample
             throw new SemanticErrorException("Type mismatch.", varStmtNode.Variable);
       }
 
-      public void Check(IPrintStatementNode printStmtNode)
+      private void Check(IPrintStatementNode printStmtNode)
       {
-         throw new System.NotImplementedException();
+         foreach (var expr in printStmtNode.Expressions)
+         {
+            CalculateTypeForNodes(expr);
+            CheckNodeType(expr);
+         }
       }
 
       private void CalculateTypeForNodes(IAstNode exprNode)

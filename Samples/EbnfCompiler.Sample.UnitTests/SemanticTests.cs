@@ -13,7 +13,10 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("var s : number = \"Hello\";",     "(1,5):Type mismatch.")]
       [TestCase("var i : string = 1 + 2;",         "(1,5):Type mismatch.")]
       [TestCase("var i : string = 1 + \"hello\";", "(1,20):Type mismatch.")]
-      public void Parser_WhenSemanticError_ThrowsSemanticException1(
+
+      [TestCase("var i : number = 1; var i : number = 2;", "(1,25):Variable \"i\" already declared.")]
+      [TestCase("var i : number = 1; var s : string = i;", "(1,25):Type mismatch.")]
+      public void Semantics_WhenSemanticError_ThrowsSemanticException1(
          string input, string expectedMessage)
       {
          // Arrange:
@@ -21,33 +24,27 @@ namespace EbnfCompiler.Sample.UnitTests
          ISemanticChecks semanticCheckCheck = new SemanticChecks();
 
          // Act:
-         void Lambda() => semanticCheckCheck.Check(rootNode.Statements.First().AsVarStatement());
+         void Lambda() => semanticCheckCheck.Check(rootNode);
 
          // Assert:
          var ex = Assert.Throws<SemanticErrorException>(Lambda);
          Assert.That(ex.Message, Is.EqualTo(expectedMessage));
       }
 
-      [TestCase("var i : number = 1; var i : number = 2;",
-                "(1,25):Variable \"i\" already declared.")]
-      [TestCase("var i : number = 1; var s : string = i;",
-                "(1,25):Type mismatch.")]
-      // NOTE: this test differs from the other test because it requires two
-      //       statements to execute
-      public void Parser_WhenSemanticError_ThrowsSemanticException2(
-         string input, string expectedMessage)
+      [TestCase("var i : number = 1; var j : number = 2; Print(i + j);")]
+      [TestCase("var s : string = \"Hello, \"; var t : string = \"world!\"; Print(s + t);")]
+      [TestCase("var s : string = \"Hello, \"; var t : string = \"world!\"; Print(s, t);")]
+      public void Semantics_WhenValidSemantics_DoesNotThrowException(string input)
       {
          // Arrange:
          var rootNode = BuildAst(input);
          ISemanticChecks semanticCheckCheck = new SemanticChecks();
 
          // Act:
-         semanticCheckCheck.Check(rootNode.Statements.First().AsVarStatement());
-         void Action() => semanticCheckCheck.Check(rootNode.Statements.Last().AsVarStatement());
+        semanticCheckCheck.Check(rootNode);
 
          // Assert:
-         var ex = Assert.Throws<SemanticErrorException>(Action);
-         Assert.That(ex.Message, Is.EqualTo(expectedMessage));
+         Assert.Pass();
       }
 
       private IRootNode BuildAst(string input)
