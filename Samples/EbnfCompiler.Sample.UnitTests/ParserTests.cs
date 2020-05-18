@@ -49,6 +49,7 @@ namespace EbnfCompiler.Sample.UnitTests
 
       [TestCase("print(1)", "(1,1):Expecting: Var, Print. Found: Identifier.")]
       [TestCase("Print(1)", "(1,8):Expecting: Semicolon. Found: Eof.")]
+      [TestCase("Print(1;", "(1,8):Expecting: RightParen. Found: Semicolon.")]
       public void Parser_WhenInvalidSyntax_ThrowsSyntaxException(string input, string expectedMessage)
       {
          // Arrange:
