@@ -7,7 +7,7 @@
    "printLine"       = "PrintLine"
    "number-literal"  = "NumberLiteral"
    "string-literal"  = "StringLiteral"
-   ";"               = "SemiColon"
+   ";"               = "Semicolon"
    ":"               = "Colon"
    ","               = "Comma"
    "="               = "Assign"
@@ -27,17 +27,18 @@
 
    <type> ::= "number" | "string" .
 
-   <expression> ::= [ <sign> ] <term> #UnaryOpEnd# { #BinaryOp# <term-operator> <term> #BinaryOpEnd# } .
+   <expression> ::= <sign> <term> #UnaryOpEnd# { #BinaryOp# <add-operator> <term> #BinaryOpEnd# } |
+                           <term> { #BinaryOp# <add-operator> <term> #BinaryOpEnd# } .
 
-   <term> ::= <factor> { #BinaryOp# <factor-operator> <factor> #BinaryOpEnd# } .
+   <term> ::= <factor> { #BinaryOp# <mult-operator> <factor> #BinaryOpEnd# } .
 
    <factor> ::= "(" <expression> ")" | ( #FactIdent# "identifier" ) | <constant-literal> .
 
    <sign> ::= #UnaryOp# "+" | "-" .
 
-   <term-operator> ::= "+" | "-" .
+   <add-operator> ::= "+" | "-" .
 
-   <factor-operator> ::= "*" | "/" .
+   <mult-operator> ::= "*" | "/" .
 
    <constant-literal> ::= ( #NumLiteral# "number-literal" ) | ( #StrLiteral# "string-literal" ) .
 

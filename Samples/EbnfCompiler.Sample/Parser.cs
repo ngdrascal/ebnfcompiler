@@ -120,26 +120,42 @@ namespace EbnfCompiler.Sample
             TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
          };
          MatchOneOf(firstSetOfStatement5);
-         var firstSetOfOption1 = new[]
+         switch (_scanner.CurrentToken.TokenKind)
          {
-            TokenKind.Plus, TokenKind.Minus
-         };
-         if (firstSetOfOption1.Contains(_scanner.CurrentToken.TokenKind))
-         {
-            ParseSign();
-         }
-         ParseTerm();
-         _astBuilder.UnaryOpEnd(_scanner.CurrentToken);
-         var firstSetOfKleeneStar2 = new[]
-         {
-            TokenKind.Plus, TokenKind.Minus
-         };
-         while (firstSetOfKleeneStar2.Contains(_scanner.CurrentToken.TokenKind))
-         {
-            _astBuilder.BinaryOp(_scanner.CurrentToken);
-            ParseTermOperator();
-            ParseTerm();
-            _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
+            case TokenKind.Plus:
+            case TokenKind.Minus:
+               ParseSign();
+               ParseTerm();
+               _astBuilder.UnaryOpEnd(_scanner.CurrentToken);
+               var firstSetOfKleeneStar2 = new[]
+               {
+                  TokenKind.Plus, TokenKind.Minus
+               };
+               while (firstSetOfKleeneStar2.Contains(_scanner.CurrentToken.TokenKind))
+               {
+                  _astBuilder.BinaryOp(_scanner.CurrentToken);
+                  ParseAddOperator();
+                  ParseTerm();
+                  _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
+               }
+               break;
+            case TokenKind.LeftParen:
+            case TokenKind.Identifier:
+            case TokenKind.NumberLiteral:
+            case TokenKind.StringLiteral:
+               ParseTerm();
+               var firstSetOfKleeneStar3 = new[]
+               {
+                  TokenKind.Plus, TokenKind.Minus
+               };
+               while (firstSetOfKleeneStar3.Contains(_scanner.CurrentToken.TokenKind))
+               {
+                  _astBuilder.BinaryOp(_scanner.CurrentToken);
+                  ParseAddOperator();
+                  ParseTerm();
+                  _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
+               }
+               break;
          }
       }
 
@@ -151,14 +167,14 @@ namespace EbnfCompiler.Sample
          };
          MatchOneOf(firstSetOfStatement6);
          ParseFactor();
-         var firstSetOfKleeneStar3 = new[]
+         var firstSetOfKleeneStar4 = new[]
          {
             TokenKind.Asterisk, TokenKind.ForwardSlash
          };
-         while (firstSetOfKleeneStar3.Contains(_scanner.CurrentToken.TokenKind))
+         while (firstSetOfKleeneStar4.Contains(_scanner.CurrentToken.TokenKind))
          {
             _astBuilder.BinaryOp(_scanner.CurrentToken);
-            ParseFactorOperator();
+            ParseMultOperator();
             ParseFactor();
             _astBuilder.BinaryOpEnd(_scanner.CurrentToken);
          }
@@ -213,7 +229,7 @@ namespace EbnfCompiler.Sample
          }
       }
 
-      private void ParseTermOperator()
+      private void ParseAddOperator()
       {
          var firstSetOfStatement9 = new[]
          {
@@ -233,7 +249,7 @@ namespace EbnfCompiler.Sample
          }
       }
 
-      private void ParseFactorOperator()
+      private void ParseMultOperator()
       {
          var firstSetOfStatement10 = new[]
          {

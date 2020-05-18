@@ -12,9 +12,11 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("var i : number = 1;", "var i : number = 1;")]
       [TestCase("var i : number = 1 + 2;", "var i : number = (1 + 2);")]
       [TestCase("var i : number = 1 + 2 * 3;", "var i : number = (1 + (2 * 3));")]
-      [TestCase("var i : number = (1 + 2) * 3;", "var i : number = ((1 + 2) * 3);")]
+      [TestCase("var i : number = (1 + 2) * 3 / 4;", "var i : number = (((1 + 2) * 3) / 4);")]
       [TestCase("var i : number = -1;", "var i : number = -1;")]
       [TestCase("var i : number = -1 - -2;", "var i : number = (-1 - -2);")]
+      [TestCase("var i : number = -(1 + 2);", "var i : number = -(1 + 2);")]
+      [TestCase("var i : number = -(-1 - -2);", "var i : number = -(-1 - -2);")]
       [TestCase("var i : number = j + 1;", "var i : number = (j + 1);")]
 
       [TestCase("var s : string = \"Hello\";", "var s : string = \"Hello\";")]

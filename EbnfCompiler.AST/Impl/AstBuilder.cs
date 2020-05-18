@@ -264,7 +264,10 @@ namespace EbnfCompiler.AST.Impl
          foreach (var node in _astNodeFactory.AllNodes.Where(p => p.AstNodeType == AstNodeType.ProdRef))
          {
             var prodRefNode = (IProdRefNode)node;
-            var prodInfo = Productions.First(p => p.Name == prodRefNode.ProdName);
+            var prodInfo = Productions.FirstOrDefault(p => p.Name == prodRefNode.ProdName);
+            if (prodInfo == null)
+               throw new SemanticErrorException($"Definition for production {prodRefNode.ProdName} not found.");
+
             prodRefNode.Expression = prodInfo.Statement.Expression;
          }
       }
