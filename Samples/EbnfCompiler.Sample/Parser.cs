@@ -40,9 +40,8 @@ namespace EbnfCompiler.Sample
          MatchOneOf(firstSetOfStatement1);
          ParseStatement();
          _astBuilder.StmtEnd(_scanner.CurrentToken);
-         Match(TokenKind.SemiColon);
+         Match(TokenKind.Semicolon);
          _scanner.Advance();
-
          var firstSetOfKleeneStar1 = new[]
          {
             TokenKind.Var, TokenKind.Print
@@ -51,9 +50,8 @@ namespace EbnfCompiler.Sample
          {
             ParseStatement();
             _astBuilder.StmtEnd(_scanner.CurrentToken);
-            Match(TokenKind.SemiColon);
+            Match(TokenKind.Semicolon);
             _scanner.Advance();
-
          }
       }
 
@@ -78,24 +76,19 @@ namespace EbnfCompiler.Sample
       private void ParseVarDeclaration()
       {
          Match(TokenKind.Var);
-         _scanner.Advance();
 
          _astBuilder.VarStmtStart(_scanner.CurrentToken);
          Match(TokenKind.Var);
          _scanner.Advance();
-
          _astBuilder.VarStmtIdent(_scanner.CurrentToken);
          Match(TokenKind.Identifier);
          _scanner.Advance();
-
          Match(TokenKind.Colon);
          _scanner.Advance();
-
          _astBuilder.VarStmtType(_scanner.CurrentToken);
          ParseType();
          Match(TokenKind.Assign);
          _scanner.Advance();
-
          ParseExpression();
          _astBuilder.VarStmtEnd(_scanner.CurrentToken);
       }
@@ -112,12 +105,10 @@ namespace EbnfCompiler.Sample
             case TokenKind.Number:
                Match(TokenKind.Number);
                _scanner.Advance();
-
                break;
             case TokenKind.String:
                Match(TokenKind.String);
                _scanner.Advance();
-
                break;
          }
       }
@@ -185,17 +176,14 @@ namespace EbnfCompiler.Sample
             case TokenKind.LeftParen:
                Match(TokenKind.LeftParen);
                _scanner.Advance();
-
                ParseExpression();
                Match(TokenKind.RightParen);
                _scanner.Advance();
-
                break;
             case TokenKind.Identifier:
                _astBuilder.FactIdent(_scanner.CurrentToken);
                Match(TokenKind.Identifier);
                _scanner.Advance();
-
                break;
             case TokenKind.NumberLiteral:
             case TokenKind.StringLiteral:
@@ -217,12 +205,10 @@ namespace EbnfCompiler.Sample
             case TokenKind.Plus:
                Match(TokenKind.Plus);
                _scanner.Advance();
-
                break;
             case TokenKind.Minus:
                Match(TokenKind.Minus);
                _scanner.Advance();
-
                break;
          }
       }
@@ -239,12 +225,10 @@ namespace EbnfCompiler.Sample
             case TokenKind.Plus:
                Match(TokenKind.Plus);
                _scanner.Advance();
-
                break;
             case TokenKind.Minus:
                Match(TokenKind.Minus);
                _scanner.Advance();
-
                break;
          }
       }
@@ -261,12 +245,10 @@ namespace EbnfCompiler.Sample
             case TokenKind.Asterisk:
                Match(TokenKind.Asterisk);
                _scanner.Advance();
-
                break;
             case TokenKind.ForwardSlash:
                Match(TokenKind.ForwardSlash);
                _scanner.Advance();
-
                break;
          }
       }
@@ -284,13 +266,11 @@ namespace EbnfCompiler.Sample
                _astBuilder.NumLiteral(_scanner.CurrentToken);
                Match(TokenKind.NumberLiteral);
                _scanner.Advance();
-
                break;
             case TokenKind.StringLiteral:
                _astBuilder.StrLiteral(_scanner.CurrentToken);
                Match(TokenKind.StringLiteral);
                _scanner.Advance();
-
                break;
          }
       }
@@ -298,19 +278,15 @@ namespace EbnfCompiler.Sample
       private void ParsePrintStmt()
       {
          Match(TokenKind.Print);
-         _scanner.Advance();
 
          _astBuilder.PrintStart(_scanner.CurrentToken);
          Match(TokenKind.Print);
          _scanner.Advance();
-
          Match(TokenKind.LeftParen);
          _scanner.Advance();
-
          ParseExprList();
          Match(TokenKind.RightParen);
          _scanner.Advance();
-
       }
 
       private void ParseExprList()
@@ -326,7 +302,6 @@ namespace EbnfCompiler.Sample
          {
             Match(TokenKind.Comma);
             _scanner.Advance();
-
             ParseExpression();
             _astBuilder.PrintExprEnd(_scanner.CurrentToken);
          }

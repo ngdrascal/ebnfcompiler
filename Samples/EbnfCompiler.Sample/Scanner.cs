@@ -99,7 +99,7 @@ namespace EbnfCompiler.Sample
                         break;
                      case ';':
                         _state = State.Done;
-                        CurrentToken.TokenKind = TokenKind.SemiColon;
+                        CurrentToken.TokenKind = TokenKind.Semicolon;
                         CurrentToken.Image = _currentCh.ToString();
                         break;
                      case '=':

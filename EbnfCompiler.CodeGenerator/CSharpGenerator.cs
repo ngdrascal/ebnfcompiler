@@ -90,7 +90,7 @@ namespace EbnfCompiler.CodeGenerator
                }
                else
                {
-                PrintMatchTerminal(node.FirstSet.AsEnumerable().First());  
+                PrintMatchNonTerminal(node.FirstSet.AsEnumerable().First());  
                }
                break;
 
@@ -367,6 +367,16 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine($"Parse{CamelCaseMethodName(name)}();");
       }
 
+      private void PrintMatchNonTerminal(string name)
+      {
+         var tokenDef = _tokens.FirstOrDefault(p => p.Image.Equals(name))?.Definition;
+         if (tokenDef == null)
+            throw new SemanticErrorException($"Token definition for \"{name}\" not found.");
+
+         PrintLine($"Match(TokenKind.{tokenDef});");
+         PrintLine();
+      }
+
       private void PrintMatchTerminal(string name)
       {
          var tokenDef = _tokens.FirstOrDefault(p => p.Image.Equals(name))?.Definition;
@@ -375,7 +385,6 @@ namespace EbnfCompiler.CodeGenerator
 
          PrintLine($"Match(TokenKind.{tokenDef});");
          PrintLine("_scanner.Advance();");
-         PrintLine();
       }
 
       private void PrintAction(string actionName)

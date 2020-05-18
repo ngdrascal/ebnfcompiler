@@ -47,8 +47,9 @@ namespace EbnfCompiler.Sample.UnitTests
          Assert.That(rootNode.Statements.First().ToString(), Is.EqualTo(expectedImage));
       }
 
-      [TestCase("print(1)", "(1,20):Type mismatch.")]
-      public void Parser_WhenInvalidSyntax_ThrowsException(string input, string expectedMessage)
+      [TestCase("print(1)", "(1,1):Expecting: Var, Print. Found: Identifier.")]
+      [TestCase("Print(1)", "(1,8):Expecting: Semicolon. Found: Eof.")]
+      public void Parser_WhenInvalidSyntax_ThrowsSyntaxException(string input, string expectedMessage)
       {
          // Arrange:
          var encoding = new UTF8Encoding();
@@ -66,7 +67,7 @@ namespace EbnfCompiler.Sample.UnitTests
          void Lambda() => parser.ParseGoal();
 
          // Assert:
-         var ex = Assert.Throws<SemanticErrorException>(Lambda);
+         var ex = Assert.Throws<SyntaxErrorException>(Lambda);
          Assert.That(ex.Message, Is.EqualTo(expectedMessage));
       }
    }
