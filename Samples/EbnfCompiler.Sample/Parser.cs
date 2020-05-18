@@ -18,6 +18,12 @@ namespace EbnfCompiler.Sample
             throw new SyntaxErrorException(tokenKind, _scanner.CurrentToken);
       }
 
+      private void MatchOneOf(TokenKind[] tokenSet)
+      {
+         if (!tokenSet.Contains(_scanner.CurrentToken.TokenKind))
+            throw new SyntaxErrorException(tokenSet, _scanner.CurrentToken);
+      }
+
       public IRootNode ParseGoal()
       {
          ParseStatementList();
@@ -27,6 +33,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseStatementList()
       {
+         var firstSetOfStatement1 = new[]
+         {
+            TokenKind.Var, TokenKind.Print
+         };
+         MatchOneOf(firstSetOfStatement1);
          ParseStatement();
          _astBuilder.StmtEnd(_scanner.CurrentToken);
          Match(TokenKind.SemiColon);
@@ -48,6 +59,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseStatement()
       {
+         var firstSetOfStatement2 = new[]
+         {
+            TokenKind.Var, TokenKind.Print
+         };
+         MatchOneOf(firstSetOfStatement2);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.Var:
@@ -61,6 +77,9 @@ namespace EbnfCompiler.Sample
 
       private void ParseVarDeclaration()
       {
+         Match(TokenKind.Var);
+         _scanner.Advance();
+
          _astBuilder.VarStmtStart(_scanner.CurrentToken);
          Match(TokenKind.Var);
          _scanner.Advance();
@@ -83,6 +102,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseType()
       {
+         var firstSetOfStatement4 = new[]
+         {
+            TokenKind.Number, TokenKind.String
+         };
+         MatchOneOf(firstSetOfStatement4);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.Number:
@@ -100,6 +124,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseExpression()
       {
+         var firstSetOfStatement5 = new[]
+         {
+            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
+         };
+         MatchOneOf(firstSetOfStatement5);
          var firstSetOfOption1 = new[]
          {
             TokenKind.Plus, TokenKind.Minus
@@ -125,6 +154,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseTerm()
       {
+         var firstSetOfStatement6 = new[]
+         {
+            TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
+         };
+         MatchOneOf(firstSetOfStatement6);
          ParseFactor();
          var firstSetOfKleeneStar3 = new[]
          {
@@ -141,6 +175,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseFactor()
       {
+         var firstSetOfStatement7 = new[]
+         {
+            TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
+         };
+         MatchOneOf(firstSetOfStatement7);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.LeftParen:
@@ -167,6 +206,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseSign()
       {
+         var firstSetOfStatement8 = new[]
+         {
+            TokenKind.Plus, TokenKind.Minus
+         };
+         MatchOneOf(firstSetOfStatement8);
          _astBuilder.UnaryOp(_scanner.CurrentToken);
          switch (_scanner.CurrentToken.TokenKind)
          {
@@ -185,6 +229,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseTermOperator()
       {
+         var firstSetOfStatement9 = new[]
+         {
+            TokenKind.Plus, TokenKind.Minus
+         };
+         MatchOneOf(firstSetOfStatement9);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.Plus:
@@ -202,6 +251,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseFactorOperator()
       {
+         var firstSetOfStatement10 = new[]
+         {
+            TokenKind.Asterisk, TokenKind.ForwardSlash
+         };
+         MatchOneOf(firstSetOfStatement10);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.Asterisk:
@@ -219,6 +273,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseConstantLiteral()
       {
+         var firstSetOfStatement11 = new[]
+         {
+            TokenKind.NumberLiteral, TokenKind.StringLiteral
+         };
+         MatchOneOf(firstSetOfStatement11);
          switch (_scanner.CurrentToken.TokenKind)
          {
             case TokenKind.NumberLiteral:
@@ -238,6 +297,9 @@ namespace EbnfCompiler.Sample
 
       private void ParsePrintStmt()
       {
+         Match(TokenKind.Print);
+         _scanner.Advance();
+
          _astBuilder.PrintStart(_scanner.CurrentToken);
          Match(TokenKind.Print);
          _scanner.Advance();
@@ -253,6 +315,11 @@ namespace EbnfCompiler.Sample
 
       private void ParseExprList()
       {
+         var firstSetOfStatement13 = new[]
+         {
+            TokenKind.Plus, TokenKind.Minus, TokenKind.LeftParen, TokenKind.Identifier, TokenKind.NumberLiteral, TokenKind.StringLiteral
+         };
+         MatchOneOf(firstSetOfStatement13);
          ParseExpression();
          _astBuilder.PrintExprEnd(_scanner.CurrentToken);
          while (_scanner.CurrentToken.TokenKind == TokenKind.Comma)

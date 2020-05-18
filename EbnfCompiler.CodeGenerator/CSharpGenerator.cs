@@ -67,6 +67,7 @@ namespace EbnfCompiler.CodeGenerator
                PrintClassProperties();
                PrintConstructor();
                PrintMatchMethod();
+               PrintMatchOneOfMethod();
 
                PrintParseGoal(node.AsSyntax().Statements.First().ProdName,
                               node.AsSyntax().PreActionNode?.ActionName,
@@ -81,6 +82,16 @@ namespace EbnfCompiler.CodeGenerator
                context.Properties.Add("PostActionName", node.AsStatement().PostActionNode?.ActionName);
 
                PrintMethodHeader(node.AsStatement().ProdName, context.Properties["PreActionName"]?.ToString());
+
+               if (node.FirstSet.AsEnumerable().Count() > 1)
+               {
+                  PrintFirstSet(node.FirstSet, node.NodeId);
+                  PrintMatchOneOf(node.NodeId);
+               }
+               else
+               {
+                PrintMatchTerminal(node.FirstSet.AsEnumerable().First());  
+               }
                break;
 
             case AstNodeType.Expression:
@@ -272,6 +283,25 @@ namespace EbnfCompiler.CodeGenerator
          PrintLine("}");
       }
 
+      private void PrintMatchOneOfMethod()
+      {
+         PrintLine();
+         PrintLine("private void MatchOneOf(TokenKind[] tokenSet)");
+         PrintLine("{");
+         Indent();
+         PrintLine("if (!tokenSet.Contains(_scanner.CurrentToken.TokenKind))");
+         Indent();
+         PrintLine("throw new SyntaxErrorException(tokenSet, _scanner.CurrentToken);");
+         Outdent();
+         Outdent();
+         PrintLine("}");
+      }
+
+      private void PrintMatchOneOf(string nodeId)
+      {
+         PrintLine($"MatchOneOf(firstSetOf{nodeId});");
+      }
+
       private void PrintParseGoal(string prodName, string preActionName, string postActionName)
       {
          PrintLine();
@@ -323,7 +353,7 @@ namespace EbnfCompiler.CodeGenerator
 
          return result;
       }
-      
+
       private void PrintMethodFooter(string postActionName)
       {
          if (!string.IsNullOrEmpty(postActionName))
