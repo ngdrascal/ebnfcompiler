@@ -41,7 +41,7 @@ namespace EbnfCompiler.Sample.UnitTests
 
          IAstBuilder astBuilder = new AstBuilder();
 
-         var parser = new Impl.Parser(scanner, astBuilder);
+         var parser = new Parser(scanner, astBuilder);
 
          // Act:
          var rootNode = parser.ParseGoal();
@@ -65,7 +65,7 @@ namespace EbnfCompiler.Sample.UnitTests
 
          IAstBuilder astBuilder = new AstBuilder();
 
-         var parser = new Impl.Parser(scanner, astBuilder);
+         var parser = new Parser(scanner, astBuilder);
 
          // Act:
          void Lambda() => parser.ParseGoal();

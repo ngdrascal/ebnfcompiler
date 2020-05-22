@@ -17,7 +17,7 @@ namespace EbnfCompiler.Sample
 
          var parser = new Parser(scanner, astBuilder);
 
-         var rootNode= parser.ParseGoal();
+         var rootNode = parser.ParseGoal();
 
          using var outputStream = File.Create("hello");
          ICodeGenerator codeGen = new CodeGenerator();
