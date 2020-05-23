@@ -22,11 +22,7 @@ namespace EbnfCompiler.Sample
          using var outputStream = File.Create("hello");
          ICodeGenerator codeGen = new CodeGenerator();
 
-         var references = new List<string>
-         {
-            "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\mscorlib.dll"
-         };
-         codeGen.Run(rootNode, "hello", references, outputStream);
+         codeGen.Run(rootNode, "hello", outputStream);
       }
    }
 }
