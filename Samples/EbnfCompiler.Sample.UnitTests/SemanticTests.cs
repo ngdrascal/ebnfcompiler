@@ -14,9 +14,9 @@ namespace EbnfCompiler.Sample.UnitTests
       [TestCase("var s : number = \"Hello\";",     "(1,5):Type mismatch.")]
       [TestCase("var i : string = 1 + 2;",         "(1,5):Type mismatch.")]
       [TestCase("var i : string = 1 + \"hello\";", "(1,20):Type mismatch.")]
-
-      [TestCase("var i : number = 1; var i : number = 2;", "(1,25):Variable \"i\" already declared.")]
+      [TestCase("var i : number = 1; var i : number = 2;", "(1,25):Variable 'i' already declared.")]
       [TestCase("var i : number = 1; var s : string = i;", "(1,25):Type mismatch.")]
+      [TestCase("Print(n);", "(1,7):Variable 'n' is not declared.")]
       public void Semantics_WhenSemanticError_ThrowsSemanticException1(
          string input, string expectedMessage)
       {

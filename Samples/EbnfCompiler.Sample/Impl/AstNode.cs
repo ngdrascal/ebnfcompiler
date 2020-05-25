@@ -36,15 +36,15 @@ namespace EbnfCompiler.Sample.Impl
 
    public class PrintStatementNode : AstNodeBase, IPrintStatementNode
    {
-      private readonly List<IAstNode> _expressions = new List<IAstNode>();
+      private readonly List<IPrintExpressionNode> _expressions = new List<IPrintExpressionNode>();
 
       public PrintStatementNode(IToken token) : base(AstNodeTypes.PrintStatement, token)
       {
       }
 
-      public IReadOnlyCollection<IAstNode> Expressions => _expressions.AsReadOnly();
+      public IReadOnlyCollection<IPrintExpressionNode> PrintExpressions => _expressions.AsReadOnly();
 
-      public void AppendExpression(IAstNode expression)
+      public void AppendExpression(IPrintExpressionNode expression)
       {
          _expressions.Add(expression);
       }
@@ -54,6 +54,15 @@ namespace EbnfCompiler.Sample.Impl
          var expressions = string.Join(", ", _expressions.Select(node => node.ToString()));
          return $"Print({expressions});";
       }
+   }
+   
+   public class PrintExpressionNode : AstNodeBase, IPrintExpressionNode
+   {
+      public PrintExpressionNode(IToken token) : base(AstNodeTypes.PrintExpression, token)
+      {
+      }
+
+      public IAstNode Expression { get; set; }
    }
 
    public class UnaryOperatorNode : AstNodeBase, IUnaryOperatorNode
@@ -177,7 +186,7 @@ namespace EbnfCompiler.Sample.Impl
 
    public class VariableNode : AstNodeBase, IVariableNode
    {
-      public VariableNode(IToken token) : base(AstNodeTypes.Variable, token)
+      public VariableNode(IToken token) : base(AstNodeTypes.VarReference, token)
       {
          Name = token.Image;
          TypeName = "unknown";

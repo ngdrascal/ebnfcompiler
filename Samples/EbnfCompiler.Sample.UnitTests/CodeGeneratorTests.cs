@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using EbnfCompiler.Sample.Impl;
 using NUnit.Framework;
@@ -11,23 +12,33 @@ namespace EbnfCompiler.Sample.UnitTests
         [Test]
         public void Test()
         {
-            var encoding = new UTF8Encoding();
-            using var inStream = new MemoryStream();
-            inStream.Write(encoding.GetBytes("var i : number = 1;"));
-            inStream.Seek(0, SeekOrigin.Begin);
+           try
+           {
+              var encoding = new UTF8Encoding();
+              using var inStream = new MemoryStream();
+              inStream.Write(encoding.GetBytes("var n : number = 2; Print(\"n = \", n);"));
+              inStream.Seek(0, SeekOrigin.Begin);
 
-            IScanner scanner = new Scanner(inStream);
+              IScanner scanner = new Scanner(inStream);
 
-            IAstBuilder astBuilder = new AstBuilder();
+              IAstBuilder astBuilder = new AstBuilder();
 
-            var parser = new Parser(scanner, astBuilder);
+              var parser = new Parser(scanner, astBuilder);
 
-            var rootNode = parser.ParseGoal();
+              var rootNode = parser.ParseGoal();
 
-            using var outputStream = File.Create("hello.exe");
-            ICodeGenerator codeGen = new CodeGenerator();
+              ISemanticChecks semanticChecks = new SemanticChecks();
+              semanticChecks.Check(rootNode);
 
-            codeGen.Run(rootNode, "hello", outputStream);
+              using var outputStream = File.Create("hello.exe");
+              ICodeGenerator codeGen = new CodeGenerator();
+
+              codeGen.Run(rootNode, "hello", outputStream);
+           }
+           catch (Exception e)
+           {
+              Console.WriteLine(e);
+           }
         }
     }
 }

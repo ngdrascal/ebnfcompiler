@@ -4,7 +4,7 @@ namespace EbnfCompiler.Sample.Impl
 {
    public class SemanticChecks : ISemanticChecks
    {
-      private readonly List<string> _symbolTable = new List<string>();
+      private readonly Dictionary<string, string> _symbolTable = new Dictionary<string, string>();
 
       public void Check(IRootNode rootNode)
       {
@@ -12,7 +12,7 @@ namespace EbnfCompiler.Sample.Impl
          {
             if (stmtNode.AstNodeType == AstNodeTypes.VarStatement)
                Check(stmtNode.AsVarStatement());
-            else if(stmtNode.AstNodeType == AstNodeTypes.PrintStatement)
+            else if (stmtNode.AstNodeType == AstNodeTypes.PrintStatement)
                Check(stmtNode.AsPrintStatement());
          }
       }
@@ -22,11 +22,11 @@ namespace EbnfCompiler.Sample.Impl
          // verify the identifier doesn't already exist
          var varName = varStmtNode.Variable.Name;
 
-         if (_symbolTable.Exists(p => p == varName))
-            throw new SemanticErrorException($"Variable \"{varName}\" already declared.", 
+         if (_symbolTable.ContainsKey(varName))
+            throw new SemanticErrorException($"Variable '{varName}' already declared.",
                varStmtNode.Variable);
 
-         _symbolTable.Add(varName);
+         _symbolTable.Add(varName, varStmtNode.Variable.TypeName);
 
          // verify the all the sub-expressions 
          CalculateTypeForNodes(varStmtNode.Expression);
@@ -39,10 +39,10 @@ namespace EbnfCompiler.Sample.Impl
 
       private void Check(IPrintStatementNode printStmtNode)
       {
-         foreach (var expr in printStmtNode.Expressions)
+         foreach (var printExpr in printStmtNode.PrintExpressions)
          {
-            CalculateTypeForNodes(expr);
-            CheckNodeType(expr);
+            CalculateTypeForNodes(printExpr.Expression);
+            CheckNodeType(printExpr.Expression);
          }
       }
 
@@ -60,8 +60,17 @@ namespace EbnfCompiler.Sample.Impl
          {
             CalculateTypeForNodes(exprNode.AsUnaryOp().Operand);
          }
-      }
+         else if (exprNode.AstNodeType == AstNodeTypes.VarReference)
+         {
+            var varRef = exprNode.AsVarReferene();
 
+            if (!_symbolTable.ContainsKey(varRef.Name))
+               throw new SemanticErrorException($"Variable '{varRef.Name}' is not declared.", exprNode);
+
+            exprNode.AsVarReferene().TypeName = _symbolTable[varRef.Name];
+         }
+      }
+       
       private void CheckNodeType(IAstNode exprNode)
       {
          if (exprNode.AstNodeType == AstNodeTypes.BinaryOperator)

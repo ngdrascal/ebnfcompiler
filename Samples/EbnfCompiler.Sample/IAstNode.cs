@@ -8,8 +8,8 @@ namespace EbnfCompiler.Sample
 
    public enum AstNodeTypes
    {
-      VarStatement, PrintStatement,
-      UnaryOperator, BinaryOperator, NumberLiteral, StringLiteral, Variable, //Type
+      VarStatement, PrintStatement, PrintExpression,
+      UnaryOperator, BinaryOperator, NumberLiteral, StringLiteral, VarReference
    };
 
    public interface IHaveNodeType
@@ -35,8 +35,14 @@ namespace EbnfCompiler.Sample
 
    public interface IPrintStatementNode : IAstNode
    {
-      IReadOnlyCollection<IAstNode> Expressions { get; }
-      void AppendExpression(IAstNode expression);
+      IReadOnlyCollection<IPrintExpressionNode> PrintExpressions { get; }
+
+      void AppendExpression(IPrintExpressionNode expression);
+   }
+
+   public interface IPrintExpressionNode : IAstNode
+   {
+      IAstNode Expression { get; set; }
    }
 
    public interface IUnaryOperatorNode : IAstNode, IHaveNodeType

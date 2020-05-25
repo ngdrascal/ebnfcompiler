@@ -19,6 +19,9 @@ namespace EbnfCompiler.Sample
 
          var rootNode = parser.ParseGoal();
 
+         ISemanticChecks semanticChecks = new SemanticChecks();
+         semanticChecks.Check(rootNode);
+
          using var outputStream = File.Create("hello");
          ICodeGenerator codeGen = new CodeGenerator();
 
