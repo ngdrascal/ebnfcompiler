@@ -125,10 +125,7 @@ namespace EbnfCompiler.Sample.Impl
                   var numValue = node.AsNumberLit().Value;
                   methodBody.GetILProcessor().Emit(OpCodes.Ldc_R4, numValue);
 
-                  var numLitElement = new NumberLiteralElement()
-                  {
-                     Value = numValue
-                  };
+                  var numLitElement = new NumberLiteralElement();
                   stack.Push(numLitElement);
                   break;
 
@@ -136,10 +133,7 @@ namespace EbnfCompiler.Sample.Impl
                   var strValue = node.AsStringLit().Value;
                   methodBody.GetILProcessor().Emit(OpCodes.Ldstr, strValue);
 
-                  var strLitElement = new StringLiteralElement()
-                  {
-                     Value = strValue
-                  };
+                  var strLitElement = new StringLiteralElement();
                   stack.Push(strLitElement);
                   break;
 
@@ -147,9 +141,8 @@ namespace EbnfCompiler.Sample.Impl
                   var localVarDef = _localVarDefs[node.AsVarReferene().Name];
                   methodBody.GetILProcessor().Emit(OpCodes.Ldloc, localVarDef);
 
-                  var varRef = new VarRefenceElement()
+                  var varRef = new VarReferenceElement()
                   {
-                     VariableDef = localVarDef,
                      TypeName = node.AsVarReferene().TypeName
                   };
                   stack.Push(varRef);
@@ -164,7 +157,7 @@ namespace EbnfCompiler.Sample.Impl
                switch (nodeType)
                {
                   case AstNodeTypes.VarStatement:
-                     stack.Pop();
+                     stack.Pop();  // expression
                      var varStmtElement = (VarStmtElement)stack.Pop();
                      var varDef = varStmtElement.VariableDef;
                      ilProcessor.Emit(OpCodes.Stloc, varDef);
@@ -190,13 +183,14 @@ namespace EbnfCompiler.Sample.Impl
                         case StringLiteralElement _:
                            ilProcessor.Emit(OpCodes.Call, _printMethods["string"]);
                            break;
-                        case VarRefenceElement variable:
+                        case VarReferenceElement variable:
                            ilProcessor.Emit(OpCodes.Call, _printMethods[variable.TypeName]);
                            break;
                      }
                      break;
 
                   case AstNodeTypes.UnaryOperator:
+                     stack.Pop();  // operand
                      var unaryOpElement = (UnaryOperatorElement)stack.Pop();
                      switch (unaryOpElement.Operator)
                      {
@@ -209,7 +203,9 @@ namespace EbnfCompiler.Sample.Impl
                      break;
 
                   case AstNodeTypes.BinaryOperator:
-                     var binaryOpElement = (BinaryOperatorElement)stack.Pop();
+                     stack.Pop();  // right operand
+                     stack.Pop();  // left operand
+                     var binaryOpElement = (BinaryOperatorElement)stack.Peek();
                      switch (binaryOpElement.Operator)
                      {
                         case BinaryOperators.Add:
