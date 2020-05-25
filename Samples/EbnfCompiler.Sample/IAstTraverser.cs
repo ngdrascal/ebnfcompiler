@@ -2,12 +2,12 @@
 
 namespace EbnfCompiler.Sample
 {
-   public interface IAstTraverser
-   {
-      event Action<IAstNode> ProcessNode;
+    public interface IAstTraverser
+    {
+        event Action<IAstNode> ProcessNode;
 
-      event Action<AstNodeTypes> PostProcessNode;
+        event Action<AstNodeTypes> PostProcessNode;
 
-      void Traverse(IAstNode astNode);
-   }
+        void Traverse(IAstNode astNode);
+    }
 }

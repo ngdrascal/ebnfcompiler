@@ -1,7 +1,7 @@
 ﻿namespace EbnfCompiler.Sample
 {
-   public interface ISemanticChecks
-   {
-      void Check(IRootNode rootNode);
-   }
+    public interface ISemanticChecks
+    {
+        void Check(IRootNode rootNode);
+    }
 }

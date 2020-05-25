@@ -1,15 +1,15 @@
 ﻿namespace EbnfCompiler.Sample.Impl
 {
-   public class SemanticErrorException : CompilerException
-   {
-      public SemanticErrorException(string message, IAstNode astNode)
-         : base(message, astNode.Location)
-      {
-      }
+    public class SemanticErrorException : CompilerException
+    {
+        public SemanticErrorException(string message, IAstNode astNode)
+           : base(message, astNode.Location)
+        {
+        }
 
-      public SemanticErrorException(string message, IToken token)
-         : base(message, token.Location)
-      {
-      }
-   }
+        public SemanticErrorException(string message, IToken token)
+           : base(message, token.Location)
+        {
+        }
+    }
 }

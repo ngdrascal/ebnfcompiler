@@ -5,205 +5,205 @@ using System.Linq;
 
 namespace EbnfCompiler.Sample.Impl
 {
-   public class AstNodeBase : IAstNode
-   {
-      protected AstNodeBase(AstNodeTypes nodeType, IToken token)
-      {
-         AstNodeType = nodeType;
-         Location = token.Location;
-      }
+    public class AstNodeBase : IAstNode
+    {
+        protected AstNodeBase(AstNodeTypes nodeType, IToken token)
+        {
+            AstNodeType = nodeType;
+            Location = token.Location;
+        }
 
-      public AstNodeTypes AstNodeType { get; }
+        public AstNodeTypes AstNodeType { get; }
 
-      public ISourceLocation Location { get; }
-   }
+        public ISourceLocation Location { get; }
+    }
 
-   public class VarStatementNode : AstNodeBase, IVarStatementNode
-   {
-      public VarStatementNode(IToken token) : base(AstNodeTypes.VarStatement, token)
-      {
-      }
+    public class VarStatementNode : AstNodeBase, IVarStatementNode
+    {
+        public VarStatementNode(IToken token) : base(AstNodeTypes.VarStatement, token)
+        {
+        }
 
-      public IVariableNode Variable { get; set; }
+        public IVariableNode Variable { get; set; }
 
-      public IAstNode Expression { get; set; }
+        public IAstNode Expression { get; set; }
 
-      public override string ToString()
-      {
-         return $"var {Variable?.ToString()} : {Variable?.TypeName} = {Expression?.ToString()};";
-      }
-   }
+        public override string ToString()
+        {
+            return $"var {Variable?.ToString()} : {Variable?.TypeName} = {Expression?.ToString()};";
+        }
+    }
 
-   public class PrintStatementNode : AstNodeBase, IPrintStatementNode
-   {
-      private readonly List<IPrintExpressionNode> _expressions = new List<IPrintExpressionNode>();
+    public class PrintStatementNode : AstNodeBase, IPrintStatementNode
+    {
+        private readonly List<IPrintExpressionNode> _expressions = new List<IPrintExpressionNode>();
 
-      public PrintStatementNode(IToken token) : base(AstNodeTypes.PrintStatement, token)
-      {
-      }
+        public PrintStatementNode(IToken token) : base(AstNodeTypes.PrintStatement, token)
+        {
+        }
 
-      public IReadOnlyCollection<IPrintExpressionNode> PrintExpressions => _expressions.AsReadOnly();
+        public IReadOnlyCollection<IPrintExpressionNode> PrintExpressions => _expressions.AsReadOnly();
 
-      public void AppendExpression(IPrintExpressionNode expression)
-      {
-         _expressions.Add(expression);
-      }
+        public void AppendExpression(IPrintExpressionNode expression)
+        {
+            _expressions.Add(expression);
+        }
 
-      public override string ToString()
-      {
-         var expressions = string.Join(", ", _expressions.Select(node => node.ToString()));
-         return $"Print({expressions});";
-      }
-   }
-   
-   public class PrintExpressionNode : AstNodeBase, IPrintExpressionNode
-   {
-      public PrintExpressionNode(IToken token) : base(AstNodeTypes.PrintExpression, token)
-      {
-      }
+        public override string ToString()
+        {
+            var expressions = string.Join(", ", _expressions.Select(node => node.ToString()));
+            return $"Print({expressions});";
+        }
+    }
 
-      public IAstNode Expression { get; set; }
+    public class PrintExpressionNode : AstNodeBase, IPrintExpressionNode
+    {
+        public PrintExpressionNode(IToken token) : base(AstNodeTypes.PrintExpression, token)
+        {
+        }
 
-      public override string ToString()
-      {
-         return Expression.ToString();
-      }
-   }
+        public IAstNode Expression { get; set; }
 
-   public class UnaryOperatorNode : AstNodeBase, IUnaryOperatorNode
-   {
-      public UnaryOperatorNode(IToken token) : base(AstNodeTypes.UnaryOperator, token)
-      {
-         var op = token.Image switch
-         {
-            "+" => UnaryOperators.Plus,
-            "-" => UnaryOperators.Minus,
-            _ => throw new ArgumentOutOfRangeException()
-         };
+        public override string ToString()
+        {
+            return Expression.ToString();
+        }
+    }
 
-         Operator = op;
-         TypeName = "unknown";
-      }
+    public class UnaryOperatorNode : AstNodeBase, IUnaryOperatorNode
+    {
+        public UnaryOperatorNode(IToken token) : base(AstNodeTypes.UnaryOperator, token)
+        {
+            var op = token.Image switch
+            {
+                "+" => UnaryOperators.Plus,
+                "-" => UnaryOperators.Minus,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
-      public UnaryOperators Operator { get; }
+            Operator = op;
+            TypeName = "unknown";
+        }
 
-      public IAstNode Operand { get; set; }
+        public UnaryOperators Operator { get; }
 
-      public string TypeName { get; set; }
+        public IAstNode Operand { get; set; }
 
-      public override string ToString()
-      {
-         var op = Operator switch
-         {
-            UnaryOperators.Plus => "+",
-            UnaryOperators.Minus => "-",
-            _ => null
-         };
+        public string TypeName { get; set; }
 
-         return $"{op}{Operand.ToString()}";
-      }
-   }
+        public override string ToString()
+        {
+            var op = Operator switch
+            {
+                UnaryOperators.Plus => "+",
+                UnaryOperators.Minus => "-",
+                _ => null
+            };
 
-   public class BinaryOperatorNode : AstNodeBase, IBinaryOperatorNode
-   {
-      public BinaryOperatorNode(IToken token) : base(AstNodeTypes.BinaryOperator, token)
-      {
-         var op = BinaryOperators.Add;
-         switch (token.Image)
-         {
-            case "+":
-               op = BinaryOperators.Add;
-               break;
-            case "-":
-               op = BinaryOperators.Subtract;
-               break;
-            case "*":
-               op = BinaryOperators.Multiply;
-               break;
-            case "/":
-               op = BinaryOperators.Divide;
-               break;
-         }
+            return $"{op}{Operand.ToString()}";
+        }
+    }
 
-         Operator = op;
-         TypeName = "unknown";
-      }
+    public class BinaryOperatorNode : AstNodeBase, IBinaryOperatorNode
+    {
+        public BinaryOperatorNode(IToken token) : base(AstNodeTypes.BinaryOperator, token)
+        {
+            var op = BinaryOperators.Add;
+            switch (token.Image)
+            {
+                case "+":
+                    op = BinaryOperators.Add;
+                    break;
+                case "-":
+                    op = BinaryOperators.Subtract;
+                    break;
+                case "*":
+                    op = BinaryOperators.Multiply;
+                    break;
+                case "/":
+                    op = BinaryOperators.Divide;
+                    break;
+            }
 
-      public BinaryOperators Operator { get; }
+            Operator = op;
+            TypeName = "unknown";
+        }
 
-      public IAstNode LeftOperand { get; set; }
+        public BinaryOperators Operator { get; }
 
-      public IAstNode RightOperand { get; set; }
+        public IAstNode LeftOperand { get; set; }
 
-      public string TypeName { get; set; }
+        public IAstNode RightOperand { get; set; }
 
-      public override string ToString()
-      {
-         var left = LeftOperand.ToString();
-         var op = Operator switch
-         {
-            BinaryOperators.Add => "+",
-            BinaryOperators.Subtract => "-",
-            BinaryOperators.Multiply => "*",
-            BinaryOperators.Divide => "/",
-            _ => throw new ArgumentOutOfRangeException()
-         };
-         var right = RightOperand.ToString();
+        public string TypeName { get; set; }
 
-         return $"({left} {op} {right})";
-      }
-   }
+        public override string ToString()
+        {
+            var left = LeftOperand.ToString();
+            var op = Operator switch
+            {
+                BinaryOperators.Add => "+",
+                BinaryOperators.Subtract => "-",
+                BinaryOperators.Multiply => "*",
+                BinaryOperators.Divide => "/",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+            var right = RightOperand.ToString();
 
-   public class NumberLiteralNode : AstNodeBase, INumberLiteralNode
-   {
-      public NumberLiteralNode(IToken token) : base(AstNodeTypes.NumberLiteral, token)
-      {
-         float.TryParse(token.Image, out var value);
-         Value = value;
-      }
+            return $"({left} {op} {right})";
+        }
+    }
 
-      public float Value { get; }
+    public class NumberLiteralNode : AstNodeBase, INumberLiteralNode
+    {
+        public NumberLiteralNode(IToken token) : base(AstNodeTypes.NumberLiteral, token)
+        {
+            float.TryParse(token.Image, out var value);
+            Value = value;
+        }
 
-      public string TypeName { get => "number"; set { } }
+        public float Value { get; }
 
-      public override string ToString()
-      {
-         return Value.ToString(CultureInfo.InvariantCulture);
-      }
-   }
+        public string TypeName { get => "number"; set { } }
 
-   public class StringLiteralNode : AstNodeBase, IStringLiteralNode
-   {
-      public StringLiteralNode(IToken token) : base(AstNodeTypes.StringLiteral, token)
-      {
-         Value = token.Image;
-      }
+        public override string ToString()
+        {
+            return Value.ToString(CultureInfo.InvariantCulture);
+        }
+    }
 
-      public string Value { get; }
+    public class StringLiteralNode : AstNodeBase, IStringLiteralNode
+    {
+        public StringLiteralNode(IToken token) : base(AstNodeTypes.StringLiteral, token)
+        {
+            Value = token.Image;
+        }
 
-      public string TypeName { get => "string"; set { } }
+        public string Value { get; }
 
-      public override string ToString()
-      {
-         return $"\"{Value}\"";
-      }
-   }
+        public string TypeName { get => "string"; set { } }
 
-   public class VariableNode : AstNodeBase, IVariableNode
-   {
-      public VariableNode(IToken token) : base(AstNodeTypes.VarReference, token)
-      {
-         Name = token.Image;
-         TypeName = "unknown";
-      }
+        public override string ToString()
+        {
+            return $"\"{Value}\"";
+        }
+    }
 
-      public string Name { get; }
+    public class VariableNode : AstNodeBase, IVariableNode
+    {
+        public VariableNode(IToken token) : base(AstNodeTypes.VarReference, token)
+        {
+            Name = token.Image;
+            TypeName = "unknown";
+        }
 
-      public string TypeName { get; set; }
+        public string Name { get; }
 
-      public override string ToString()
-      {
-         return Name;
-      }
-   }
+        public string TypeName { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
 }
