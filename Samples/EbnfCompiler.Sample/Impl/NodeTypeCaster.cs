@@ -20,6 +20,14 @@ namespace EbnfCompiler.Sample.Impl
          return result;
       }
 
+      public static IPrintExpressionNode AsPrintExpression(this IAstNode astNode)
+      {
+         if (!(astNode is IPrintExpressionNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IPrintExpressionNode)));
+
+         return result;
+      }
+
       public static IUnaryOperatorNode AsUnaryOp(this IAstNode astNode)
       {
          if (!(astNode is IUnaryOperatorNode result))
@@ -32,6 +40,30 @@ namespace EbnfCompiler.Sample.Impl
       {
          if (!(astNode is IBinaryOperatorNode result))
             throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IBinaryOperatorNode)));
+
+         return result;
+      }
+
+      public static INumberLiteralNode AsNumberLit(this IAstNode astNode)
+      {
+         if (!(astNode is INumberLiteralNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(INumberLiteralNode)));
+
+         return result;
+      }
+
+      public static IStringLiteralNode AsStringLit(this IAstNode astNode)
+      {
+         if (!(astNode is IStringLiteralNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IStringLiteralNode)));
+
+         return result;
+      }
+
+      public static IVariableNode AsVarReferene(this IAstNode astNode)
+      {
+         if (!(astNode is IVariableNode result))
+            throw new NodeCastException(ErrorMessage(astNode.AstNodeType, typeof(IVariableNode)));
 
          return result;
       }

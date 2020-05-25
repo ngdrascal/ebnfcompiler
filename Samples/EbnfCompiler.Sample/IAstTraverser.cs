@@ -6,7 +6,7 @@ namespace EbnfCompiler.Sample
    {
       event Action<IAstNode> ProcessNode;
 
-      event Action PostProcessNode;
+      event Action<AstNodeTypes> PostProcessNode;
 
       void Traverse(IAstNode astNode);
    }

@@ -6,7 +6,7 @@ namespace EbnfCompiler.Sample.Impl
     {
         public event Action<IAstNode> ProcessNode;
 
-        public event Action PostProcessNode;
+        public event Action<AstNodeTypes> PostProcessNode;
 
         public void Traverse(IAstNode astNode)
         {
@@ -15,13 +15,16 @@ namespace EbnfCompiler.Sample.Impl
             switch (astNode.AstNodeType)
             {
                 case AstNodeTypes.VarStatement:
-                    Traverse(astNode.AsVarStatement().Variable);
                     Traverse(astNode.AsVarStatement().Expression);
                     break;
 
                 case AstNodeTypes.PrintStatement:
-                    foreach (var expr in astNode.AsPrintStatement().Expressions)
-                        Traverse(expr);
+                    foreach (var printExpr in astNode.AsPrintStatement().PrintExpressions)
+                        Traverse(printExpr);
+                    break;
+
+                case AstNodeTypes.PrintExpression:
+                    Traverse(astNode.AsPrintExpression().Expression);
                     break;
 
                 case AstNodeTypes.UnaryOperator:
@@ -39,11 +42,11 @@ namespace EbnfCompiler.Sample.Impl
                 case AstNodeTypes.StringLiteral:
                     break;
 
-                case AstNodeTypes.Variable:
+                case AstNodeTypes.VarReference:
                     break;
             }
 
-            PostProcessNode?.Invoke();
+            PostProcessNode?.Invoke(astNode.AstNodeType);
         }
     }
 }

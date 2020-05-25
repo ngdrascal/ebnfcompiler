@@ -46,7 +46,11 @@ namespace EbnfCompiler.Sample.Impl
       public void PrintExprEnd(IToken token)
       {
          var expr = _stack.Pop();
-         _stack.Peek().AsPrintStatement().AppendExpression(expr);
+         var printExpr = new PrintExpressionNode(token)
+         {
+            Expression = expr
+         };
+         _stack.Peek().AsPrintStatement().AppendExpression(printExpr);
       }
 
       public void UnaryOp(IToken token)
