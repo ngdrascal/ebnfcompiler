@@ -13,7 +13,7 @@ namespace EbnfCompiler.Sample.Impl
             N, Nu, Num, Numb, Numbe, Number,
             P, Pr, Pri, Prin, Print,
             S, St, Str, Stri, Strin, String,
-            V, Va, Var,
+            L, Le, Let,
             Ident,
             StringLiteral,
             Sign,
@@ -73,9 +73,9 @@ namespace EbnfCompiler.Sample.Impl
                                 _state = State.S;
                                 CurrentToken.Image = _currentCh.ToString();
                                 break;
-                            case 'v':
-                                _state = State.V;
-                                CurrentToken.Image = "v";
+                            case 'l':
+                                _state = State.L;
+                                CurrentToken.Image = "l";
                                 break;
                             case '(':
                                 _state = State.Done;
@@ -491,10 +491,10 @@ namespace EbnfCompiler.Sample.Impl
                         }
                         break;
 
-                    case State.V:
-                        if (_currentCh == 'a')
+                    case State.L:
+                        if (_currentCh == 'e')
                         {
-                            _state = State.Va;
+                            _state = State.Le;
                             CurrentToken.Image += _currentCh;
                             _currentCh = NextChar();
                         }
@@ -511,10 +511,10 @@ namespace EbnfCompiler.Sample.Impl
                         }
                         break;
 
-                    case State.Va:
-                        if (_currentCh == 'r')
+                    case State.Le:
+                        if (_currentCh == 't')
                         {
-                            _state = State.Var;
+                            _state = State.Let;
                             CurrentToken.Image += _currentCh;
                             _currentCh = NextChar();
                         }
@@ -531,7 +531,7 @@ namespace EbnfCompiler.Sample.Impl
                         }
                         break;
 
-                    case State.Var:
+                    case State.Let:
                         if (Regex.IsMatch(_currentCh.ToString(), @"^[a-zA-Z0-9_]$"))
                         {
                             _state = State.Ident;
@@ -541,7 +541,7 @@ namespace EbnfCompiler.Sample.Impl
                         else
                         {
                             _state = State.Done;
-                            CurrentToken.TokenKind = TokenKind.Var;
+                            CurrentToken.TokenKind = TokenKind.Let;
                         }
                         break;
 

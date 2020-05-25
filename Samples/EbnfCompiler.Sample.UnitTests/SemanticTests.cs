@@ -10,13 +10,13 @@ namespace EbnfCompiler.Sample.UnitTests
     [TestFixture, ExcludeFromCodeCoverage]
     public class SemanticTests
     {
-        [TestCase("var i : string = 1;", "(1,5):Type mismatch.")]
-        [TestCase("var s : number = \"Hello\";", "(1,5):Type mismatch.")]
-        [TestCase("var i : string = 1 + 2;", "(1,5):Type mismatch.")]
-        [TestCase("var i : string = 1 + \"hello\";", "(1,20):Type mismatch.")]
-        [TestCase("var i : number = 1; var i : number = 2;", "(1,25):Variable 'i' already declared.")]
-        [TestCase("var i : number = 1; var s : string = i;", "(1,25):Type mismatch.")]
-        [TestCase("Print(n);", "(1,7):Variable 'n' is not declared.")]
+        [TestCase("let i : string = 1;",                     "(1,5):Type mismatch.")]
+        [TestCase("let s : number = \"Hello\";",             "(1,5):Type mismatch.")]
+        [TestCase("let i : string = 1 + 2;",                 "(1,5):Type mismatch.")]
+        [TestCase("let i : string = 1 + \"hello\";",         "(1,20):Type mismatch.")]
+        [TestCase("let i : number = 1; let i : number = 2;", "(1,25):Variable 'i' already declared.")]
+        [TestCase("let i : number = 1; let s : string = i;", "(1,25):Type mismatch.")]
+        [TestCase("Print(n);",                               "(1,7):Variable 'n' is not declared.")]
         public void Semantics_WhenSemanticError_ThrowsSemanticException1(
            string input, string expectedMessage)
         {
@@ -32,9 +32,9 @@ namespace EbnfCompiler.Sample.UnitTests
             Assert.That(ex.Message, Is.EqualTo(expectedMessage));
         }
 
-        [TestCase("var i : number = 1; var j : number = 2; Print(i + j);")]
-        [TestCase("var s : string = \"Hello, \"; var t : string = \"world!\"; Print(s + t);")]
-        [TestCase("var s : string = \"Hello, \"; var t : string = \"world!\"; Print(s, t);")]
+        [TestCase("let i : number = 1; let j : number = 2; Print(i + j);")]
+        [TestCase("let s : string = \"Hello, \"; let t : string = \"world!\"; Print(s + t);")]
+        [TestCase("let s : string = \"Hello, \"; let t : string = \"world!\"; Print(s, t);")]
         public void Semantics_WhenValidSemantics_DoesNotThrowException(string input)
         {
             // Arrange:

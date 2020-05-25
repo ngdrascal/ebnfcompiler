@@ -16,7 +16,7 @@ namespace EbnfCompiler.Sample.UnitTests
             {
                 var encoding = new UTF8Encoding();
                 using var inStream = new MemoryStream();
-                inStream.Write(encoding.GetBytes("var n : number = 2 * 5 - 3; Print(\"n = \", n);"));
+                inStream.Write(encoding.GetBytes("let n : number = 2 * 5 - 3; Print(\"n = \", n);"));
                 inStream.Seek(0, SeekOrigin.Begin);
 
                 IScanner scanner = new Scanner(inStream);

@@ -49,9 +49,9 @@ namespace EbnfCompiler.Sample.UnitTests
         [TestCase("strinz", TokenKind.Identifier, "strinz")]
         [TestCase("stringz", TokenKind.Identifier, "stringz")]
 
-        [TestCase("v", TokenKind.Identifier, "v")]
-        [TestCase("va", TokenKind.Identifier, "va")]
-        [TestCase("var", TokenKind.Var, "var")]
+        [TestCase("l", TokenKind.Identifier, "l")]
+        [TestCase("le", TokenKind.Identifier, "le")]
+        [TestCase("let", TokenKind.Let, "let")]
 
         [TestCase("vz", TokenKind.Identifier, "vz")]
         [TestCase("vaz", TokenKind.Identifier, "vaz")]
@@ -70,7 +70,6 @@ namespace EbnfCompiler.Sample.UnitTests
 
         [TestCase("\"Some string literal\"", TokenKind.StringLiteral, "Some string literal")]
         [TestCase("\"missing quote", TokenKind.Error, "missing quote")]
-
 
         [TestCase("12", TokenKind.NumberLiteral, "12")]
         [TestCase("12.34", TokenKind.NumberLiteral, "12.34")]
@@ -126,9 +125,9 @@ namespace EbnfCompiler.Sample.UnitTests
             Assert.That(scanner.CurrentToken.Location.StopLine, Is.EqualTo(1));
         }
 
-        [TestCase("\rvar")]
-        [TestCase("\nvar")]
-        [TestCase("\r\nvar")]
+        [TestCase("\rlet")]
+        [TestCase("\nlet")]
+        [TestCase("\r\nlet")]
         public void Scanner_GivenControlChars_ReturnsCorrectToken(string input)
         {
             // Arrange:
@@ -142,7 +141,7 @@ namespace EbnfCompiler.Sample.UnitTests
             var scanner = new Scanner(stream); // scanner advances on creation
 
             // Assert:
-            Assert.That(scanner.CurrentToken.TokenKind, Is.EqualTo(TokenKind.Var));
+            Assert.That(scanner.CurrentToken.TokenKind, Is.EqualTo(TokenKind.Let));
         }
 
         [Test]

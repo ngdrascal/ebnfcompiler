@@ -1,5 +1,5 @@
 %TOKENS%
-   "var"             = "Var"
+   "let"             = "Let"
    "identifier"      = "Identifier"
    "number"          = "Number"
    "string"          = "String"
@@ -23,7 +23,7 @@
 
    <statement> ::= <var-declaration> | <print-stmt> .
 
-   <var-declaration> ::= #VarStmtStart# "var" #VarStmtIdent# "identifier" ":" #VarStmtType# <type> "=" <expression> #VarStmtEnd# .
+   <var-declaration> ::= #VarStmtStart# "let" #VarStmtIdent# "identifier" ":" #VarStmtType# <type> "=" <expression> #VarStmtEnd# .
 
    <type> ::= "number" | "string" .
 

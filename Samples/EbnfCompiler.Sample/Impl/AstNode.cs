@@ -30,7 +30,7 @@ namespace EbnfCompiler.Sample.Impl
 
         public override string ToString()
         {
-            return $"var {Variable?.ToString()} : {Variable?.TypeName} = {Expression?.ToString()};";
+            return $"let {Variable?.ToString()} : {Variable?.TypeName} = {Expression?.ToString()};";
         }
     }
 
