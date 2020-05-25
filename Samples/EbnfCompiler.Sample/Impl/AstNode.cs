@@ -63,11 +63,6 @@ namespace EbnfCompiler.Sample.Impl
       }
 
       public IAstNode Expression { get; set; }
-
-      public override string ToString()
-      {
-         return Expression.ToString();
-      }
    }
 
    public class UnaryOperatorNode : AstNodeBase, IUnaryOperatorNode

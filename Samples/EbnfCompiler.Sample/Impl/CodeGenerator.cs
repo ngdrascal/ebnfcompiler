@@ -164,13 +164,25 @@ namespace EbnfCompiler.Sample.Impl
                switch (nodeType)
                {
                   case AstNodeTypes.VarStatement:
-                     stack.Pop();
+                     var exprElement = stack.Pop();
                      var varStmtElement = (VarStmtElement)stack.Pop();
                      var varDef = varStmtElement.VariableDef;
                      ilProcessor.Emit(OpCodes.Stloc, varDef);
                      break;
 
                   case AstNodeTypes.PrintStatement:
+                     // var expressions = new List<StackElementBase>();
+                     // while (stack.Peek().NodeType != AstNodeTypes.PrintStatement)
+                     // {
+                     //    expressions.Add(stack.Pop());
+                     // }
+                     //
+                     // expressions.Reverse();
+                     // foreach (var expr in expressions)
+                     // {
+                     //
+                     // }
+
                      ilProcessor.Emit(OpCodes.Call, _writeLineMethod);
                      break;
 
